@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Lean, self-contained build for Docker / AWS (App Runner, ECS Fargate).
-  output: "standalone",
   poweredByHeader: false,
   images: {
     // Serve images as-is (no optimizer) so every local/remote image always loads.

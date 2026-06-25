@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
 import "./globals.css";
-import { getSiteSettings } from "@/lib/content";
+import { getSiteSettings, getTestimonials } from "@/lib/content";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], display: "swap" });
@@ -40,8 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const s = await getSiteSettings();
+  const [s, testimonials] = await Promise.all([getSiteSettings(), getTestimonials()]);
   const abs = (p?: string | null) => (p ? (p.startsWith("http") ? p : `${SITE_URL}${p}`) : undefined);
+  const avgRating = testimonials.length
+    ? +(testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length).toFixed(1)
+    : 5;
 
   // Site-wide structured data — TravelAgency + WebSite with sitelinks search box.
   const orgLd = {
@@ -85,6 +88,13 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       "Hanmer Springs Tours",
       "Small Group Tours New Zealand",
     ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: avgRating,
+      bestRating: 5,
+      worstRating: 1,
+      reviewCount: testimonials.length || 1,
+    },
     sameAs: Object.values(s.social ?? {}).filter(Boolean),
   };
   const siteLd = {

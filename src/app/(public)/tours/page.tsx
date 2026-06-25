@@ -4,15 +4,35 @@ import { PageHero } from "@/components/PageHero";
 import { ToursExplorer } from "@/components/ToursExplorer";
 import { getTours } from "@/lib/content";
 
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
+
 export const metadata: Metadata = {
-  title: "Tours",
-  description: "Browse our full range of New Zealand day tours and book online.",
+  title: "New Zealand Day Tours",
+  description: "Browse small-group South Island day tours from Christchurch — Akaroa, Kaikōura, Hanmer Springs, Waipara Valley and more. Book online, free cancellation.",
+  alternates: { canonical: `${SITE_URL}/tours` },
+  openGraph: { title: "New Zealand Day Tours | Kiwi Globe Tours", description: "Small-group South Island day tours. Book online, instant confirmation.", url: `${SITE_URL}/tours` },
 };
 
 export default async function ToursPage() {
   const tours = await getTours();
+
+  const itemListLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "South Island Day Tours",
+    url: `${SITE_URL}/tours`,
+    numberOfItems: tours.length,
+    itemListElement: tours.map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${SITE_URL}/tours/${t.slug}`,
+      name: t.title,
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
       <PageHero
         eyebrow="Exciting Experiences"
         title="Our Tours"

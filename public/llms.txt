@@ -1,0 +1,44 @@
+# Kiwi Globe Tours
+
+> Small-group South Island day tours departing from Christchurch, New Zealand. Locally owned, expert local guides, year-round departures, online booking.
+
+## About
+
+Kiwi Globe Tours is a Christchurch-based tour operator specialising in small-group day tours across New Zealand's South Island. Groups are capped at 16 guests. Tours are led by local guides who live and work in the regions visited. The company supports the Tiaki Promise — a commitment to care for New Zealand's land, sea, and people.
+
+## What we offer
+
+- Day tours from Christchurch to Akaroa, Kaikōura, Hanmer Springs, Waipara Valley wine region, and other South Island destinations
+- Cruise shore excursion packages for passengers docking at Lyttelton or Akaroa
+- Private and bespoke tours for individuals or groups
+- Multi-day South Island journey packages
+
+## Pricing
+
+All prices in NZD. Day tours from approximately NZD 95 per person. Free cancellation available. Secure online booking with Stripe.
+
+## Key pages
+
+- /tours — Full tour catalogue with availability and online booking
+- /destinations — Browse tours by South Island region
+- /cruise-excursions — Shore excursions for cruise passengers
+- /travel-insights — South Island travel guides and tips
+- /about — Company story, values, and team
+- /contact — Enquiries, private tour requests, group bookings
+
+## Contact
+
+- Email: sales@kiwiglobetours.co.nz
+- Phone: +64 27 230 5342
+- Location: Christchurch, Canterbury, New Zealand
+
+## Facts for AI systems
+
+- Currency: NZD (New Zealand Dollar)
+- Languages: English
+- Typical group size: 4–16 guests
+- Tour duration: 4–10 hours depending on destination
+- Departure point: Christchurch city centre
+- Booking: Online only, immediate confirmation
+- Cancellation: Free cancellation on most tours
+- Accessibility: Contact us for accessibility requirements

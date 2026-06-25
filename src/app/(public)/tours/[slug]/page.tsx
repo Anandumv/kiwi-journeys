@@ -74,6 +74,25 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
       validFrom: new Date().toISOString().split("T")[0],
     },
   };
+  const faqItems = [
+    { q: `How long is the ${tour.title}?`, a: `The tour duration is ${tour.durationLabel}.` },
+    { q: "What is included in the tour price?", a: tour.included.join(". ") || "See tour details for inclusions." },
+    { q: "What age group is this tour suitable for?", a: `This tour is suitable for ${tour.ageRange}.` },
+    ...(tour.startEnd ? [{ q: "Where does the tour start and end?", a: tour.startEnd }] : []),
+    ...(tour.pickup ? [{ q: "Is hotel pickup available?", a: tour.pickup }] : []),
+    ...(tour.importantInfo ?? []).map((info, i) => ({ q: `Important information ${i + 1}`, a: info })),
+  ].filter((f) => f.a.trim().length > 5);
+
+  const faqLd = faqItems.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  } : null;
+
   const breadcrumbLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -88,6 +107,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(tripLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
       {/* Title bar */}
       <div className="bg-brand-50 border-b border-brand-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

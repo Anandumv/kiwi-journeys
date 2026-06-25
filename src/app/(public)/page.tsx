@@ -40,8 +40,26 @@ export default async function HomePage() {
   ]);
   const featured = tours.filter((t) => t.featured).slice(0, 6);
 
+  const reviewsLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Guest Reviews",
+    itemListElement: testimonials.map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Review",
+        reviewRating: { "@type": "Rating", ratingValue: t.rating, bestRating: 5 },
+        author: { "@type": "Person", name: t.name },
+        reviewBody: t.text,
+        itemReviewed: { "@id": `${SITE_URL}/#organization` },
+      },
+    })),
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsLd) }} />
       {/* Hero */}
       <section className="relative isolate -mt-16 flex min-h-[88vh] items-center overflow-hidden sm:min-h-[92vh]">
         <div className="absolute inset-0 -z-10 overflow-hidden">

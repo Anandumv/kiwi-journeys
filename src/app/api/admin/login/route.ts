@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { signSession, SESSION_COOKIE } from "@/lib/auth";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  // 10 attempts per IP per 15 minutes.
+  const { allowed } = rateLimit(rateLimitKey(req, "login"), { limit: 10, windowMs: 15 * 60 * 1000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
+  }
+
   const { email, password } = await req.json().catch(() => ({ email: "", password: "" }));
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });

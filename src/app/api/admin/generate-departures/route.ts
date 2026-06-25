@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
+import { getCurrentAdmin } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 // Top up the rolling 90-day departure window for all active tours, using each
 // tour's schedule stored in the DB. Idempotent.
 export async function POST() {
+  if (!(await getCurrentAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const tours = await prisma.tour.findMany({ where: { isActive: true } });
   let total = 0;
   const results: { tour: string; created: number }[] = [];

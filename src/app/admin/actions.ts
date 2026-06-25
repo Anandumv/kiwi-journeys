@@ -6,6 +6,12 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
 import { aucklandLocalToUtc, aucklandDateOnly } from "@/lib/time";
+import { getCurrentAdmin } from "@/lib/auth";
+
+async function assertAdmin() {
+  const session = await getCurrentAdmin();
+  if (!session) redirect("/admin/login");
+}
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -22,6 +28,7 @@ function revalidateAll() {
 
 // ─── Tours ──────────────────────────────────────────────────────────────────
 export async function saveTour(fd: FormData) {
+  await assertAdmin();
   const id = str(fd, "id");
   const gallery = lines(fd, "gallery");
   const priceOptions = lines(fd, "priceOptions").map((line, i) => {
@@ -82,12 +89,14 @@ export async function saveTour(fd: FormData) {
 }
 
 export async function deleteTour(fd: FormData) {
+  await assertAdmin();
   await prisma.tour.delete({ where: { id: str(fd, "id") } });
   revalidateAll();
   revalidatePath("/admin/tours");
 }
 
 export async function regenerateDepartures(fd: FormData) {
+  await assertAdmin();
   const tour = await prisma.tour.findUnique({ where: { id: str(fd, "id") } });
   if (tour) {
     await generateSessions({
@@ -99,11 +108,13 @@ export async function regenerateDepartures(fd: FormData) {
 }
 
 export async function cancelSession(fd: FormData) {
+  await assertAdmin();
   await prisma.session.update({ where: { id: str(fd, "sessionId") }, data: { status: "CANCELLED" } });
   revalidatePath(`/admin/tours/${str(fd, "tourId")}`);
 }
 
 export async function addSession(fd: FormData) {
+  await assertAdmin();
   const tourId = str(fd, "tourId");
   const date = str(fd, "date"); // YYYY-MM-DD (Auckland)
   const time = str(fd, "time"); // HH:mm
@@ -120,6 +131,7 @@ export async function addSession(fd: FormData) {
 
 // ─── Destinations ─────────────────────────────────────────────────────────────
 export async function saveDestination(fd: FormData) {
+  await assertAdmin();
   const id = str(fd, "id");
   const data = {
     slug: str(fd, "slug"), name: str(fd, "name"), status: str(fd, "status") || "active",
@@ -132,12 +144,14 @@ export async function saveDestination(fd: FormData) {
   redirect("/admin/destinations");
 }
 export async function deleteDestination(fd: FormData) {
+  await assertAdmin();
   await prisma.destination.delete({ where: { id: str(fd, "id") } });
   revalidateAll(); revalidatePath("/admin/destinations");
 }
 
 // ─── Blog ───────────────────────────────────────────────────────────────────
 export async function savePost(fd: FormData) {
+  await assertAdmin();
   const id = str(fd, "id");
   const data = {
     slug: str(fd, "slug"), title: str(fd, "title"), excerpt: str(fd, "excerpt"),
@@ -151,12 +165,14 @@ export async function savePost(fd: FormData) {
   redirect("/admin/blog");
 }
 export async function deletePost(fd: FormData) {
+  await assertAdmin();
   await prisma.blogPost.delete({ where: { id: str(fd, "id") } });
   revalidateAll(); revalidatePath("/admin/blog");
 }
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 export async function saveTestimonial(fd: FormData) {
+  await assertAdmin();
   const id = str(fd, "id");
   const data = {
     name: str(fd, "name"), country: str(fd, "country"), text: str(fd, "text"),
@@ -168,12 +184,14 @@ export async function saveTestimonial(fd: FormData) {
   redirect("/admin/testimonials");
 }
 export async function deleteTestimonial(fd: FormData) {
+  await assertAdmin();
   await prisma.testimonial.delete({ where: { id: str(fd, "id") } });
   revalidateAll(); revalidatePath("/admin/testimonials");
 }
 
 // ─── Site settings ─────────────────────────────────────────────────────────────
 export async function saveSettings(fd: FormData) {
+  await assertAdmin();
   const parseJson = (k: string, fallback: unknown) => { try { return JSON.parse(str(fd, k)); } catch { return fallback; } };
   await prisma.siteSetting.update({
     where: { id: "singleton" },
@@ -192,6 +210,7 @@ export async function saveSettings(fd: FormData) {
 
 // ─── Admin users ───────────────────────────────────────────────────────────────
 export async function createUser(fd: FormData) {
+  await assertAdmin();
   const email = str(fd, "email").toLowerCase();
   const password = str(fd, "password");
   if (email && password) {
@@ -202,6 +221,7 @@ export async function createUser(fd: FormData) {
   revalidatePath("/admin/users");
 }
 export async function deleteUser(fd: FormData) {
+  await assertAdmin();
   await prisma.adminUser.delete({ where: { id: str(fd, "id") } });
   revalidatePath("/admin/users");
 }

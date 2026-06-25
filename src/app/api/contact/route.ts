@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
 import { getSiteSettings } from "@/lib/content";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().min(1).max(200),
@@ -11,6 +12,12 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  // 5 messages per IP per hour.
+  const { allowed } = rateLimit(rateLimitKey(req, "contact"), { limit: 5, windowMs: 60 * 60 * 1000 });
+  if (!allowed) {
+    return NextResponse.json({ error: "Too many requests. Try again later." }, { status: 429 });
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

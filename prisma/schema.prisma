@@ -231,3 +231,34 @@ model BookingItem {
 
   @@index([bookingId])
 }
+
+model PromoCode {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  description   String    @default("")
+  type          String    @default("percentage") // percentage | fixed
+  value         Int       // percent 0-100 OR NZD cents
+  minSpendCents Int       @default(0)
+  maxUses       Int?      // null = unlimited
+  usedCount     Int       @default(0)
+  expiresAt     DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+}
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  tourId    String
+  tourTitle String   @default("")
+  sessionId String?
+  email     String
+  fullName  String
+  phone     String?
+  seats     Int      @default(1)
+  notified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([tourId])
+  @@index([sessionId])
+  @@index([email])
+}

@@ -5,11 +5,16 @@ import { usePathname } from "next/navigation";
 
 const links = [
   { href: "/admin", label: "Dashboard" },
+  { href: "/admin/analytics", label: "Analytics" },
+  { href: "/admin/bookings", label: "Bookings" },
+  { href: "/admin/customers", label: "Customers" },
+  { href: "/admin/calendar", label: "Calendar" },
+  { href: "/admin/promo-codes", label: "Promo Codes" },
+  { href: "/admin/waitlist", label: "Waitlist" },
   { href: "/admin/tours", label: "Tours" },
   { href: "/admin/destinations", label: "Destinations" },
   { href: "/admin/blog", label: "Blog" },
   { href: "/admin/testimonials", label: "Testimonials" },
-  { href: "/admin/bookings", label: "Bookings" },
   { href: "/admin/media", label: "Media" },
   { href: "/admin/settings", label: "Site Settings" },
   { href: "/admin/users", label: "Admin Users" },

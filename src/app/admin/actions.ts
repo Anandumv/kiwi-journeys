@@ -225,3 +225,47 @@ export async function deleteUser(fd: FormData) {
   await prisma.adminUser.delete({ where: { id: str(fd, "id") } });
   revalidatePath("/admin/users");
 }
+
+// ─── Promo Codes ──────────────────────────────────────────────────────────────
+export async function createPromoCode(fd: FormData) {
+  await assertAdmin();
+  const code = str(fd, "code").toUpperCase();
+  const type = str(fd, "type") === "fixed" ? "fixed" : "percentage";
+  const value = num(fd, "value");
+  const minSpendCents = Math.round(num(fd, "minSpend", 0) * 100);
+  const maxUsesRaw = str(fd, "maxUses");
+  const maxUses = maxUsesRaw ? parseInt(maxUsesRaw) : null;
+  const expiresRaw = str(fd, "expiresAt");
+  const expiresAt = expiresRaw ? new Date(expiresRaw) : null;
+  if (!code || value <= 0) return;
+  await prisma.promoCode.create({
+    data: { code, description: str(fd, "description"), type, value, minSpendCents, maxUses, expiresAt },
+  });
+  revalidatePath("/admin/promo-codes");
+}
+
+export async function deletePromoCode(fd: FormData) {
+  await assertAdmin();
+  await prisma.promoCode.delete({ where: { id: str(fd, "id") } });
+  revalidatePath("/admin/promo-codes");
+}
+
+export async function togglePromoCode(fd: FormData) {
+  await assertAdmin();
+  const promo = await prisma.promoCode.findUnique({ where: { id: str(fd, "id") } });
+  if (promo) await prisma.promoCode.update({ where: { id: promo.id }, data: { isActive: !promo.isActive } });
+  revalidatePath("/admin/promo-codes");
+}
+
+// ─── Waitlist ─────────────────────────────────────────────────────────────────
+export async function markWaitlistNotified(fd: FormData) {
+  await assertAdmin();
+  await prisma.waitlist.update({ where: { id: str(fd, "id") }, data: { notified: true } });
+  revalidatePath("/admin/waitlist");
+}
+
+export async function deleteWaitlistEntry(fd: FormData) {
+  await assertAdmin();
+  await prisma.waitlist.delete({ where: { id: str(fd, "id") } });
+  revalidatePath("/admin/waitlist");
+}

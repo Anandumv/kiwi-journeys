@@ -1,0 +1,186 @@
+import { prisma } from "@/lib/db";
+import { formatNZD } from "@/lib/money";
+
+export const dynamic = "force-dynamic";
+export const metadata = { title: "Analytics" };
+
+export default async function AdminAnalytics() {
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+  const [allBookings, totalCustomers, thisMonthAgg, lastMonthAgg] = await Promise.all([
+    prisma.booking.findMany({
+      where: { status: "CONFIRMED", createdAt: { gte: sixMonthsAgo } },
+      select: { totalCents: true, createdAt: true, sessionId: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.customer.count(),
+    prisma.booking.aggregate({
+      where: { status: "CONFIRMED", createdAt: { gte: new Date(now.getFullYear(), now.getMonth(), 1) } },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+    prisma.booking.aggregate({
+      where: {
+        status: "CONFIRMED",
+        createdAt: {
+          gte: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+          lt: new Date(now.getFullYear(), now.getMonth(), 1),
+        },
+      },
+      _sum: { totalCents: true },
+      _count: true,
+    }),
+  ]);
+
+  // Monthly buckets — last 6 months oldest → newest
+  const months: { label: string; bookings: number; revCents: number }[] = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: d.toLocaleString("en-NZ", { month: "short", year: "2-digit" }),
+      bookings: 0,
+      revCents: 0,
+    });
+  }
+  for (const b of allBookings) {
+    const ago =
+      (now.getFullYear() - b.createdAt.getFullYear()) * 12 +
+      (now.getMonth() - b.createdAt.getMonth());
+    if (ago >= 0 && ago <= 5) {
+      const idx = 5 - ago;
+      months[idx].bookings += 1;
+      months[idx].revCents += b.totalCents;
+    }
+  }
+
+  const maxRev = Math.max(...months.map((m) => m.revCents), 1);
+  const maxBookings = Math.max(...months.map((m) => m.bookings), 1);
+  const totalRev = allBookings.reduce((s, b) => s + b.totalCents, 0);
+  const totalBookings = allBookings.length;
+  const avgCents = totalBookings ? Math.round(totalRev / totalBookings) : 0;
+  const thisRev = thisMonthAgg._sum.totalCents ?? 0;
+  const lastRev = lastMonthAgg._sum.totalCents ?? 0;
+  const mom = lastRev > 0 ? Math.round(((thisRev - lastRev) / lastRev) * 100) : null;
+
+  // Top tours from session lookup
+  const sessionIds = [...new Set(allBookings.map((b) => b.sessionId))];
+  const sessions = await prisma.session.findMany({
+    where: { id: { in: sessionIds } },
+    select: { id: true, tour: { select: { title: true } } },
+  });
+  const sessionTourMap = new Map(sessions.map((s) => [s.id, s.tour.title]));
+  const tourRevMap = new Map<string, { revCents: number; count: number }>();
+  for (const b of allBookings) {
+    const title = sessionTourMap.get(b.sessionId) ?? "Unknown";
+    const existing = tourRevMap.get(title);
+    if (existing) {
+      existing.revCents += b.totalCents;
+      existing.count += 1;
+    } else {
+      tourRevMap.set(title, { revCents: b.totalCents, count: 1 });
+    }
+  }
+  const topTours = Array.from(tourRevMap.entries())
+    .map(([title, d]) => ({ title, ...d }))
+    .sort((a, b) => b.revCents - a.revCents)
+    .slice(0, 5);
+
+  return (
+    <div className="p-8">
+      <h1 className="font-serif text-3xl font-semibold text-brand-900">Analytics</h1>
+      <p className="mt-1 text-sm text-foreground/50">Last 6 months — confirmed bookings only</p>
+
+      {/* KPI cards */}
+      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <KpiCard label="6-month revenue" value={formatNZD(totalRev)} />
+        <KpiCard label="6-month bookings" value={String(totalBookings)} />
+        <KpiCard label="Avg booking value" value={formatNZD(avgCents)} />
+        <KpiCard label="Total customers" value={String(totalCustomers)} />
+      </div>
+
+      {/* Revenue bar chart */}
+      <div className="mt-8 rounded-xl border border-ivory-200 bg-white p-6">
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-serif text-lg font-semibold text-brand-900">Monthly Revenue</h2>
+          {mom !== null && (
+            <span className={`text-sm font-medium ${mom >= 0 ? "text-green-600" : "text-red-500"}`}>
+              {mom >= 0 ? "+" : ""}
+              {mom}% vs last month
+            </span>
+          )}
+        </div>
+        <div className="mt-6 flex items-end gap-2" style={{ height: 180 }}>
+          {months.map((m) => {
+            const pct = maxRev > 0 ? Math.max((m.revCents / maxRev) * 100, 2) : 2;
+            return (
+              <div key={m.label} className="flex flex-1 flex-col items-center gap-1 self-end">
+                {m.revCents > 0 && (
+                  <span className="whitespace-nowrap text-[10px] text-foreground/50">{formatNZD(m.revCents)}</span>
+                )}
+                <div
+                  className="w-full rounded-t-md bg-brand-400 transition-all"
+                  style={{ height: `${pct}%` }}
+                />
+                <span className="text-xs text-foreground/60">{m.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        {/* Bookings horizontal bars */}
+        <div className="rounded-xl border border-ivory-200 bg-white p-6">
+          <h2 className="font-serif text-lg font-semibold text-brand-900">Monthly Bookings</h2>
+          <div className="mt-4 space-y-3">
+            {months.map((m) => (
+              <div key={m.label} className="flex items-center gap-3">
+                <span className="w-14 shrink-0 text-right text-xs text-foreground/60">{m.label}</span>
+                <div className="flex-1 overflow-hidden rounded bg-ivory">
+                  <div
+                    className="h-5 rounded bg-brand-300 transition-all"
+                    style={{ width: `${Math.max((m.bookings / maxBookings) * 100, m.bookings > 0 ? 8 : 0)}%` }}
+                  />
+                </div>
+                <span className="w-6 text-right text-xs text-foreground/70">{m.bookings}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top tours */}
+        <div className="rounded-xl border border-ivory-200 bg-white p-6">
+          <h2 className="font-serif text-lg font-semibold text-brand-900">Top Tours by Revenue</h2>
+          <div className="mt-4 space-y-3">
+            {topTours.length === 0 && (
+              <p className="text-sm text-foreground/50">No booking data yet.</p>
+            )}
+            {topTours.map((t) => (
+              <div key={t.title} className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">{t.title}</p>
+                  <p className="text-xs text-foreground/50">
+                    {t.count} booking{t.count !== 1 ? "s" : ""}
+                  </p>
+                </div>
+                <span className="shrink-0 text-sm font-semibold text-brand-700">
+                  {formatNZD(t.revCents)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KpiCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-ivory-200 bg-white p-4">
+      <div className="font-serif text-2xl font-semibold text-brand-700">{value}</div>
+      <div className="mt-1 text-xs text-foreground/55">{label}</div>
+    </div>
+  );
+}

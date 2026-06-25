@@ -2,15 +2,42 @@ import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { getSiteSettings } from "@/lib/content";
 
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSiteSettings();
-  return { title: "About", description: `Learn about ${s.name}.` };
+  const description = `${s.name} is a Christchurch-based small-group day tour operator exploring the South Island. Locally owned, expert guides, year-round departures.`;
+  return {
+    title: "About Us",
+    description,
+    alternates: { canonical: `${SITE_URL}/about` },
+    openGraph: { title: `About ${s.name}`, description, url: `${SITE_URL}/about` },
+  };
 }
 
 export default async function AboutPage() {
   const site = await getSiteSettings();
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "@id": `${SITE_URL}/about`,
+    url: `${SITE_URL}/about`,
+    name: `About ${site.name}`,
+    description: `${site.name} is a Christchurch-based small-group day tour operator. Locally owned, expert guides, year-round South Island departures.`,
+    mainEntity: { "@id": `${SITE_URL}/#organization` },
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "About", item: `${SITE_URL}/about` },
+    ],
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <PageHero eyebrow="Our Story" title="A small team, big country" subtitle="Small-group South Island day trips, run by people who actually live here." image="/images/general/view-over-Hanmer-from-Conical-Hill.jpg" />
       <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <div className="space-y-5 text-lg text-foreground/80 leading-relaxed">

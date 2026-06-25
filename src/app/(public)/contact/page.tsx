@@ -3,7 +3,13 @@ import { PageHero } from "@/components/PageHero";
 import { ContactForm } from "@/components/ContactForm";
 import { getSiteSettings } from "@/lib/content";
 
-export const metadata: Metadata = { title: "Contact", description: "Get in touch with us." };
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
+export const metadata: Metadata = {
+  title: "Contact Us",
+  description: "Get in touch with Kiwi Journeys. Ask about our South Island day tours, private bookings, or group enquiries. We respond within one business day.",
+  alternates: { canonical: `${SITE_URL}/contact` },
+  openGraph: { title: "Contact Kiwi Journeys", description: "Enquire about South Island day tours, private tours, or group bookings.", url: `${SITE_URL}/contact` },
+};
 
 export default async function ContactPage() {
   const site = await getSiteSettings();

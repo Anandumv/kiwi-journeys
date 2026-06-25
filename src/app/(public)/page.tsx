@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { getTours, getDestinations, getTestimonials, getSiteSettings } from "@/lib/content";
@@ -5,6 +6,23 @@ import { categories } from "@/data/tours";
 import { TourCard } from "@/components/TourCard";
 import { Reveal } from "@/components/Reveal";
 import { Blob, Frond } from "@/components/OrganicShape";
+
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const s = await getSiteSettings();
+  return {
+    title: `${s.name} — New Zealand Small-Group Day Tours`,
+    description: `Explore the South Island with ${s.name}. Small groups, local guides, year-round departures from Christchurch. Book online — free cancellation.`,
+    alternates: { canonical: SITE_URL },
+    openGraph: {
+      title: `${s.name} — New Zealand Small-Group Day Tours`,
+      description: s.description,
+      url: SITE_URL,
+      images: s.heroImage ? [{ url: s.heroImage, width: 1200, height: 630, alt: "Kiwi Journeys — South Island Day Tours" }] : undefined,
+    },
+  };
+}
 
 const experienceImages: Record<string, string> = {
   "iconic-day-trips": "/images/brand/Discover.jpg",

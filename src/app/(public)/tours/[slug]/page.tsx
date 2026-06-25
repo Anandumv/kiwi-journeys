@@ -7,10 +7,33 @@ import { TourCard } from "@/components/TourCard";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { formatNZD } from "@/lib/money";
 
+const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
+
+function isoMinutes(mins: number) {
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `PT${h > 0 ? `${h}H` : ""}${m > 0 ? `${m}M` : ""}`;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const tour = await getTour(slug);
-  return tour ? { title: tour.title, description: tour.summary } : { title: "Tour" };
+  if (!tour) return { title: "Tour" };
+  const url = `${SITE_URL}/tours/${tour.slug}`;
+  const image = tour.heroImage || tour.gallery?.[0] || "";
+  return {
+    title: tour.title,
+    description: tour.summary,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${tour.title} | New Zealand Day Tour`,
+      description: tour.summary,
+      type: "article",
+      url,
+      images: image ? [{ url: image, width: 1200, height: 630, alt: tour.title }] : undefined,
+    },
+    twitter: { card: "summary_large_image", title: tour.title, description: tour.summary, images: image ? [image] : undefined },
+  };
 }
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -28,24 +51,43 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     { label: "Payment", value: "Pay online" },
   ];
 
-  const jsonLd = {
+  const pageUrl = `${SITE_URL}/tours/${tour.slug}`;
+  const tripLd = {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
+    "@id": pageUrl,
     name: tour.title,
     description: tour.summary,
-    image: tour.gallery,
-    touristType: tour.category,
+    url: pageUrl,
+    image: tour.gallery.length ? tour.gallery : undefined,
+    duration: isoMinutes(tour.durationMins),
+    touristType: { "@type": "Audience", audienceType: "Tourists" },
+    itinerary: tour.itinerary.map((step, i) => ({ "@type": "Place", name: `Stop ${i + 1}`, description: step })),
+    provider: { "@id": `${SITE_URL}/#organization` },
+    tourOperator: { "@id": `${SITE_URL}/#organization` },
     offers: {
       "@type": "Offer",
-      price: (tour.priceFromCents / 100).toFixed(0),
+      url: `${pageUrl}/book`,
+      price: (tour.priceFromCents / 100).toFixed(2),
       priceCurrency: "NZD",
       availability: "https://schema.org/InStock",
+      validFrom: new Date().toISOString().split("T")[0],
     },
+  };
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Tours", item: `${SITE_URL}/tours` },
+      { "@type": "ListItem", position: 3, name: tour.title, item: pageUrl },
+    ],
   };
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(tripLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {/* Title bar */}
       <div className="bg-brand-50 border-b border-brand-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

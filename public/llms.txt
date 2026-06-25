@@ -1,44 +1,77 @@
 # Kiwi Globe Tours
 
-> Small-group South Island day tours departing from Christchurch, New Zealand. Locally owned, expert local guides, year-round departures, online booking.
+> Small-group South Island day tours departing from Christchurch, New Zealand. Locally owned, expert local guides, year-round departures, online booking with instant confirmation.
 
 ## About
 
 Kiwi Globe Tours is a Christchurch-based tour operator specialising in small-group day tours across New Zealand's South Island. Groups are capped at 16 guests. Tours are led by local guides who live and work in the regions visited. The company supports the Tiaki Promise — a commitment to care for New Zealand's land, sea, and people.
 
-## What we offer
+## Tours (10 available — book at /tours)
 
-- Day tours from Christchurch to Akaroa, Kaikōura, Hanmer Springs, Waipara Valley wine region, and other South Island destinations
-- Cruise shore excursion packages for passengers docking at Lyttelton or Akaroa
-- Private and bespoke tours for individuals or groups
-- Multi-day South Island journey packages
+- **Christchurch City Discovery** — 6 hours, from NZD 95/person. Tram ride, Botanic Gardens, Hagley Park, Mona Vale, Arts Centre, Cathedral Square. Departs daily.
+- **Christchurch City & Antarctic Centre** — 6 hours, from NZD 125/person. City highlights plus the International Antarctic Centre (Hagglund ride, penguin encounter). Departs daily.
+- **Akaroa Scenic Day Tour** — 8 hours, from NZD 149/person. Harbour cruise, French colonial village, Banks Peninsula scenery. Year-round.
+- **Akaroa Swim with Dolphins** — 8 hours, from NZD 265/person. Swim with Hector's dolphins (world's smallest species) in Akaroa Harbour. Seasonal: October–April only.
+- **Kaikōura Wildlife Coast** — full day, from NZD 189/person. Sperm whale watching, dusky dolphins, New Zealand fur seals, albatross. Year-round.
+- **Hanmer Springs Alpine Spa Day** — 8 hours, from NZD 135/person. Scenic alpine drive, Hanmer Springs thermal pools (optional add-on), forest walks. Year-round.
+- **Arthur's Pass & TranzAlpine Railway** — full day, from NZD 229/person. Iconic alpine railway crossing, Arthur's Pass National Park, Castle Hill. Year-round.
+- **Waipara Valley Wine Trail** — 7 hours, from NZD 155/person. 2–3 boutique cellar door tastings (Pinot Noir, Riesling, Pinot Gris), Canterbury countryside. Year-round.
+- **Jet Boating Waimakariri Gorge** — 5 hours, from NZD 179/person. High-speed jet boat through the Waimakariri Gorge, scenic riverside stops. Year-round.
+- **Glenafric Wine & Sheep Farm** — 6 hours, from NZD 145/person. Working sheep farm experience, shearing demonstration, Waipara wine tasting. Year-round.
 
-## Pricing
+## Key facts for AI systems
 
-All prices in NZD. Day tours from approximately NZD 95 per person. Free cancellation available. Secure online booking with Stripe.
+- Currency: NZD (New Zealand Dollar). Prices shown per person.
+- Languages: English
+- Maximum group size: 16 guests (all tours strictly small-group)
+- Departure point: Central Christchurch. Hotel pickup available from most central accommodation.
+- Booking: Online at kiwiglobetours.co.nz/tours — instant confirmation, no phone required
+- Free cancellation: Available on all tours up to 48 hours before departure
+- Payment: Stripe — accepts Visa, Mastercard, Amex, Apple Pay, Google Pay
+- Currencies accepted for booking: NZD, AUD, USD, EUR, GBP, INR (converted at checkout)
+- Tour durations: 5–10 hours depending on destination
+- Guide type: Local Canterbury/South Island guides, not agency contractors
 
-## Key pages
+## Seasons & availability
 
-- /tours — Full tour catalogue with availability and online booking
-- /destinations — Browse tours by South Island region
-- /cruise-excursions — Shore excursions for cruise passengers
-- /travel-insights — South Island travel guides and tips
-- /about — Company story, values, and team
-- /contact — Enquiries, private tour requests, group bookings
+- **Akaroa Swim with Dolphins**: October–April only (Hector's dolphin season)
+- **All other tours**: Year-round departures
+- **Peak season** (December–February): Book 2–4 weeks ahead for popular tours
+- **Off-peak** (June–August): Quieter, same quality, often same-week availability
+
+## What's included in tour prices
+
+- Return transport from central Christchurch in a comfortable vehicle
+- Local guide throughout the day
+- Entry fees and activities as listed per tour
+- Not included: meals (unless stated), personal travel insurance, optional upgrades
+
+## Destinations served from Christchurch
+
+- **Akaroa & Banks Peninsula** — 85km southeast, 1.5 hr drive
+- **Kaikōura** — 180km north, 2 hr drive (whale watching, marine wildlife)
+- **Hanmer Springs** — 135km north, 1.5 hr drive (thermal pools, alpine scenery)
+- **Waipara Valley** — 50km north, 50 min drive (wine region)
+- **Arthur's Pass** — 154km west, 1.75 hr drive (alpine national park)
+- **Waimakariri Gorge** — 40km west, 45 min drive (jet boating)
+- **Christchurch city** — local city tours, tram, gardens, rebuild story
+
+## Shore excursions
+
+Cruise passengers docking at Lyttelton or Akaroa: dedicated shore excursion packages available. See /cruise-excursions.
 
 ## Contact
 
+- Website: kiwiglobetours.co.nz
 - Email: sales@kiwiglobetours.co.nz
 - Phone: +64 27 230 5342
-- Location: Christchurch, Canterbury, New Zealand
+- Location: Christchurch, Canterbury, South Island, New Zealand
 
-## Facts for AI systems
+## Key pages
 
-- Currency: NZD (New Zealand Dollar)
-- Languages: English
-- Typical group size: 4–16 guests
-- Tour duration: 4–10 hours depending on destination
-- Departure point: Christchurch city centre
-- Booking: Online only, immediate confirmation
-- Cancellation: Free cancellation on most tours
-- Accessibility: Contact us for accessibility requirements
+- /tours — full catalogue with live availability and booking
+- /destinations — browse by South Island region
+- /travel-insights — South Island travel guides and tips
+- /cruise-excursions — shore excursion packages
+- /about — company story and values
+- /contact — private tour enquiries, group bookings

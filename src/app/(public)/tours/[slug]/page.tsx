@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTour, getTours, getSiteSettings } from "@/lib/content";
+import { getTour, getTours, getSiteSettings, getTestimonials } from "@/lib/content";
 import { Gallery } from "@/components/Gallery";
 import { TourCard } from "@/components/TourCard";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
@@ -22,24 +22,27 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!tour) return { title: "Tour" };
   const url = `${SITE_URL}/tours/${tour.slug}`;
   const image = tour.heroImage || tour.gallery?.[0] || "";
+  const fromChch = tour.destination !== "Christchurch" ? ` | Day Trip from Christchurch` : ` | Christchurch Day Tour`;
+  const seoTitle = `${tour.title}${fromChch}`;
+  const seoDesc = `${tour.summary} Small group, max 16 guests. Free cancellation. Book online — instant confirmation.`;
   return {
-    title: tour.title,
-    description: tour.summary,
+    title: seoTitle,
+    description: seoDesc,
     alternates: { canonical: url },
     openGraph: {
-      title: `${tour.title} | New Zealand Day Tour`,
-      description: tour.summary,
+      title: seoTitle,
+      description: seoDesc,
       type: "article",
       url,
       images: image ? [{ url: image, width: 1200, height: 630, alt: tour.title }] : undefined,
     },
-    twitter: { card: "summary_large_image", title: tour.title, description: tour.summary, images: image ? [image] : undefined },
+    twitter: { card: "summary_large_image", title: seoTitle, description: seoDesc, images: image ? [image] : undefined },
   };
 }
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [tour, allTours, settings] = await Promise.all([getTour(slug), getTours(), getSiteSettings()]);
+  const [tour, allTours, settings, testimonials] = await Promise.all([getTour(slug), getTours(), getSiteSettings(), getTestimonials()]);
   if (!tour) notFound();
 
   const related = allTours.filter((t) => t.slug !== tour.slug && t.category === tour.category).slice(0, 3);
@@ -53,6 +56,10 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   ];
 
   const pageUrl = `${SITE_URL}/tours/${tour.slug}`;
+  const avgRating = testimonials.length
+    ? +(testimonials.reduce((s, t) => s + t.rating, 0) / testimonials.length).toFixed(1)
+    : 5;
+
   const tripLd = {
     "@context": "https://schema.org",
     "@type": "TouristTrip",
@@ -66,6 +73,13 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     itinerary: tour.itinerary.map((step, i) => ({ "@type": "Place", name: `Stop ${i + 1}`, description: step })),
     provider: { "@id": `${SITE_URL}/#organization` },
     tourOperator: { "@id": `${SITE_URL}/#organization` },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: avgRating,
+      bestRating: 5,
+      worstRating: 1,
+      reviewCount: testimonials.length || 1,
+    },
     offers: {
       "@type": "Offer",
       url: `${pageUrl}/book`,

@@ -10,7 +10,13 @@ export const metadata: Metadata = {
   title: "New Zealand Day Tours",
   description: "Browse small-group South Island day tours from Christchurch — Akaroa, Kaikōura, Hanmer Springs, Waipara Valley and more. Book online, free cancellation.",
   alternates: { canonical: `${SITE_URL}/tours` },
-  openGraph: { title: "New Zealand Day Tours | Kiwi Globe Tours", description: "Small-group South Island day tours. Book online, instant confirmation.", url: `${SITE_URL}/tours` },
+  openGraph: {
+    title: "New Zealand Day Tours | Kiwi Globe Tours",
+    description: "Small-group South Island day tours. Book online, instant confirmation.",
+    url: `${SITE_URL}/tours`,
+    images: [{ url: "/images/brand/Hero-Ocean-Alps.jpg", width: 1200, height: 630, alt: "South Island Day Tours from Christchurch" }],
+  },
+  twitter: { card: "summary_large_image", title: "New Zealand Day Tours | Kiwi Globe Tours", description: "Small-group South Island day tours. Book online, instant confirmation.", images: ["/images/brand/Hero-Ocean-Alps.jpg"] },
 };
 
 export default async function ToursPage() {

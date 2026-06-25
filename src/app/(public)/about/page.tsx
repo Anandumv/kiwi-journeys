@@ -11,7 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "About Us",
     description,
     alternates: { canonical: `${SITE_URL}/about` },
-    openGraph: { title: `About ${s.name}`, description, url: `${SITE_URL}/about` },
+    openGraph: {
+      title: `About ${s.name} — Christchurch Day Tour Operator`,
+      description,
+      url: `${SITE_URL}/about`,
+      images: [{ url: "/images/brand/Hero-Ocean-Alps.jpg", width: 1200, height: 630, alt: `About ${s.name}` }],
+    },
+    twitter: { card: "summary_large_image", title: `About ${s.name}`, description, images: ["/images/brand/Hero-Ocean-Alps.jpg"] },
   };
 }
 

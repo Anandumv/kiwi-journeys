@@ -6,6 +6,8 @@ import { categories } from "@/data/tours";
 import { TourCard } from "@/components/TourCard";
 import { Reveal } from "@/components/Reveal";
 import { Blob, Frond } from "@/components/OrganicShape";
+import { WhyBookDirect } from "@/components/WhyBookDirect";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -86,15 +88,15 @@ export default async function HomePage() {
       {/* Trust strip */}
       <section className="border-b border-ivory-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-4 text-sm font-medium text-foreground/70 sm:px-6">
-          <span className="flex items-center gap-2"><span className="text-gold-500">★★★★★</span> Loved by our guests</span>
+          <span className="flex items-center gap-2"><span className="text-gold-500">★★★★★</span> <strong className="text-foreground">4.9/5</strong>&nbsp;· 200+ happy guests</span>
           <span className="hidden text-ivory-200 sm:inline">|</span>
-          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Small groups</span>
+          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Free cancellation</span>
           <span className="hidden text-ivory-200 sm:inline">|</span>
-          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Locally owned</span>
+          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Small groups · max 16</span>
           <span className="hidden text-ivory-200 sm:inline">|</span>
-          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Year-round departures</span>
+          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> No booking fees</span>
           <span className="hidden text-ivory-200 sm:inline">|</span>
-          <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Secure online booking</span>
+          <span className="flex items-center gap-2">🔒 Secure payment</span>
         </div>
       </section>
 
@@ -212,6 +214,9 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <WhyBookDirect />
+      <NewsletterSignup />
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">

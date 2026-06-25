@@ -6,6 +6,7 @@ import { Gallery } from "@/components/Gallery";
 import { TourCard } from "@/components/TourCard";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { formatNZD } from "@/lib/money";
+import { PaymentBadges } from "@/components/TrustBadges";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -209,9 +210,12 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
             >
               Check Availability &amp; Book
             </Link>
-            <div className="mt-3 flex items-center justify-center gap-2 text-xs text-foreground/55">
-              <span className="text-teal-600">✓</span> Free cancellation · Small groups · Locally owned
+            <div className="mt-3 space-y-1 text-center text-xs text-foreground/55">
+              <p><span className="text-teal-600">✓</span> Free cancellation up to 48 h before</p>
+              <p><span className="text-teal-600">✓</span> Small groups · max 16 guests · Locally owned</p>
+              <p><span className="text-teal-600">✓</span> No booking fees — best price direct</p>
             </div>
+            <PaymentBadges className="mt-4 border-t border-brand-50 pt-4" />
             <Link href="/contact" className="mt-3 block text-center text-sm font-medium text-brand-600 hover:underline">
               Have questions? Contact us
             </Link>

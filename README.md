@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kiwi Journeys — NZ Tour Booking Site
 
-## Getting Started
+A New Zealand day-tour booking website (Next.js + TypeScript + Tailwind + Prisma/Postgres + Stripe)
+with a full custom booking engine: calendar availability, package/price options, seat-hold reservations,
+online payment, confirmation emails, and an admin dashboard.
 
-First, run the development server:
+> **Branding is placeholder** ("Kiwi Journeys"). All brand strings live in `src/config/site.ts` —
+> edit that one file to rebrand. Replace placeholder images in `public/images/` with your own
+> **licensed** photography before going public (the bundled photos are from a scraped reference and
+> are not cleared for production use).
+
+## Stack
+
+- **Next.js 16** (App Router) + React 19 + TypeScript
+- **Tailwind CSS v4**
+- **PostgreSQL** via **Prisma 6**
+- **Stripe** (Payment Intents + embedded Payment Element)
+- **Resend** for confirmation/contact email (optional)
+
+## Local setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 1. Postgres must be running and the DB created:
+createdb kiwi_journeys                      # if not already created
+
+# 2. Install + generate + migrate + seed
+npm install
+npx prisma migrate dev
+npm run seed                                # tours, price options, 90-day departures
+
+# 3. Run
+npm run dev                                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment (`.env`)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Var | Purpose |
+|-----|---------|
+| `DATABASE_URL` | Postgres connection string |
+| `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe test/live keys |
+| `STRIPE_WEBHOOK_SECRET` | from `stripe listen` or the dashboard |
+| `RESEND_API_KEY` + `BOOKINGS_FROM_EMAIL` | confirmation emails (optional; logs to console if unset) |
+| `ADMIN_TOKEN` | password for `/admin` |
+| `CRON_SECRET` | protects `/api/cron/*` |
+| `RESERVATION_HOLD_MINUTES` | seat-hold lifetime (default 10) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Enabling payments (Stripe test mode)
 
-## Learn More
+1. Get test keys from <https://dashboard.stripe.com/test/apikeys> and set `STRIPE_SECRET_KEY` +
+   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` in `.env`.
+2. Forward webhooks locally:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   ```
+   Copy the `whsec_…` it prints into `STRIPE_WEBHOOK_SECRET`, restart `npm run dev`.
+3. Book a tour and pay with test card `4242 4242 4242 4242` (any future expiry/CVC).
+   The booking is committed **only** when the `payment_intent.succeeded` webhook fires.
 
-To learn more about Next.js, take a look at the following resources:
+## How the booking engine works
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Content** lives in `src/data/tours.ts` (10 tours) and is seeded into the DB.
+- **Departures** (`Session` rows) are generated 90 days out from each tour's recurrence
+  (times/weekdays/capacity), DST-safe in `Pacific/Auckland`.
+- **Availability** is computed live: `capacity − confirmed bookings − active holds` — never stored.
+- **Booking flow**: pick date → time slot → guests → `POST /api/reservations` creates a row-locked
+  `HELD` reservation (`SELECT … FOR UPDATE` prevents overbooking) + a Stripe PaymentIntent →
+  checkout with the Payment Element → the **webhook** commits the `Booking` (idempotent).
+- **Holds expire** after 10 min; `/api/cron/expire-holds` (Vercel Cron, every 5 min) sweeps them and
+  cancels their PaymentIntents. `/api/cron/generate-departures` (daily) tops up the rolling window.
+- **Admin** (`/admin`, token-gated): bookings list, revenue, refunds, departure generation.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Verification scripts
 
-## Deploy on Vercel
+```bash
+npm run seed
+npx tsx scripts/verify.ts          # overbooking, live availability, hold expiry
+npx tsx scripts/verify-commit.ts   # booking commit + idempotency (webhook's job)
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key files
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Path | Role |
+|------|------|
+| `src/config/site.ts` | all brand strings (rebrand here) |
+| `src/data/tours.ts` | tour content (swap copy/images here) |
+| `src/lib/availability.ts` | remaining-seats, session generation, **locked hold** (overbooking guard) |
+| `src/lib/booking.ts` | booking commit + confirmation email |
+| `src/app/api/reservations/route.ts` | create hold + PaymentIntent |
+| `src/app/api/stripe/webhook/route.ts` | the only place a booking commits |
+| `src/components/BookingWidget.tsx` | calendar + slots + quantity |
+| `src/app/checkout/[reservationId]/page.tsx` | Stripe Payment Element |
+
+## Before public launch
+
+- Replace placeholder branding (`src/config/site.ts`, `src/components/Logo.tsx`).
+- Replace all images with your own **licensed** photography; rewrite tour copy as original content.
+- Add real legal text (privacy, terms), production Stripe keys, a custom domain, and GST handling.

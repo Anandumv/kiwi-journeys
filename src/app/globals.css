@@ -1,26 +1,119 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #15281c; /* deep forest ink */
+
+  /* Soft ivory paper base (Fern & Gold) */
+  --color-ivory: #f4f2e9;
+  --color-ivory-200: #e5dfcb;
+
+  /* Brand — forest / fern emerald (Fern & Gold; re-skins site) */
+  --color-brand-50: #eaf3ec;
+  --color-brand-100: #d0e6d5;
+  --color-brand-200: #a6cdb0;
+  --color-brand-300: #6fb083;
+  --color-brand-400: #3f9760;
+  --color-brand-500: #2c8551;
+  --color-brand-600: #237043;
+  --color-brand-700: #1d5a37;
+  --color-brand-800: #19482d;
+  --color-brand-900: #123823;
+  --color-brand-950: #0b2417;
+
+  /* Warm gold accent */
+  --color-sand-400: #ecc06a;
+  --color-sand-500: #dca73f;
+  --color-sand-600: #c08a28;
+  --color-sand-700: #9c6c1d; /* deep gold — accent hover */
+
+  /* Honey gold — highlights, ratings, badges */
+  --color-gold-300: #e0c373;
+  --color-gold-400: #cfa94f;
+  --color-gold-500: #c9a14a;
+  --color-gold-600: #a9842f;
+
+  /* Eucalyptus — cool natural accent for links / info */
+  --color-teal-400: #7fa093;
+  --color-teal-500: #5f8076;
+  --color-teal-600: #4c685f;
+
+  /* Pine — deep green for footers / contrast bands */
+  --color-pine-700: #26352a;
+  --color-pine-900: #18221a;
+
+  /* Stone / taupe — warm neutral surfaces & borders */
+  --color-stone-300: #cabfa8;
+  --color-stone-400: #b9ac95;
+  --color-stone-500: #9c8f78;
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ivory);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Subtle paper grain overlay — apply to a fixed full-screen layer or section */
+.paper-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Arch-topped image frame (organic motif) */
+.arch-top {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Slow hero zoom */
+@keyframes kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.14); }
+}
+.animate-kenburns {
+  animation: kenburns 20s ease-out forwards;
+}
+
+/* Gentle float for decorative shapes */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-floaty {
+  animation: floaty 9s ease-in-out infinite;
 }

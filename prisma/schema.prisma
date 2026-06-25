@@ -1,0 +1,233 @@
+// Kiwi Journeys — booking engine schema.
+// All datetimes stored UTC. Business timezone = Pacific/Auckland.
+// Money stored as integer minor units (NZD cents). Never floats.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tour {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  code         String        @default("")
+  title        String
+  summary      String
+  descriptionLong String?
+  destination  String
+  destinationSlug String      @default("")
+  category     String        @default("iconic-day-trips")
+  durationLabel String        @default("1 Day")
+  durationMins Int
+  ageRange     String        @default("All Ages")
+  startEnd     String        @default("")
+  pickup       String        @default("")
+  priceFromCents Int         @default(0)
+  heroImage    String        @default("")
+  gallery      String[]      @default([])
+  highlights   String[]      @default([])
+  itinerary    String[]      @default([])
+  included     String[]      @default([])
+  optionalUpgrades String[]  @default([])
+  importantInfo String[]     @default([])
+  featured     Boolean       @default(false)
+  closedMonths Int[]         @default([])
+  departureTimes String[]    @default([])
+  departureWeekdays Int[]    @default([])
+  capacityPerDeparture Int   @default(12)
+  sortOrder    Int           @default(0)
+  isActive     Boolean       @default(true)
+  priceOptions PriceOption[]
+  sessions     Session[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Destination {
+  id        String  @id @default(cuid())
+  slug      String  @unique
+  name      String
+  status    String  @default("active") // active | coming-soon
+  blurb     String  @default("")
+  intro     String?
+  heroImage String?
+  sortOrder Int     @default(0)
+}
+
+model BlogPost {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  date       DateTime
+  excerpt    String   @default("")
+  body       String[] @default([])
+  coverImage String?
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model Testimonial {
+  id        String  @id @default(cuid())
+  name      String
+  country   String  @default("")
+  text      String
+  rating    Int     @default(5)
+  sortOrder Int     @default(0)
+  published Boolean @default(true)
+}
+
+model SiteSetting {
+  id            String @id @default("singleton")
+  name          String @default("Kiwi Journeys")
+  tagline       String @default("Your Journey. Your New Zealand.")
+  description   String @default("")
+  logoImage     String?
+  phone         String @default("")
+  phoneHref     String @default("")
+  email         String @default("")
+  address       String @default("")
+  currency      String @default("NZD")
+  heroImage     String @default("")
+  footerTagline String @default("")
+  social        Json   @default("{}")
+  stats         Json   @default("[]")
+  nav           Json   @default("[]")
+  valueProps    Json   @default("[]")
+  currencyRates Json   @default("{}")
+  updatedAt     DateTime @updatedAt @default(now())
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String   @default("")
+  role         String   @default("admin")
+  createdAt    DateTime @default(now())
+}
+
+model Media {
+  id        String   @id @default(cuid())
+  url       String
+  alt       String?
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+}
+
+model PriceOption {
+  id           String        @id @default(cuid())
+  tourId       String
+  tour         Tour          @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  key          String // stable key from content, e.g. "adult"
+  label        String
+  priceCents   Int
+  seatsPerUnit Int           @default(1)
+  sortOrder    Int           @default(0)
+  bookingItems BookingItem[]
+
+  @@unique([tourId, key])
+  @@index([tourId])
+}
+
+enum SessionStatus {
+  SCHEDULED
+  CANCELLED
+}
+
+model Session {
+  id           String        @id @default(cuid())
+  tourId       String
+  tour         Tour          @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  startsAtUtc  DateTime
+  localDate    DateTime      @db.Date // Auckland calendar date for fast calendar queries
+  capacity     Int
+  status       SessionStatus @default(SCHEDULED)
+  bookings     Booking[]
+  reservations Reservation[]
+
+  @@unique([tourId, startsAtUtc])
+  @@index([tourId, localDate])
+}
+
+enum ReservationStatus {
+  HELD
+  CONVERTED
+  EXPIRED
+  CANCELLED
+}
+
+model Reservation {
+  id                    String            @id @default(cuid())
+  sessionId             String
+  session               Session           @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  seats                 Int
+  totalCents            Int
+  status                ReservationStatus @default(HELD)
+  expiresAt             DateTime
+  stripePaymentIntentId String?           @unique
+  cartSnapshot          Json // [{priceOptionId, key, label, unitPriceCents, qty, seats}]
+  contactSnapshot       Json? // {fullName, email, phone, notes}
+  booking               Booking?
+  createdAt             DateTime          @default(now())
+
+  @@index([sessionId, status])
+  @@index([status, expiresAt])
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  email     String
+  fullName  String
+  phone     String?
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+}
+
+model Booking {
+  id                    String        @id @default(cuid())
+  reference             String        @unique
+  sessionId             String
+  session               Session       @relation(fields: [sessionId], references: [id])
+  customerId            String
+  customer              Customer      @relation(fields: [customerId], references: [id])
+  reservationId         String?       @unique
+  reservation           Reservation?  @relation(fields: [reservationId], references: [id])
+  seats                 Int
+  totalCents            Int
+  currency              String        @default("NZD")
+  stripePaymentIntentId String        @unique
+  status                BookingStatus @default(CONFIRMED)
+  notes                 String?
+  items                 BookingItem[]
+  createdAt             DateTime      @default(now())
+
+  @@index([sessionId])
+  @@index([customerId])
+}
+
+model BookingItem {
+  id             String      @id @default(cuid())
+  bookingId      String
+  booking        Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  priceOptionId  String
+  priceOption    PriceOption @relation(fields: [priceOptionId], references: [id])
+  label          String
+  unitPriceCents Int
+  qty            Int
+  seats          Int
+
+  @@index([bookingId])
+}

@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #2a2722; /* warm ink */
+
+  /* Warm cream paper base (organic) */
+  --color-ivory: #f6f1e7;
+  --color-ivory-200: #e8dfce;
+
+  /* Brand — muted sage (remapped from teal; re-skins the whole site) */
+  --color-brand-50: #eef1e9;
+  --color-brand-100: #dde3d3;
+  --color-brand-200: #c2ccb2;
+  --color-brand-300: #a3b18d;
+  --color-brand-400: #879873;
+  --color-brand-500: #6f7f60;
+  --color-brand-600: #59684c;
+  --color-brand-700: #47543d;
+  --color-brand-800: #3a4533;
+  --color-brand-900: #2c3826;
+  --color-brand-950: #1c2419;
+
+  /* Clay / terracotta accent */
+  --color-sand-400: #dba37a;
+  --color-sand-500: #c2774a;
+  --color-sand-600: #a65f37;
+  --color-sand-700: #9c4a2f; /* deep rust — terracotta hover */
+
+  /* Honey gold — highlights, ratings, badges */
+  --color-gold-300: #e0c373;
+  --color-gold-400: #cfa94f;
+  --color-gold-500: #c9a14a;
+  --color-gold-600: #a9842f;
+
+  /* Eucalyptus — cool natural accent for links / info */
+  --color-teal-400: #7fa093;
+  --color-teal-500: #5f8076;
+  --color-teal-600: #4c685f;
+
+  /* Pine — deep green for footers / contrast bands */
+  --color-pine-700: #26352a;
+  --color-pine-900: #18221a;
+
+  /* Stone / taupe — warm neutral surfaces & borders */
+  --color-stone-300: #cabfa8;
+  --color-stone-400: #b9ac95;
+  --color-stone-500: #9c8f78;
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.font-serif {
+  font-family: var(--font-serif);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Eyebrow label */
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Subtle paper grain overlay — apply to a fixed full-screen layer or section */
+.paper-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Arch-topped image frame (organic motif) */
+.arch-top {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Slow hero zoom */
+@keyframes kenburns {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.14); }
+}
+.animate-kenburns {
+  animation: kenburns 20s ease-out forwards;
+}
+
+/* Gentle float for decorative shapes */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+.animate-floaty {
+  animation: floaty 9s ease-in-out infinite;
+}

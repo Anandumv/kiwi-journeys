@@ -6,7 +6,7 @@ import { formatNZD } from "./money";
 import { dateLabel, timeLabel } from "./time";
 
 type CartLine = { priceOptionId: string; label: string; unitPriceCents: number; qty: number; seats: number };
-type Contact = { fullName: string; email: string; phone?: string; notes?: string };
+type Contact = { fullName: string; email: string; phone?: string; notes?: string; marketingConsent?: boolean; promoCodeId?: string };
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
 function makeReference(): string {
@@ -47,7 +47,12 @@ export async function commitReservation(
 
   await prisma.$transaction(async (tx) => {
     const customer = await tx.customer.create({
-      data: { email: contact.email, fullName: contact.fullName, phone: contact.phone || null },
+      data: {
+        email: contact.email,
+        fullName: contact.fullName,
+        phone: contact.phone || null,
+        marketingConsent: contact.marketingConsent ?? false,
+      },
     });
     await tx.booking.create({
       data: {
@@ -84,6 +89,15 @@ export async function commitReservation(
     totalCents: reservation.totalCents,
     lines,
   }).catch((e) => console.error("Confirmation email failed:", e));
+
+  // Auto-subscribe to newsletter if marketing consent was given at checkout.
+  if (contact.marketingConsent) {
+    void prisma.newsletterSubscriber.upsert({
+      where: { email: contact.email },
+      create: { email: contact.email },
+      update: {},
+    }).catch((e) => console.error("Newsletter upsert failed:", e));
+  }
 
   return { reference, alreadyExisted: false };
 }

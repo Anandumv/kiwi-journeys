@@ -31,12 +31,26 @@ export async function POST(req: Request) {
   if (apiKey) {
     try {
       const resend = new Resend(apiKey);
+      const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
       await resend.emails.send({
-        from: process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`,
+        from,
         to: site.email,
         replyTo: email,
         subject: `[Contact] ${subject || "New enquiry"} — ${name}`,
         text: `From: ${name} <${email}>\n\n${message}`,
+      });
+      // Auto-responder so the sender knows their message arrived.
+      await resend.emails.send({
+        from,
+        to: email,
+        subject: `We received your message — ${site.name}`,
+        text:
+          `Hi ${name},\n\n` +
+          `Thank you for getting in touch with ${site.name}. We've received your message ` +
+          `and will get back to you within 1–2 business days.\n\n` +
+          `--- Your message ---\n${message}\n---\n\n` +
+          `If your enquiry is urgent, please call us at ${site.phone}.\n\n` +
+          `${site.name}`,
       });
     } catch (e) {
       console.error("Contact email failed:", e);

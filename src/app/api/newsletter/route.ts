@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { Resend } from "resend";
+import { getSiteSettings } from "@/lib/content";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
@@ -12,11 +14,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid email." }, { status: 400 });
   }
 
-  await prisma.newsletterSubscriber.upsert({
-    where: { email },
-    create: { email },
-    update: {},
-  });
+  const existing = await prisma.newsletterSubscriber.findUnique({ where: { email }, select: { id: true } });
+  await prisma.newsletterSubscriber.upsert({ where: { email }, create: { email }, update: {} });
+
+  // Send welcome email only on first signup (not on re-subscribe).
+  if (!existing) {
+    void sendWelcomeEmail(email).catch((e) => console.error("Welcome email failed:", e));
+  }
 
   return NextResponse.json({ ok: true });
+}
+
+async function sendWelcomeEmail(to: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const site = await getSiteSettings();
+  const resend = new Resend(apiKey);
+  await resend.emails.send({
+    from: process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`,
+    to,
+    subject: `Welcome to ${site.name} — your South Island adventure starts here`,
+    text:
+      `Hi there,\n\n` +
+      `Thanks for subscribing! You're now on the ${site.name} list for travel inspiration, ` +
+      `early-bird deals, and seasonal tour news.\n\n` +
+      `Browse our tours: ${process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz"}/tours\n\n` +
+      `To unsubscribe at any time, simply reply to this email with "unsubscribe" in the subject.\n\n` +
+      `${site.name}\n${site.phone}`,
+  });
 }

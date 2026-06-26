@@ -33,16 +33,6 @@ export const posts: Post[] = [
     ],
   },
   {
-    slug: "riding-the-tranzalpine-train",
-    title: "Riding the TranzAlpine: One of the World's Great Rail Journeys",
-    date: "2026-01-04",
-    excerpt: "Crossing the Southern Alps by rail — what to expect on the Arthur's Pass day tour.",
-    body: [
-      "The TranzAlpine climbs from the Canterbury Plains, across the braided Waimakariri River and through deep gorges and beech forest to the alpine village of Arthur's Pass.",
-      "Sit back in panoramic carriages, step out into the open-air viewing car, and keep an eye out for the cheeky native kea. Our day tour pairs the rail journey with an alpine road return and expert local commentary.",
-    ],
-  },
-  {
     slug: "a-day-in-akaroa",
     title: "A Perfect Day in Akaroa & Banks Peninsula",
     date: "2025-12-12",

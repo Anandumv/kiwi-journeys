@@ -43,7 +43,7 @@ export default async function ToursPage() {
         eyebrow="Exciting Experiences"
         title="Our Tours"
         subtitle="Small-group days out across the South Island — pick a date and book online in minutes."
-        image="/images/general/queenstown-aerial.jpg"
+        image="/images/brand/Hero-Ocean-Alps.jpg"
       />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <Suspense fallback={<p className="text-foreground/60">Loading tours…</p>}>

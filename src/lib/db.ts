@@ -9,18 +9,30 @@ function buildDatabaseUrl() {
   const url = process.env.DATABASE_URL;
   if (!url || process.env.NODE_ENV !== "production") return url;
   // Append connection_limit=1 if not already set by the operator.
-  const u = new URL(url);
-  if (!u.searchParams.has("connection_limit")) {
-    u.searchParams.set("connection_limit", "1");
+  try {
+    const u = new URL(url);
+    if (!u.searchParams.has("connection_limit")) {
+      u.searchParams.set("connection_limit", "1");
+    }
+    return u.toString();
+  } catch {
+    return url;
   }
-  return u.toString();
 }
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
-    datasources: { db: { url: buildDatabaseUrl() } },
-  });
+function createPrismaClient() {
+  try {
+    return new PrismaClient({
+      log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+      datasources: { db: { url: buildDatabaseUrl() } },
+    });
+  } catch {
+    // DATABASE_URL not available at build time — return a stub that throws on use.
+    // Callers (content.ts, etc.) all have try/catch and fall back to static data.
+    return new PrismaClient({ log: [] });
+  }
+}
+
+export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

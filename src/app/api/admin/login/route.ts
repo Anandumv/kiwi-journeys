@@ -18,11 +18,23 @@ export async function POST(req: Request) {
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password required" }, { status: 400 });
   }
-  const user = await prisma.adminUser.findUnique({ where: { email: String(email).toLowerCase().trim() } });
+  let user;
+  try {
+    user = await prisma.adminUser.findUnique({ where: { email: String(email).toLowerCase().trim() } });
+  } catch (e) {
+    console.error("DB error during login:", e);
+    return NextResponse.json({ error: "Database unavailable. Try again shortly." }, { status: 503 });
+  }
   if (!user || !(await bcrypt.compare(String(password), user.passwordHash))) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
-  const token = await signSession({ sub: user.id, email: user.email, name: user.name, role: user.role });
+  let token: string;
+  try {
+    token = await signSession({ sub: user.id, email: user.email, name: user.name, role: user.role });
+  } catch (e) {
+    console.error("Session signing error:", e);
+    return NextResponse.json({ error: "Server misconfiguration: AUTH_SECRET may not be set." }, { status: 500 });
+  }
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, token, {
     httpOnly: true,

@@ -134,15 +134,14 @@ async function main() {
   console.log("Seeding admin user…");
   const email = process.env.ADMIN_EMAIL || "admin@kiwijourneys.example";
   const password = process.env.ADMIN_PASSWORD || "changeme123";
-  const existing = await prisma.adminUser.findUnique({ where: { email } });
-  if (!existing) {
-    await prisma.adminUser.create({
-      data: { email, passwordHash: await bcrypt.hash(password, 10), name: "Administrator", role: "owner" },
-    });
-    console.log(`  created admin: ${email}`);
-  } else {
-    console.log(`  admin ${email} already exists`);
-  }
+  console.log(`  using email: ${email}`);
+  const passwordHash = await bcrypt.hash(password, 10);
+  await prisma.adminUser.upsert({
+    where: { email },
+    create: { email, passwordHash, name: "Administrator", role: "owner" },
+    update: { passwordHash },
+  });
+  console.log(`  admin upserted: ${email}`);
 
   console.log("Done.");
 }

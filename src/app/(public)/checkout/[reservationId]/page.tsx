@@ -89,6 +89,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
             stripeReady={stripeReady}
             expiresAt={reservation.expiresAt.toISOString()}
             tourSlug={reservation.session.tour.slug}
+            totalCents={reservation.totalCents}
           />
         </div>
       </div>

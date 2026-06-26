@@ -9,6 +9,8 @@ const schema = z.object({
   email: z.string().email(),
   phone: z.string().max(50).optional().or(z.literal("")),
   notes: z.string().max(2000).optional().or(z.literal("")),
+  marketingConsent: z.boolean().optional().default(false),
+  promoCodeId: z.string().optional(),
 });
 
 // Save passenger/contact details onto the reservation before payment confirms.

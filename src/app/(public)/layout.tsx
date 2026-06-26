@@ -9,7 +9,7 @@ export default async function PublicLayout({ children }: { children: React.React
   const s = await getSiteSettings();
   return (
     <div className="flex min-h-screen flex-col">
-      <Header name={s.name} logoImage={s.logoImage} nav={s.nav} />
+      <Header name={s.name} logoImage={s.logoImage} nav={s.nav} phone={s.phone} phoneHref={s.phoneHref} />
       <main className="flex-1 pt-16">{children}</main>
       <Footer
         name={s.name}

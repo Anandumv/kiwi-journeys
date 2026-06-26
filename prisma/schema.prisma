@@ -59,15 +59,18 @@ model Destination {
 }
 
 model BlogPost {
-  id         String   @id @default(cuid())
-  slug       String   @unique
-  title      String
-  date       DateTime
-  excerpt    String   @default("")
-  body       String[] @default([])
-  coverImage String?
-  published  Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  title           String
+  date            DateTime
+  excerpt         String   @default("")
+  body            String[] @default([])
+  coverImage      String?
+  published       Boolean  @default(true)
+  category        String   @default("general")
+  tags            String[] @default([])
+  metaDescription String?
+  createdAt       DateTime @default(now())
 }
 
 model Testimonial {
@@ -186,12 +189,21 @@ enum BookingStatus {
 }
 
 model Customer {
-  id        String    @id @default(cuid())
-  email     String
-  fullName  String
-  phone     String?
-  bookings  Booking[]
-  createdAt DateTime  @default(now())
+  id                String    @id @default(cuid())
+  email             String
+  fullName          String
+  phone             String?
+  marketingConsent  Boolean   @default(false)
+  smsConsent        Boolean   @default(false)
+  country           String?
+  travelStyle       String[]  @default([])
+  groupType         String?
+  ageGroup          String?
+  isCruisePassenger Boolean   @default(false)
+  referralSource    String?
+  bookings          Booking[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@index([email])
 }
@@ -267,4 +279,25 @@ model Waitlist {
   @@index([tourId])
   @@index([sessionId])
   @@index([email])
+}
+
+model MagicToken {
+  id        String    @id @default(cuid())
+  email     String
+  token     String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([token])
+}
+
+model SurveyResponse {
+  id          String   @id @default(cuid())
+  bookingId   String   @unique
+  rating      Int
+  wouldReturn Boolean  @default(true)
+  feedback    String?
+  createdAt   DateTime @default(now())
 }

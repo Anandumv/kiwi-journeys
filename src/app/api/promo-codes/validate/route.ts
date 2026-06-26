@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  const { allowed } = rateLimit(rateLimitKey(req, "promo"), { limit: 10, windowMs: 60 * 1000 });
+  if (!allowed) return NextResponse.json({ error: "Too many requests." }, { status: 429 });
   const body = await req.json().catch(() => ({}));
   const code = String(body.code ?? "").trim().toUpperCase();
   const totalCents: number = Number(body.totalCents) || 0;

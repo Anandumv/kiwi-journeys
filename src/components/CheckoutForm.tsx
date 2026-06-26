@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadStripe, type Stripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { formatNZD } from "@/lib/money";
 
 const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 let stripePromise: Promise<Stripe | null> | null = null;
@@ -44,12 +45,53 @@ function ContactFields({
   );
 }
 
-function PaymentInner({ reservationId, expiresAt }: { reservationId: string; expiresAt: string }) {
+type PromoResult = {
+  valid: boolean;
+  discountCents?: number;
+  promoId?: string;
+  message: string;
+};
+
+function PaymentInner({
+  reservationId,
+  expiresAt,
+  totalCents,
+}: {
+  reservationId: string;
+  expiresAt: string;
+  totalCents: number;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [contact, setContact] = useState({ fullName: "", email: "", phone: "", notes: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [promoCode, setPromoCode] = useState("");
+  const [promoResult, setPromoResult] = useState<PromoResult | null>(null);
+  const [applyingPromo, setApplyingPromo] = useState(false);
+
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  async function applyPromo() {
+    if (!promoCode.trim()) return;
+    setApplyingPromo(true);
+    setPromoResult(null);
+    try {
+      const res = await fetch("/api/promo-codes/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoCode.trim(), totalCents }),
+      });
+      const data = await res.json();
+      setPromoResult(data);
+    } catch {
+      setPromoResult({ valid: false, message: "Could not apply code. Try again." });
+    } finally {
+      setApplyingPromo(false);
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,14 +100,21 @@ function PaymentInner({ reservationId, expiresAt }: { reservationId: string; exp
       setError("Please enter your name and email.");
       return;
     }
+    if (!termsAccepted) {
+      setError("Please accept the Terms & Conditions to continue.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
-    // Save contact onto the reservation so the webhook can build the booking.
     const c = await fetch(`/api/reservations/${reservationId}/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact),
+      body: JSON.stringify({
+        ...contact,
+        marketingConsent,
+        promoCodeId: promoResult?.valid ? promoResult.promoId : undefined,
+      }),
     });
     if (!c.ok) {
       const d = await c.json().catch(() => ({}));
@@ -88,24 +137,96 @@ function PaymentInner({ reservationId, expiresAt }: { reservationId: string; exp
     // On success Stripe redirects to return_url.
   }
 
+  const discountCents = promoResult?.valid ? (promoResult.discountCents ?? 0) : 0;
+  const finalCents = Math.max(0, totalCents - discountCents);
+
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       <div>
         <h2 className="text-lg font-semibold text-brand-900">Your details</h2>
         <div className="mt-3"><ContactFields contact={contact} setContact={setContact} /></div>
       </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-brand-900">Promo code</h2>
+        <div className="mt-3 flex gap-2">
+          <input
+            className="flex-1 rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            placeholder="Enter code"
+            value={promoCode}
+            onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoResult(null); }}
+          />
+          <button
+            type="button"
+            onClick={applyPromo}
+            disabled={applyingPromo || !promoCode.trim()}
+            className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:opacity-50"
+          >
+            {applyingPromo ? "…" : "Apply"}
+          </button>
+        </div>
+        {promoResult && (
+          <p className={`mt-2 text-sm ${promoResult.valid ? "text-teal-700" : "text-red-600"}`}>
+            {promoResult.message}
+          </p>
+        )}
+      </div>
+
       <div>
         <h2 className="text-lg font-semibold text-brand-900">Payment</h2>
         <div className="mt-3 rounded-xl border border-brand-100 p-4">
           <PaymentElement />
         </div>
       </div>
+
+      <div className="space-y-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+          />
+          <span className="text-sm text-foreground/70">
+            Send me travel inspiration, special offers, and tour news. You can unsubscribe at any time.
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            className="mt-0.5 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+            checked={termsAccepted}
+            onChange={(e) => setTermsAccepted(e.target.checked)}
+          />
+          <span className="text-sm text-foreground/70">
+            I agree to the{" "}
+            <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
+              Terms &amp; Conditions
+            </a>{" "}
+            and{" "}
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
+              Privacy Policy
+            </a>
+            . <span className="text-red-500">*</span>
+          </span>
+        </label>
+      </div>
+
       {error && <p className="text-sm text-red-600">{error}</p>}
+
       <div className="flex items-center justify-between text-sm text-foreground/60">
         <span>Seats held for <Countdown expiresAt={expiresAt} /></span>
+        {discountCents > 0 && (
+          <span className="font-medium text-teal-700">Saving {formatNZD(discountCents)}</span>
+        )}
       </div>
-      <button type="submit" disabled={!stripe || submitting} className="w-full rounded-full bg-brand-600 px-6 py-3 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50">
-        {submitting ? "Processing…" : "Pay now"}
+
+      <button
+        type="submit"
+        disabled={!stripe || submitting || !termsAccepted}
+        className="w-full rounded-full bg-brand-600 px-6 py-3 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
+      >
+        {submitting ? "Processing…" : discountCents > 0 ? `Pay ${formatNZD(finalCents)}` : "Pay now"}
       </button>
     </form>
   );
@@ -117,12 +238,14 @@ export function CheckoutForm({
   stripeReady,
   expiresAt,
   tourSlug,
+  totalCents,
 }: {
   reservationId: string;
   clientSecret: string | null;
   stripeReady: boolean;
   expiresAt: string;
   tourSlug: string;
+  totalCents: number;
 }) {
   if (!stripeReady || !clientSecret) {
     return (
@@ -142,7 +265,7 @@ export function CheckoutForm({
   const promise = getStripePromise();
   return (
     <Elements stripe={promise} options={{ clientSecret, appearance: { theme: "stripe", variables: { colorPrimary: "#137264" } } }}>
-      <PaymentInner reservationId={reservationId} expiresAt={expiresAt} />
+      <PaymentInner reservationId={reservationId} expiresAt={expiresAt} totalCents={totalCents} />
     </Elements>
   );
 }

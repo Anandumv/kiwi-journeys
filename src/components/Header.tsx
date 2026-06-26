@@ -11,10 +11,14 @@ export function Header({
   name,
   logoImage,
   nav,
+  phone,
+  phoneHref,
 }: {
   name: string;
   logoImage?: string | null;
   nav: NavItem[];
+  phone?: string | null;
+  phoneHref?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -54,6 +58,14 @@ export function Header({
               </Link>
             );
           })}
+          {phone && phoneHref && (
+            <a
+              href={phoneHref}
+              className={`text-sm font-medium transition-colors ${solid ? "text-foreground/70 hover:text-brand-600" : "text-white/90 hover:text-white"}`}
+            >
+              {phone}
+            </a>
+          )}
           <Link
             href="/tours"
             className={`rounded-full px-5 py-2 text-sm font-semibold transition ${

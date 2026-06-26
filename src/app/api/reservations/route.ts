@@ -30,6 +30,9 @@ export async function POST(req: Request) {
     include: { tour: { include: { priceOptions: true } } },
   });
   if (!session) return NextResponse.json({ error: "Session not found" }, { status: 404 });
+  if (!session.tour.isActive) {
+    return NextResponse.json({ error: "This tour is no longer available" }, { status: 410 });
+  }
   if (session.status !== "SCHEDULED" || session.startsAtUtc <= new Date()) {
     return NextResponse.json({ error: "This departure is no longer available" }, { status: 409 });
   }

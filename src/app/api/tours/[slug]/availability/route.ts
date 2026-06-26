@@ -18,7 +18,7 @@ export async function GET(
   }
   const [year, mon] = month.split("-").map(Number);
 
-  const tour = await prisma.tour.findUnique({ where: { slug }, select: { id: true } });
+  const tour = await prisma.tour.findUnique({ where: { slug, isActive: true }, select: { id: true } });
   if (!tour) return NextResponse.json({ error: "Tour not found" }, { status: 404 });
 
   const days = await getMonthAvailability(tour.id, year, mon);

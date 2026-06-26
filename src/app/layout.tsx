@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       "Kaikōura wildlife tour",
       "Hanmer Springs day trip",
       "Waipara Valley wine tour",
-      "Arthur's Pass day tour",
+      "Akaroa scenic day tour",
       "swim with dolphins Akaroa",
       "whale watching Kaikōura",
       "best day trips from Christchurch",

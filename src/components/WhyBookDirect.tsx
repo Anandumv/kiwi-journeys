@@ -1,32 +1,25 @@
-// "Why book with us direct" conversion section — addresses the Viator/GetYourGuide objection.
 const reasons = [
   {
-    icon: "💰",
     title: "No OTA markup",
     body: "Booking direct means you pay our actual price — no 20–30% commission added by Viator or GetYourGuide.",
   },
   {
-    icon: "🗺️",
     title: "Local guides, local knowledge",
     body: "Every guide lives in the region they show you. No scripts — just genuine insider stories, shortcuts and hidden spots.",
   },
   {
-    icon: "👥",
     title: "Guaranteed small groups",
     body: "We cap every departure at 16 guests. You'll never be one face in a 50-seat coach.",
   },
   {
-    icon: "📞",
     title: "Direct support",
     body: "Questions before, during or after? You reach us directly — not a call centre. We respond within one business day.",
   },
   {
-    icon: "🌿",
     title: "Tiaki Promise certified",
     body: "We travel with care for the land, sea and communities we visit. Your booking supports local family businesses.",
   },
   {
-    icon: "🔄",
     title: "Free cancellation",
     body: "Plans change. Cancel up to 48 hours before departure for a full refund — no questions asked.",
   },
@@ -48,8 +41,7 @@ export function WhyBookDirect() {
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {reasons.map((r) => (
             <div key={r.title} className="rounded-2xl border border-brand-700/50 bg-brand-800/60 p-6">
-              <span className="text-3xl">{r.icon}</span>
-              <h3 className="mt-3 font-serif text-lg font-semibold text-white">{r.title}</h3>
+              <h3 className="font-serif text-lg font-semibold text-white">{r.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-brand-100/75">{r.body}</p>
             </div>
           ))}

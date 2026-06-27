@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { formatNZD } from "@/lib/money";
 import { dateLabel } from "@/lib/time";
+import { CampaignModal } from "@/components/admin/CampaignModal";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Customers" };
@@ -8,19 +9,21 @@ export const metadata = { title: "Customers" };
 export default async function AdminCustomers({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; consent?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, consent } = await searchParams;
+  const consentOnly = consent === "1";
 
   const customers = await prisma.customer.findMany({
-    where: q
-      ? {
-          OR: [
-            { fullName: { contains: q, mode: "insensitive" } },
-            { email: { contains: q, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
+    where: {
+      ...(consentOnly && { marketingConsent: true }),
+      ...(q && {
+        OR: [
+          { fullName: { contains: q, mode: "insensitive" } },
+          { email: { contains: q, mode: "insensitive" } },
+        ],
+      }),
+    },
     include: { bookings: { orderBy: { createdAt: "desc" } } },
     orderBy: { createdAt: "desc" },
     take: 150,
@@ -35,24 +38,33 @@ export default async function AdminCustomers({
     lastBooking: c.bookings[0] ?? null,
   }));
 
+  const consentCount = rows.filter((c) => c.marketingConsent).length;
+
   return (
     <div className="p-8">
-      <h1 className="font-serif text-3xl font-semibold text-brand-900">Customers</h1>
+      <div className="flex items-baseline justify-between">
+        <h1 className="font-serif text-3xl font-semibold text-brand-900">Customers</h1>
+        <CampaignModal consentCount={consentCount} filters={{ q, consent }} />
+      </div>
 
-      <form method="get" className="mt-4 flex gap-2">
+      <form method="get" className="mt-4 flex flex-wrap gap-2">
         <input
           name="q"
           defaultValue={q}
           placeholder="Search by name or email…"
           className="flex-1 rounded-lg border border-ivory-200 bg-white px-4 py-2 text-sm outline-none focus:border-brand-400"
         />
+        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-ivory-200 bg-white px-3 py-2 text-sm">
+          <input type="checkbox" name="consent" value="1" defaultChecked={consentOnly} />
+          Consent only
+        </label>
         <button
           type="submit"
           className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
           Search
         </button>
-        {q && (
+        {(q || consent) && (
           <a
             href="/admin/customers"
             className="rounded-lg border border-ivory-200 px-4 py-2 text-sm hover:bg-ivory"
@@ -63,7 +75,8 @@ export default async function AdminCustomers({
       </form>
       <p className="mt-2 text-sm text-foreground/50">
         {rows.length} customer{rows.length !== 1 ? "s" : ""}
-        {q ? ` matching "${q}"` : " total"}
+        {q ? ` matching "${q}"` : ""}
+        {consentOnly ? " with marketing consent" : ` · ${consentCount} with consent`}
       </p>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-ivory-200 bg-white">

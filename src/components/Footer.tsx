@@ -45,6 +45,8 @@ export function Footer({
               <li><Link href="/contact" className="hover:text-white">Contact</Link></li>
               <li><Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link></li>
               <li><Link href="/terms-of-use" className="hover:text-white">Terms of Use</Link></li>
+              <li><Link href="/account/bookings" className="hover:text-white">My Bookings</Link></li>
+              <li><Link href="/account/login" className="hover:text-white">Sign In</Link></li>
             </ul>
           </div>
           <div>

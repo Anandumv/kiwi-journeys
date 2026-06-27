@@ -58,9 +58,19 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ r
           <a href={site.phoneHref} className="font-semibold text-brand-600">{site.phone}</a>.
         </div>
 
-        <Link href="/tours" className="mt-6 inline-block rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700">
-          Browse more tours
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link href="/tours" className="inline-block rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700">
+            Browse more tours
+          </Link>
+          <Link href="/account/login" className="inline-block rounded-full border border-brand-300 px-6 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-50">
+            View my bookings
+          </Link>
+        </div>
+        <div className="mt-4 rounded-xl border border-brand-100 bg-brand-50 p-4 text-sm">
+          <p className="font-semibold text-brand-900">Personalise your experience</p>
+          <p className="mt-1 text-foreground/60">Save your travel preferences and manage all your bookings in one place.</p>
+          <Link href="/account/login" className="mt-2 inline-block font-semibold text-brand-600 hover:underline">Set up your account →</Link>
+        </div>
       </div>
     </div>
   );

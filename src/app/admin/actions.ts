@@ -158,6 +158,9 @@ export async function savePost(fd: FormData) {
     body: str(fd, "body").split("\n\n").map((s) => s.trim()).filter(Boolean),
     coverImage: str(fd, "coverImage") || null, published: bool(fd, "published"),
     date: new Date(str(fd, "date") || Date.now()),
+    category: str(fd, "category") || "general",
+    tags: str(fd, "tags").split(",").map((s) => s.trim()).filter(Boolean),
+    metaDescription: str(fd, "metaDescription") || null,
   };
   if (id) await prisma.blogPost.update({ where: { id }, data });
   else await prisma.blogPost.create({ data });

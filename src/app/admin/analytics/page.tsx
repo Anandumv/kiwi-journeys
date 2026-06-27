@@ -4,13 +4,22 @@ import { formatNZD } from "@/lib/money";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Analytics" };
 
-export default async function AdminAnalytics() {
+export default async function AdminAnalytics({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
+  const { from, to } = await searchParams;
   const now = new Date();
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+  const rangeEnd = to ? new Date(to + "T23:59:59.999Z") : now;
+  const rangeStart = from
+    ? new Date(from)
+    : new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() - 5, 1);
 
   const [allBookings, totalCustomers, thisMonthAgg, lastMonthAgg] = await Promise.all([
     prisma.booking.findMany({
-      where: { status: "CONFIRMED", createdAt: { gte: sixMonthsAgo } },
+      where: { status: "CONFIRMED", createdAt: { gte: rangeStart, lte: rangeEnd } },
       select: { totalCents: true, createdAt: true, sessionId: true },
       orderBy: { createdAt: "asc" },
     }),
@@ -33,10 +42,10 @@ export default async function AdminAnalytics() {
     }),
   ]);
 
-  // Monthly buckets — last 6 months oldest → newest
+  // Monthly buckets — 6 months ending at rangeEnd, oldest → newest
   const months: { label: string; bookings: number; revCents: number }[] = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const d = new Date(rangeEnd.getFullYear(), rangeEnd.getMonth() - i, 1);
     months.push({
       label: d.toLocaleString("en-NZ", { month: "short", year: "2-digit" }),
       bookings: 0,
@@ -45,8 +54,8 @@ export default async function AdminAnalytics() {
   }
   for (const b of allBookings) {
     const ago =
-      (now.getFullYear() - b.createdAt.getFullYear()) * 12 +
-      (now.getMonth() - b.createdAt.getMonth());
+      (rangeEnd.getFullYear() - b.createdAt.getFullYear()) * 12 +
+      (rangeEnd.getMonth() - b.createdAt.getMonth());
     if (ago >= 0 && ago <= 5) {
       const idx = 5 - ago;
       months[idx].bookings += 1;
@@ -86,15 +95,32 @@ export default async function AdminAnalytics() {
     .sort((a, b) => b.revCents - a.revCents)
     .slice(0, 5);
 
+  const rangeLabel = from || to
+    ? `${from ?? "all time"} → ${to ?? "today"}`
+    : "Last 6 months";
+
   return (
     <div className="p-8">
       <h1 className="font-serif text-3xl font-semibold text-brand-900">Analytics</h1>
-      <p className="mt-1 text-sm text-foreground/50">Last 6 months — confirmed bookings only</p>
+      <p className="mt-1 text-sm text-foreground/50">{rangeLabel} — confirmed bookings only</p>
+
+      <form method="get" className="mt-4 flex flex-wrap items-end gap-3">
+        <label className="text-sm">
+          From
+          <input type="date" name="from" defaultValue={from} className="mt-1 block rounded-lg border border-ivory-200 bg-white px-3 py-2 text-sm" />
+        </label>
+        <label className="text-sm">
+          To
+          <input type="date" name="to" defaultValue={to} className="mt-1 block rounded-lg border border-ivory-200 bg-white px-3 py-2 text-sm" />
+        </label>
+        <button type="submit" className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">Apply</button>
+        {(from || to) && <a href="/admin/analytics" className="rounded-lg border border-ivory-200 px-4 py-2 text-sm hover:bg-ivory">Reset</a>}
+      </form>
 
       {/* KPI cards */}
       <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <KpiCard label="6-month revenue" value={formatNZD(totalRev)} />
-        <KpiCard label="6-month bookings" value={String(totalBookings)} />
+        <KpiCard label="Revenue" value={formatNZD(totalRev)} />
+        <KpiCard label="Bookings" value={String(totalBookings)} />
         <KpiCard label="Avg booking value" value={formatNZD(avgCents)} />
         <KpiCard label="Total customers" value={String(totalCustomers)} />
       </div>

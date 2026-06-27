@@ -132,11 +132,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     },
   };
 
+  const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   return (
     <html lang="en" className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="min-h-screen bg-ivory text-foreground">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }} />
+        {ga4Id && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} />
+            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga4Id}')` }} />
+          </>
+        )}
         {children}
       </body>
     </html>

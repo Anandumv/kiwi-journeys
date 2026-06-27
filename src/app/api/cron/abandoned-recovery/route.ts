@@ -6,7 +6,7 @@ import { cronAuthorized } from "@/lib/cron";
 
 export const dynamic = "force-dynamic";
 
-// Run every 2 minutes via Railway cron.
+// Run every 2 minutes via Vercel Cron (see vercel.json).
 // Finds HELD reservations with contact info that are about to expire without
 // payment and sends one recovery email per reservation.
 export async function GET(req: Request) {

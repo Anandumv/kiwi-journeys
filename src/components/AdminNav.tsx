@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/customers", label: "Customers" },
   { href: "/admin/calendar", label: "Calendar" },
   { href: "/admin/promo-codes", label: "Promo Codes" },
+  { href: "/admin/gift-vouchers", label: "Gift Vouchers" },
   { href: "/admin/waitlist", label: "Waitlist" },
   { href: "/admin/tours", label: "Tours" },
   { href: "/admin/destinations", label: "Destinations" },

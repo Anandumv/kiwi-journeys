@@ -67,7 +67,11 @@ npm run dev                                 # http://localhost:3000
   checkout with the Payment Element → the **webhook** commits the `Booking` (idempotent).
 - **Holds expire** after 10 min; `/api/cron/expire-holds` (Vercel Cron, every 5 min) sweeps them and
   cancels their PaymentIntents. `/api/cron/generate-departures` (daily) tops up the rolling window.
-- **Admin** (`/admin`, token-gated): bookings list, revenue, refunds, departure generation.
+- **Abandoned checkout recovery**: `/api/cron/abandoned-recovery` (every 2 min) emails customers whose
+  HELD reservation has contact info but is about to expire unpaid (one email per reservation).
+- **Loyalty reward**: `/api/cron/loyalty-reward` (daily) emails a one-time 10%-off promo code to
+  customers after their 2nd+ completed tour.
+- **Admin** (`/admin`, token-gated): bookings list, revenue, refunds, departure generation, gift vouchers.
 
 ## Verification scripts
 

@@ -111,6 +111,17 @@ export async function commitReservation(
     lines,
   }).catch((e) => console.error("Confirmation email failed:", e));
 
+  // Fire-and-forget admin alert for the new booking.
+  void sendAdminBookingAlert({
+    reference,
+    tourTitle: reservation.session.tour.title,
+    startsAtUtc: reservation.session.startsAtUtc,
+    seats: reservation.seats,
+    totalCents: reservation.totalCents,
+    customerName: contact.fullName,
+    customerEmail: contact.email,
+  }).catch((e) => console.error("Admin booking alert failed:", e));
+
   // Auto-subscribe to newsletter if marketing consent was given at checkout.
   if (contact.marketingConsent) {
     void prisma.newsletterSubscriber.upsert({
@@ -152,6 +163,39 @@ async function sendConfirmationEmail(args: {
       `${itemsText}\n\n` +
       `Total paid: ${formatNZD(args.totalCents)} NZD\n\n` +
       `We look forward to seeing you!\n${site.name}\n${site.phone}`,
+  });
+}
+
+async function sendAdminBookingAlert(args: {
+  reference: string;
+  tourTitle: string;
+  startsAtUtc: Date;
+  seats: number;
+  totalCents: number;
+  customerName: string;
+  customerEmail: string;
+}) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log(`[booking] (no RESEND_API_KEY) new booking alert ${args.reference}`);
+    return;
+  }
+  const resend = new Resend(apiKey);
+  const site = await getSiteSettings();
+  const adminEmail = site.email || process.env.ADMIN_EMAIL || "admin@kiwiglobetours.co.nz";
+  await resend.emails.send({
+    from: process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`,
+    to: adminEmail,
+    subject: `New booking: ${args.tourTitle} (${args.reference})`,
+    text:
+      `A new booking was confirmed.\n\n` +
+      `Reference: ${args.reference}\n` +
+      `Tour: ${args.tourTitle}\n` +
+      `Date: ${dateLabel(args.startsAtUtc)}\n` +
+      `Departs: ${timeLabel(args.startsAtUtc)} (NZ time)\n` +
+      `Seats: ${args.seats}\n` +
+      `Total paid: ${formatNZD(args.totalCents)} NZD\n\n` +
+      `Customer: ${args.customerName} (${args.customerEmail})\n`,
   });
 }
 

@@ -199,7 +199,7 @@ export function BookingWidget({
                     ].join(" ")}
                   >
                     {timeLabel(s.startsAtUtc)}
-                    <span className="ml-1 text-xs opacity-75">{soldout ? "Sold out" : `${s.remaining} left`}</span>
+                    <span className="ml-1 text-xs opacity-75">{soldout ? "Sold out" : s.remaining <= 3 ? `Only ${s.remaining} left!` : `${s.remaining} left`}</span>
                   </button>
                 );
               })}
@@ -207,6 +207,11 @@ export function BookingWidget({
 
             {activeSession && (
               <>
+                {activeSession.remaining <= 4 && (
+                  <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
+                    Only {activeSession.remaining} spot{activeSession.remaining !== 1 ? "s" : ""} left on this departure!
+                  </p>
+                )}
                 <p className="mt-5 text-sm font-medium text-foreground/70">Guests</p>
                 <div className="mt-2 space-y-2">
                   {priceOptions.map((po) => (

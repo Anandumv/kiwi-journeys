@@ -3,10 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
+import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
-import { aucklandLocalToUtc, aucklandDateOnly } from "@/lib/time";
+import { aucklandLocalToUtc, aucklandDateOnly, dateLabel, timeLabel } from "@/lib/time";
 import { getCurrentAdmin } from "@/lib/auth";
+import { getSiteSettings } from "@/lib/content";
 
 async function assertAdmin() {
   const session = await getCurrentAdmin();
@@ -109,8 +111,51 @@ export async function regenerateDepartures(fd: FormData) {
 
 export async function cancelSession(fd: FormData) {
   await assertAdmin();
-  await prisma.session.update({ where: { id: str(fd, "sessionId") }, data: { status: "CANCELLED" } });
-  revalidatePath(`/admin/tours/${str(fd, "tourId")}`);
+  const sessionId = str(fd, "sessionId");
+  const tourId = str(fd, "tourId");
+
+  // Fetch session + affected bookings before cancelling
+  const session = await prisma.session.findUnique({
+    where: { id: sessionId },
+    include: {
+      tour: { select: { title: true } },
+      bookings: {
+        where: { status: "CONFIRMED" },
+        select: { reference: true, customer: { select: { fullName: true, email: true } } },
+      },
+    },
+  });
+
+  await prisma.session.update({ where: { id: sessionId }, data: { status: "CANCELLED" } });
+
+  // Email every affected customer
+  const apiKey = process.env.RESEND_API_KEY;
+  if (session && session.bookings.length > 0 && apiKey) {
+    const resend = new Resend(apiKey);
+    const site = await getSiteSettings();
+    const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
+    for (const b of session.bookings) {
+      await resend.emails
+        .send({
+          from,
+          to: b.customer.email,
+          subject: `Important update: Your ${session.tour.title} tour has been cancelled`,
+          text:
+            `Hi ${b.customer.fullName},\n\n` +
+            `We're very sorry to inform you that the ${session.tour.title} tour on ` +
+            `${dateLabel(session.startsAtUtc)} at ${timeLabel(session.startsAtUtc)} (NZ time) ` +
+            `has been cancelled.\n\n` +
+            `Your booking (ref: ${b.reference}) will be fully refunded. ` +
+            `Refunds typically appear within 5–10 business days depending on your bank.\n\n` +
+            `We sincerely apologise for the inconvenience. ` +
+            `To book an alternative date, visit our website or call us at ${site.phone}.\n\n` +
+            `${site.name}`,
+        })
+        .catch((e: Error) => console.error(`Cancel email failed ${b.reference}:`, e));
+    }
+  }
+
+  revalidatePath(`/admin/tours/${tourId}`);
 }
 
 export async function addSession(fd: FormData) {
@@ -250,6 +295,26 @@ export async function createPromoCode(fd: FormData) {
 export async function deletePromoCode(fd: FormData) {
   await assertAdmin();
   await prisma.promoCode.delete({ where: { id: str(fd, "id") } });
+  revalidatePath("/admin/promo-codes");
+}
+
+export async function updatePromoCode(fd: FormData) {
+  await assertAdmin();
+  const id = str(fd, "id");
+  if (!id) return;
+  const maxUsesRaw = str(fd, "maxUses");
+  await prisma.promoCode.update({
+    where: { id },
+    data: {
+      description: str(fd, "description"),
+      type: str(fd, "type") === "fixed" ? "fixed" : "percentage",
+      value: num(fd, "value"),
+      minSpendCents: Math.round(num(fd, "minSpend", 0) * 100),
+      maxUses: maxUsesRaw ? parseInt(maxUsesRaw) : null,
+      expiresAt: str(fd, "expiresAt") ? new Date(str(fd, "expiresAt")) : null,
+      isActive: bool(fd, "isActive"),
+    },
+  });
   revalidatePath("/admin/promo-codes");
 }
 

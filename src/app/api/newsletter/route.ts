@@ -39,7 +39,7 @@ async function sendWelcomeEmail(to: string) {
       `Thanks for subscribing! You're now on the ${site.name} list for travel inspiration, ` +
       `early-bird deals, and seasonal tour news.\n\n` +
       `Browse our tours: ${process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz"}/tours\n\n` +
-      `To unsubscribe at any time, simply reply to this email with "unsubscribe" in the subject.\n\n` +
+      `To unsubscribe at any time, click here: ${process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz"}/unsubscribe?e=${Buffer.from(to).toString("base64")}\n\n` +
       `${site.name}\n${site.phone}`,
   });
 }

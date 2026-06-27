@@ -198,6 +198,50 @@ export default async function AdminAnalytics({
           </div>
         </div>
       </div>
+
+      {/* Promo code usage */}
+      <PromoCodeTable />
+    </div>
+  );
+}
+
+async function PromoCodeTable() {
+  const codes = await prisma.promoCode.findMany({
+    orderBy: { usedCount: "desc" },
+    take: 20,
+  });
+  if (codes.length === 0) return null;
+  return (
+    <div className="mt-6 rounded-xl border border-ivory-200 bg-white p-6">
+      <h2 className="font-serif text-lg font-semibold text-brand-900">Promo Code Usage</h2>
+      <div className="mt-4 overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="text-left text-foreground/60">
+            <tr>
+              <th className="pb-2 pr-6">Code</th>
+              <th className="pb-2 pr-6">Discount</th>
+              <th className="pb-2 pr-6">Uses</th>
+              <th className="pb-2 pr-6">Max</th>
+              <th className="pb-2">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {codes.map((c) => (
+              <tr key={c.id} className="border-t border-ivory-100">
+                <td className="py-2 pr-6 font-mono font-semibold tracking-widest text-brand-700">{c.code}</td>
+                <td className="py-2 pr-6">{c.type === "percentage" ? `${c.value}%` : formatNZD(c.value)} off</td>
+                <td className="py-2 pr-6 font-semibold">{c.usedCount}</td>
+                <td className="py-2 pr-6 text-foreground/60">{c.maxUses ?? "∞"}</td>
+                <td className="py-2">
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${c.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                    {c.isActive ? "Active" : "Inactive"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

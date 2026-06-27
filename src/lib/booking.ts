@@ -6,7 +6,16 @@ import { formatNZD } from "./money";
 import { dateLabel, timeLabel } from "./time";
 
 type CartLine = { priceOptionId: string; label: string; unitPriceCents: number; qty: number; seats: number };
-type Contact = { fullName: string; email: string; phone?: string; notes?: string; marketingConsent?: boolean; promoCodeId?: string };
+type Contact = {
+  fullName: string;
+  email: string;
+  phone?: string;
+  notes?: string;
+  marketingConsent?: boolean;
+  promoCodeId?: string;
+  giftVoucherCode?: string;
+  giftVoucherDiscountCents?: number;
+};
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
 function makeReference(): string {
@@ -78,6 +87,18 @@ export async function commitReservation(
       },
     });
     await tx.reservation.update({ where: { id: reservation.id }, data: { status: "CONVERTED" } });
+
+    // Deduct gift voucher balance if one was applied at checkout.
+    if (contact.giftVoucherCode && contact.giftVoucherDiscountCents && contact.giftVoucherDiscountCents > 0) {
+      await tx.giftVoucher.updateMany({
+        where: {
+          code: contact.giftVoucherCode,
+          isActive: true,
+          balanceCents: { gte: contact.giftVoucherDiscountCents },
+        },
+        data: { balanceCents: { decrement: contact.giftVoucherDiscountCents } },
+      });
+    }
   });
 
   // Fire-and-forget confirmation email (don't block the webhook response).

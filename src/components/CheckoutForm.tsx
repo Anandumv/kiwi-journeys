@@ -71,8 +71,32 @@ function PaymentInner({
   const [promoResult, setPromoResult] = useState<PromoResult | null>(null);
   const [applyingPromo, setApplyingPromo] = useState(false);
 
+  const [giftVoucherCode, setGiftVoucherCode] = useState("");
+  type VoucherResult = { valid: boolean; voucherId?: string; voucherCode?: string; discountCents?: number; message: string };
+  const [voucherResult, setVoucherResult] = useState<VoucherResult | null>(null);
+  const [applyingVoucher, setApplyingVoucher] = useState(false);
+
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+
+  async function applyVoucher() {
+    if (!giftVoucherCode.trim()) return;
+    setApplyingVoucher(true);
+    setVoucherResult(null);
+    try {
+      const res = await fetch("/api/gift-vouchers/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: giftVoucherCode.trim(), totalCents }),
+      });
+      const data = await res.json();
+      setVoucherResult(data);
+    } catch {
+      setVoucherResult({ valid: false, message: "Could not apply voucher. Try again." });
+    } finally {
+      setApplyingVoucher(false);
+    }
+  }
 
   async function applyPromo() {
     if (!promoCode.trim()) return;
@@ -114,6 +138,8 @@ function PaymentInner({
         ...contact,
         marketingConsent,
         promoCodeId: promoResult?.valid ? promoResult.promoId : undefined,
+        giftVoucherCode: voucherResult?.valid ? voucherResult.voucherCode : undefined,
+        giftVoucherDiscountCents: voucherResult?.valid ? (voucherResult.discountCents ?? 0) : 0,
       }),
     });
     if (!c.ok) {
@@ -137,8 +163,10 @@ function PaymentInner({
     // On success Stripe redirects to return_url.
   }
 
-  const discountCents = promoResult?.valid ? (promoResult.discountCents ?? 0) : 0;
-  const finalCents = Math.max(0, totalCents - discountCents);
+  const promoDiscount = promoResult?.valid ? (promoResult.discountCents ?? 0) : 0;
+  const voucherDiscount = voucherResult?.valid ? (voucherResult.discountCents ?? 0) : 0;
+  const discountCents = promoDiscount + voucherDiscount;
+  const finalCents = Math.max(100, totalCents - discountCents);
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
@@ -168,6 +196,31 @@ function PaymentInner({
         {promoResult && (
           <p className={`mt-2 text-sm ${promoResult.valid ? "text-teal-700" : "text-red-600"}`}>
             {promoResult.message}
+          </p>
+        )}
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold text-brand-900">Gift voucher</h2>
+        <div className="mt-3 flex gap-2">
+          <input
+            className="flex-1 rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            placeholder="GV-XXXXXXXX"
+            value={giftVoucherCode}
+            onChange={(e) => { setGiftVoucherCode(e.target.value.toUpperCase()); setVoucherResult(null); }}
+          />
+          <button
+            type="button"
+            onClick={applyVoucher}
+            disabled={applyingVoucher || !giftVoucherCode.trim()}
+            className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:opacity-50"
+          >
+            {applyingVoucher ? "…" : "Apply"}
+          </button>
+        </div>
+        {voucherResult && (
+          <p className={`mt-2 text-sm ${voucherResult.valid ? "text-teal-700" : "text-red-600"}`}>
+            {voucherResult.message}
           </p>
         )}
       </div>

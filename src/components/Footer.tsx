@@ -36,7 +36,10 @@ export function Footer({
               <li><Link href="/tours" className="hover:text-white">Tours</Link></li>
               <li><Link href="/destinations" className="hover:text-white">Destinations</Link></li>
               <li><Link href="/cruise-excursions" className="hover:text-white">Cruise Excursions</Link></li>
+              <li><Link href="/private-tours" className="hover:text-white">Private Tours</Link></li>
+              <li><Link href="/gift-vouchers" className="hover:text-white">Gift Vouchers</Link></li>
               <li><Link href="/travel-insights" className="hover:text-white">Travel Insights</Link></li>
+              <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
             </ul>
           </div>
           <div>

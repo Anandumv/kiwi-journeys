@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { formatNZD } from "@/lib/money";
 import { dateLabel, timeLabel } from "@/lib/time";
 import { UpdateNotesForm, CancelRequestButton } from "@/components/account/BookingActions";
+import { RescheduleForm } from "@/components/account/RescheduleForm";
 
 export const metadata: Metadata = { title: "Booking detail" };
 export const dynamic = "force-dynamic";
@@ -39,6 +40,7 @@ export default async function BookingDetailPage({
   const hoursUntilDeparture = (booking.session.startsAtUtc.getTime() - now.getTime()) / (1000 * 60 * 60);
   const canUpdateNotes = !isPast && booking.status === "CONFIRMED" && hoursUntilDeparture >= 48;
   const canCancel = !isPast && booking.status === "CONFIRMED";
+  const canReschedule = !isPast && booking.status === "CONFIRMED" && hoursUntilDeparture >= 48;
 
   const st = STATUS[booking.status] ?? { label: booking.status, className: "bg-ivory text-foreground/50" };
 
@@ -89,6 +91,20 @@ export default async function BookingDetailPage({
           initialNotes={booking.notes ?? ""}
           canEdit={canUpdateNotes}
         />
+
+        {canReschedule && (
+          <div className="border-t border-brand-50 pt-5">
+            <p className="text-sm font-medium text-brand-800 mb-2">Change your date</p>
+            <p className="text-xs text-foreground/50 mb-3">
+              Reschedule to any available date for the same tour.
+            </p>
+            <RescheduleForm
+              reference={booking.reference}
+              tourSlug={booking.session.tour.slug}
+              seats={booking.seats}
+            />
+          </div>
+        )}
 
         {canCancel && (
           <div className="border-t border-brand-50 pt-5">

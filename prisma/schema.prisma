@@ -176,6 +176,7 @@ model Reservation {
   cartSnapshot          Json // [{priceOptionId, key, label, unitPriceCents, qty, seats}]
   contactSnapshot       Json? // {fullName, email, phone, notes}
   booking               Booking?
+  recoverySentAt        DateTime?
   createdAt             DateTime          @default(now())
 
   @@index([sessionId, status])
@@ -201,9 +202,10 @@ model Customer {
   ageGroup          String?
   isCruisePassenger Boolean   @default(false)
   referralSource    String?
-  bookings          Booking[]
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  bookings              Booking[]
+  loyaltyEmailSentAt    DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   @@index([email])
 }
@@ -223,8 +225,10 @@ model Booking {
   stripePaymentIntentId String        @unique
   status                BookingStatus @default(CONFIRMED)
   notes                 String?
-  items                 BookingItem[]
-  createdAt             DateTime      @default(now())
+  items                    BookingItem[]
+  rescheduledFromSessionId String?
+  rescheduledAt            DateTime?
+  createdAt                DateTime      @default(now())
 
   @@index([sessionId])
   @@index([customerId])
@@ -300,4 +304,23 @@ model SurveyResponse {
   wouldReturn Boolean  @default(true)
   feedback    String?
   createdAt   DateTime @default(now())
+}
+
+model GiftVoucher {
+  id                    String    @id @default(cuid())
+  code                  String    @unique
+  amountCents           Int
+  balanceCents          Int
+  purchaserName         String
+  purchaserEmail        String
+  recipientName         String?
+  recipientEmail        String?
+  message               String?
+  stripePaymentIntentId String?   @unique
+  isActive              Boolean   @default(false)
+  expiresAt             DateTime?
+  createdAt             DateTime  @default(now())
+
+  @@index([code])
+  @@index([purchaserEmail])
 }

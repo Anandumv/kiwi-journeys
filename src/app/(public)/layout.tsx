@@ -20,6 +20,7 @@ export default async function PublicLayout({ children }: { children: React.React
         phoneHref={s.phoneHref}
         email={s.email}
         address={s.address}
+        social={s.social as Record<string, string>}
       />
     </div>
   );

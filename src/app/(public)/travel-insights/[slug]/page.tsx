@@ -76,6 +76,35 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <div className="mt-8 space-y-5 text-lg leading-relaxed text-foreground/80">
           {post.body.map((para, i) => <p key={i}>{para}</p>)}
         </div>
+
+        {/* Book a tour CTA */}
+        <div className="mt-14 rounded-2xl bg-brand-50 border border-brand-100 px-8 py-10 text-center">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">Ready to explore?</p>
+          <h2 className="mt-2 font-serif text-2xl font-semibold text-brand-900">
+            See New Zealand with {s.name}
+          </h2>
+          <p className="mt-3 text-sm text-foreground/60 max-w-md mx-auto">
+            Small groups, local guides, and hand-crafted itineraries across the South Island. Free cancellation on most tours.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/tours"
+              className="inline-block rounded-full bg-brand-600 px-7 py-3 text-sm font-semibold text-white hover:bg-brand-700 transition"
+            >
+              Browse all tours →
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-block rounded-full border border-brand-300 px-7 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-100 transition"
+            >
+              Ask a question
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-ivory-200 pt-6">
+          <Link href="/travel-insights" className="text-sm font-semibold text-brand-600 hover:underline">← Back to Travel Insights</Link>
+        </div>
       </article>
     </>
   );

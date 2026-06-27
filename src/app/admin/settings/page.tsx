@@ -35,14 +35,40 @@ export default async function AdminSettings() {
         </div>
 
         <p className="text-sm font-semibold text-brand-800">Structured content (JSON)</p>
-        <label className="block text-sm">Navigation<textarea name="nav" rows={5} defaultValue={J(s.nav)} className={`${input} font-mono text-xs`} /></label>
-        <label className="block text-sm">Stats<textarea name="stats" rows={4} defaultValue={J(s.stats)} className={`${input} font-mono text-xs`} /></label>
-        <label className="block text-sm">Value props<textarea name="valueProps" rows={5} defaultValue={J(s.valueProps)} className={`${input} font-mono text-xs`} /></label>
-        <label className="block text-sm">Social links<textarea name="social" rows={3} defaultValue={J(s.social)} className={`${input} font-mono text-xs`} /></label>
-        <label className="block text-sm">Currency rates (1 NZD = …)<textarea name="currencyRates" rows={4} defaultValue={J(s.currencyRates)} className={`${input} font-mono text-xs`} /></label>
+        <p className="text-xs text-foreground/50">Invalid JSON will be flagged before saving — your data won&apos;t be wiped.</p>
+        <label className="block text-sm">Navigation<textarea name="nav" rows={5} defaultValue={J(s.nav)} className={`${input} font-mono text-xs`} data-json /></label>
+        <label className="block text-sm">Stats<textarea name="stats" rows={4} defaultValue={J(s.stats)} className={`${input} font-mono text-xs`} data-json /></label>
+        <label className="block text-sm">Value props<textarea name="valueProps" rows={5} defaultValue={J(s.valueProps)} className={`${input} font-mono text-xs`} data-json /></label>
+        <label className="block text-sm">Social links
+          <textarea name="social" rows={3} defaultValue={J(s.social)} className={`${input} font-mono text-xs`} data-json />
+          <span className="mt-1 block text-xs text-foreground/50">Format: {`{"facebook":"https://...","instagram":"https://...","tripadvisor":"https://..."}`}</span>
+        </label>
+        <label className="block text-sm">Currency rates (1 NZD = …)<textarea name="currencyRates" rows={4} defaultValue={J(s.currencyRates)} className={`${input} font-mono text-xs`} data-json /></label>
 
-        <button className="rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white hover:bg-brand-700">Save settings</button>
+        <div id="json-error" className="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" />
+
+        <button id="settings-submit" className="rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white hover:bg-brand-700">Save settings</button>
       </form>
+      <script dangerouslySetInnerHTML={{ __html: `
+        document.querySelector('form').addEventListener('submit', function(e) {
+          const err = document.getElementById('json-error');
+          err.textContent = '';
+          err.classList.add('hidden');
+          const fields = this.querySelectorAll('textarea[data-json]');
+          for (const f of fields) {
+            f.style.borderColor = '';
+            try { JSON.parse(f.value); } catch (ex) {
+              e.preventDefault();
+              f.style.borderColor = '#ef4444';
+              f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              const label = f.closest('label')?.firstChild?.textContent?.trim() || 'A JSON field';
+              err.textContent = label + ': ' + ex.message;
+              err.classList.remove('hidden');
+              return;
+            }
+          }
+        });
+      ` }} />
     </div>
   );
 }

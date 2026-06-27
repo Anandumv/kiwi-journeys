@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  const staticPaths = ["", "/tours", "/destinations", "/about", "/sustainability", "/contact", "/cruise-excursions", "/travel-insights"];
+  const staticPaths = ["", "/tours", "/destinations", "/about", "/sustainability", "/contact", "/cruise-excursions", "/travel-insights", "/privacy-policy", "/terms-of-use"];
 
   let tours: Awaited<ReturnType<typeof getTours>> = [];
   let destinations: Awaited<ReturnType<typeof getDestinations>> = [];
@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // DB unavailable (e.g. during build) — emit the static paths only.
   }
 
-  const priorities: Record<string, number> = { "": 1.0, "/tours": 0.9, "/destinations": 0.8, "/cruise-excursions": 0.75, "/about": 0.6, "/contact": 0.6, "/travel-insights": 0.6, "/sustainability": 0.4 };
+  const priorities: Record<string, number> = { "": 1.0, "/tours": 0.9, "/destinations": 0.8, "/cruise-excursions": 0.75, "/about": 0.6, "/contact": 0.6, "/travel-insights": 0.6, "/sustainability": 0.4, "/privacy-policy": 0.2, "/terms-of-use": 0.2 };
   const freq = (p: string) => (p === "" || p === "/tours" ? ("daily" as const) : ("weekly" as const));
   return [
     ...staticPaths.map((p) => ({

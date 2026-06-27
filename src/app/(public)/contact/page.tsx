@@ -13,8 +13,36 @@ export const metadata: Metadata = {
 
 export default async function ContactPage() {
   const site = await getSiteSettings();
+  const contactLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `${SITE_URL}/contact`,
+    url: `${SITE_URL}/contact`,
+    name: "Contact Kiwi Globe Tours",
+    description: "Get in touch with Kiwi Globe Tours about South Island day tours, private bookings, or group enquiries.",
+    breadcrumb: {
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Contact", item: `${SITE_URL}/contact` },
+      ],
+    },
+    mainEntity: {
+      "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
+      contactPoint: {
+        "@type": "ContactPoint",
+        telephone: site.phone,
+        email: site.email,
+        contactType: "customer service",
+        areaServed: "NZ",
+        availableLanguage: "English",
+      },
+    },
+  };
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactLd) }} />
       <PageHero eyebrow="Get in touch" title="Contact Us" subtitle="Have questions or want a bespoke private tour? We'd love to help." image="/images/general/tekapo-church-sunset.jpg" />
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2">
         <div>

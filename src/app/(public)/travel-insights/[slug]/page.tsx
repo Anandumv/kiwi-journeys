@@ -41,8 +41,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     url: pageUrl,
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(),
-    image: post.coverImage ?? undefined,
-    author: { "@type": "Organization", name: s.name, url: SITE_URL },
+    image: post.coverImage ?? `${SITE_URL}/images/brand/Hero-Ocean-Alps.jpg`,
+    author: { "@type": "Person", name: "Kiwi Globe Tours Editorial", url: `${SITE_URL}/about` },
     publisher: {
       "@type": "Organization",
       name: s.name,

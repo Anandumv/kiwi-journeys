@@ -89,24 +89,32 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
       validFrom: new Date().toISOString().split("T")[0],
     },
   };
-  const faqItems = [
-    { q: `How long is the ${tour.title}?`, a: `The tour duration is ${tour.durationLabel}.` },
-    { q: "What is included in the tour price?", a: tour.included.join(". ") || "See tour details for inclusions." },
-    { q: "What age group is this tour suitable for?", a: `This tour is suitable for ${tour.ageRange}.` },
-    ...(tour.startEnd ? [{ q: "Where does the tour start and end?", a: tour.startEnd }] : []),
-    ...(tour.pickup ? [{ q: "Is hotel pickup available?", a: tour.pickup }] : []),
-    ...(tour.importantInfo ?? []).map((info, i) => ({ q: `Important information ${i + 1}`, a: info })),
-  ].filter((f) => f.a.trim().length > 5);
-
-  const faqLd = faqItems.length > 0 ? {
+  // Product schema unlocks price/availability rich results in Google Search
+  const productLd = {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqItems.map((f) => ({
-      "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
-    })),
-  } : null;
+    "@type": "Product",
+    "@id": `${pageUrl}#product`,
+    name: tour.title,
+    description: tour.summary,
+    image: tour.gallery.length ? tour.gallery : [tour.heroImage].filter(Boolean),
+    brand: { "@type": "Brand", name: settings.name },
+    offers: {
+      "@type": "Offer",
+      url: `${pageUrl}/book`,
+      priceCurrency: "NZD",
+      price: (tour.priceFromCents / 100).toFixed(2),
+      priceValidUntil: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split("T")[0],
+      availability: "https://schema.org/InStock",
+      seller: { "@id": `${SITE_URL}/#organization` },
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: avgRating,
+      bestRating: 5,
+      worstRating: 1,
+      reviewCount: testimonials.length || 1,
+    },
+  };
 
   const breadcrumbLd = {
     "@context": "https://schema.org",
@@ -121,8 +129,8 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(tripLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
       {/* Title bar */}
       <div className="bg-brand-50 border-b border-brand-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

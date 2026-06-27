@@ -51,7 +51,7 @@ const STATIC_VALUE_PROPS = [
 const DEFAULT_SETTINGS: SiteSettings = {
   name: "Kiwi Globe Tours",
   tagline: "New Zealand Adventure Tours & Packages",
-  description: "Explore Aotearoa — relishing the wonders of New Zealand. Tailor-made coach, honeymoon, self-drive and South Island day tours.",
+  description: "Small-group South Island day tours from Christchurch — Akaroa, Kaikōura, Hanmer Springs, Waipara Valley and more. Expert local guides, max 16 guests, free cancellation.",
   logoImage: "/images/brand/Kiwi-Globe-Tours-NZ-resized.png",
   phone: "+64 27 230 5342",
   phoneHref: "tel:+64272305342",

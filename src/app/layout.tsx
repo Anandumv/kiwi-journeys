@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { getSiteSettings, getTestimonials } from "@/lib/content";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], display: "swap" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
@@ -76,7 +77,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     url: SITE_URL,
     description: s.description,
     image: abs(s.heroImage),
-    logo: { "@type": "ImageObject", url: abs(s.logoImage) ?? `${SITE_URL}/icon.png` },
+    logo: { "@type": "ImageObject", url: abs(s.logoImage) ?? `${SITE_URL}/images/brand/Kiwi-Globe-Tours-NZ-resized.png` },
     telephone: s.phone,
     email: s.email,
     priceRange: "NZD $$",
@@ -88,18 +89,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     ],
     address: {
       "@type": "PostalAddress",
-      streetAddress: s.address || "",
       addressLocality: "Christchurch",
       addressRegion: "Canterbury",
+      postalCode: "8011",
       addressCountry: "NZ",
     },
     geo: { "@type": "GeoCoordinates", latitude: -43.5321, longitude: 172.6362 },
-    openingHoursSpecification: {
+    openingHoursSpecification: [{
       "@type": "OpeningHoursSpecification",
       dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
       opens: "08:00",
       closes: "18:00",
-    },
+    }],
     knowsAbout: [
       "New Zealand Day Tours",
       "South Island Tourism",
@@ -140,8 +141,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }} />
         {ga4Id && (
           <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} />
-            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga4Id}')` }} />
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} strategy="afterInteractive" />
+            <Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga4Id}')`}</Script>
           </>
         )}
         {children}

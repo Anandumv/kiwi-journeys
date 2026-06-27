@@ -31,8 +31,12 @@ export default async function ToursPage() {
     itemListElement: tours.map((t, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `${SITE_URL}/tours/${t.slug}`,
-      name: t.title,
+      item: {
+        "@type": "TouristTrip",
+        "@id": `${SITE_URL}/tours/${t.slug}`,
+        url: `${SITE_URL}/tours/${t.slug}`,
+        name: t.title,
+      },
     })),
   };
 

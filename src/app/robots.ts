@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
 export default function robots(): MetadataRoute.Robots {
-  const disallow = ["/admin", "/api", "/checkout", "/booking"];
+  const disallow = ["/admin", "/api", "/checkout", "/booking", "/account"];
   return {
     rules: [
       { userAgent: "*", allow: "/", disallow },

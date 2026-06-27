@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/content";
 
-export const metadata: Metadata = { title: "Terms & Conditions" };
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+  robots: { index: false, follow: false },
+};
 
 export default async function TermsPage() {
   const site = await getSiteSettings();

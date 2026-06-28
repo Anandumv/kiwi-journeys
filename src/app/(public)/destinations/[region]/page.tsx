@@ -11,6 +11,7 @@ const regionMatch: Record<string, (dest: string) => boolean> = {
   kaikoura: (d) => d.includes("Kaik"),
   waipara: (d) => d.includes("Waipara"),
   "hanmer-springs": (d) => d.includes("Hanmer"),
+  tekapo: (d) => d.includes("Tekapo"),
 };
 
 const regionFaqs: Record<string, { q: string; a: string }[]> = {
@@ -43,6 +44,12 @@ const regionFaqs: Record<string, { q: string; a: string }[]> = {
     { q: "How far is Waipara from Christchurch?", a: "Waipara Valley is about 50km north of Christchurch — less than an hour's drive. It makes an ideal half-day or leisurely full-day wine tour without a long journey." },
     { q: "Do I need to know about wine to enjoy the Waipara tour?", a: "Not at all. Our guides make the tasting experience accessible and enjoyable for everyone — whether you're a wine enthusiast or a complete beginner. The focus is on relaxed enjoyment and beautiful Canterbury scenery." },
     { q: "Is food included on the Waipara wine tour?", a: "Check your specific tour inclusions at booking. Many cellar doors offer platters and food pairing options on-site. We recommend eating before the tour as lunch is typically not included in the base price." },
+  ],
+  tekapo: [
+    { q: "How far is Lake Tekapo from Christchurch?", a: "Lake Tekapo is about 230km southwest of Christchurch — roughly a 3 hour drive through Geraldine and the Mackenzie Country, done as a guided day trip with stops along the way." },
+    { q: "What is Lake Tekapo known for?", a: "Lake Tekapo is famous for its strikingly turquoise, glacier-fed water, the lakefront Church of the Good Shepherd, and its International Dark Sky Reserve — one of the best stargazing locations in the world." },
+    { q: "Can I do a Lake Tekapo day trip from Christchurch?", a: "Yes — our Lake Tekapo Alpine Adventure runs as a full-day guided trip, with time at the lakefront, the Church of the Good Shepherd, and the Mt John Lookout, returning to Christchurch the same evening." },
+    { q: "Is the Lake Tekapo tour suitable for families?", a: "Yes — the pace is gentle and the main stops (lakefront walk, church, lookout) are easy for all ages. Optional add-ons like the Dark Sky Experience suit older children and adults best." },
   ],
 };
 

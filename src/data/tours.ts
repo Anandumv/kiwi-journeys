@@ -433,8 +433,8 @@ export const tours: Tour[] = [
     summary:
       "A long, spectacular run south through Geraldine and the Mackenzie Country to the turquoise waters of Lake Tekapo — the lakefront Church of the Good Shepherd, an alpine walk, and sweeping views from the Mt John Lookout.",
     priceFromCents: 22900,
-    heroImage: "/images/brand/H1-img-1.jpg",
-    gallery: ["/images/brand/H1-img-1.jpg", "/images/brand/Hero-Ocean-Alps.jpg"],
+    heroImage: "/images/brand/Adventure.jpg",
+    gallery: ["/images/brand/Adventure.jpg", "/images/brand/Queenstown-NZ.jpg"],
     highlights: [
       "A scenic drive south through Geraldine and into the high country of the Mackenzie Basin",
       "The famously turquoise, glacier-fed waters of Lake Tekapo",

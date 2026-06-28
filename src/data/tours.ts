@@ -431,8 +431,8 @@ export const tours: Tour[] = [
     summary:
       "A long, spectacular run south through Geraldine and the Mackenzie Country to the turquoise waters of Lake Tekapo — the lakefront Church of the Good Shepherd, an alpine walk, and sweeping views from the Mt John Lookout.",
     priceFromCents: 22900,
-    heroImage: img("lake-tekapo-alpine-adventure", "hero.jpg"),
-    gallery: [img("lake-tekapo-alpine-adventure", "hero.jpg")],
+    heroImage: "/images/brand/Queenstown-NZ.jpg",
+    gallery: ["/images/brand/Queenstown-NZ.jpg"],
     highlights: [
       "A scenic drive south through Geraldine and into the high country of the Mackenzie Basin",
       "The famously turquoise, glacier-fed waters of Lake Tekapo",
@@ -458,6 +458,7 @@ export const tours: Tour[] = [
     departureTimes: ["07:00"],
     departureWeekdays: [1, 2, 3, 4, 5, 6, 7],
     capacityPerDeparture: 14,
+    featured: true,
   },
   {
     slug: "kaikoura-coastal-experience",
@@ -473,8 +474,8 @@ export const tours: Tour[] = [
     summary:
       "A full day along the spectacular Kaikōura coast — mountains dropping straight to the sea, a fur seal colony at Point Kean, the Kaikōura Peninsula Walkway, and free time in the seaside township. No swimming required.",
     priceFromCents: 19900,
-    heroImage: img("kaikoura-coastal-experience", "hero.jpg"),
-    gallery: [img("kaikoura-coastal-experience", "hero.jpg")],
+    heroImage: "/images/brand/Beach.jpg",
+    gallery: ["/images/brand/Beach.jpg"],
     highlights: [
       "A scenic run north along the Coastal Pacific route, mountains meeting the sea",
       "Close-up viewing of the wild fur seal colony at Point Kean",
@@ -500,6 +501,7 @@ export const tours: Tour[] = [
     departureTimes: ["07:00"],
     departureWeekdays: [1, 2, 3, 4, 5, 6, 7],
     capacityPerDeparture: 14,
+    featured: true,
   },
   {
     slug: "akaroa-swim-with-dolphins",

@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { getSiteSettings } from "@/lib/content";
 import { formatNZD } from "./money";
 import { dateLabel, timeLabel } from "./time";
+import { sendAdminWhatsApp, sendCustomerWhatsApp } from "./whatsapp";
 
 type CartLine = { priceOptionId: string; label: string; unitPriceCents: number; qty: number; seats: number };
 type Contact = {
@@ -55,14 +56,18 @@ export async function commitReservation(
   const reference = makeReference();
 
   await prisma.$transaction(async (tx) => {
-    const customer = await tx.customer.create({
-      data: {
-        email: contact.email,
-        fullName: contact.fullName,
-        phone: contact.phone || null,
-        marketingConsent: contact.marketingConsent ?? false,
-      },
-    });
+    // Dedup by email so repeat customers don't get duplicate Customer rows.
+    let customer = await tx.customer.findFirst({ where: { email: contact.email } });
+    if (!customer) {
+      customer = await tx.customer.create({
+        data: {
+          email: contact.email,
+          fullName: contact.fullName,
+          phone: contact.phone || null,
+          marketingConsent: contact.marketingConsent ?? false,
+        },
+      });
+    }
     await tx.booking.create({
       data: {
         reference,
@@ -101,6 +106,14 @@ export async function commitReservation(
     }
   });
 
+  // Increment promo code usage counter so maxUses limits are enforced.
+  if (contact.promoCodeId) {
+    void prisma.promoCode.update({
+      where: { id: contact.promoCodeId },
+      data: { usedCount: { increment: 1 } },
+    }).catch((e) => console.error("Promo usedCount increment failed:", e));
+  }
+
   // Fire-and-forget confirmation email (don't block the webhook response).
   void sendConfirmationEmail({
     reference,
@@ -121,6 +134,35 @@ export async function commitReservation(
     customerName: contact.fullName,
     customerEmail: contact.email,
   }).catch((e) => console.error("Admin booking alert failed:", e));
+
+  // WhatsApp notifications (fire-and-forget, no-op if env vars absent).
+  void getSiteSettings().then((site) => {
+    const startsAt = `${dateLabel(reservation.session.startsAtUtc)} at ${timeLabel(reservation.session.startsAtUtc)} NZT`;
+    const adminPhone = process.env.ADMIN_WHATSAPP || site.phone;
+    if (adminPhone) {
+      void sendAdminWhatsApp({
+        adminPhone,
+        reference,
+        tourTitle: reservation.session.tour.title,
+        startsAt,
+        customerName: contact.fullName,
+        customerEmail: contact.email,
+        seats: reservation.seats,
+        totalNZD: formatNZD(reservation.totalCents),
+      });
+    }
+    if (contact.phone) {
+      void sendCustomerWhatsApp({
+        phone: contact.phone,
+        firstName: contact.fullName.split(" ")[0],
+        reference,
+        tourTitle: reservation.session.tour.title,
+        startsAt,
+        siteName: site.name,
+        sitePhone: site.phone,
+      });
+    }
+  }).catch((e) => console.error("WhatsApp notifications failed:", e));
 
   // Auto-subscribe to newsletter if marketing consent was given at checkout.
   if (contact.marketingConsent) {

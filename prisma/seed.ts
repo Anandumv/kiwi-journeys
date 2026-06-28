@@ -152,6 +152,7 @@ function deriveDestinationSlug(dest: string): string {
   if (d.includes("kaik")) return "kaikoura";
   if (d.includes("waipara")) return "waipara";
   if (d.includes("hanmer")) return "hanmer-springs";
+  if (d.includes("tekapo")) return "tekapo";
   return "christchurch";
 }
 

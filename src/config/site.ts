@@ -19,8 +19,8 @@ export const site = {
   // Business operating timezone — all departures are scheduled in this zone.
   timezone: "Pacific/Auckland",
   social: {
-    facebook: "#",
-    instagram: "#",
+    facebook: "https://www.facebook.com/share/193YYJk3ib/",
+    instagram: "https://www.instagram.com/kiwiglobetours?igsh=MTc2Y29vZDBiYW03aw==",
     tripadvisor: "#",
   },
   // Fallback only — runtime stats come from the DB (SiteSetting). Kept honest.

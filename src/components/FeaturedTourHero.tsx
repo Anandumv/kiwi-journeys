@@ -40,23 +40,21 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
   const tours = useMemo(() => featuredTours.slice(0, 6), [featuredTours]);
   const hasCarousel = tours.length >= 2;
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const pointerStartX = useRef<number | null>(null);
 
   const activeTour = tours[activeIndex];
 
   useEffect(() => {
-    if (!hasCarousel || hasInteracted || prefersReducedMotion) return;
+    if (!hasCarousel || prefersReducedMotion) return;
 
     const id = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % tours.length);
     }, AUTOPLAY_MS);
 
     return () => window.clearInterval(id);
-  }, [hasCarousel, hasInteracted, prefersReducedMotion, tours.length]);
+  }, [hasCarousel, prefersReducedMotion, tours.length]);
 
   function moveTo(index: number) {
-    setHasInteracted(true);
     setActiveIndex((index + tours.length) % tours.length);
   }
 
@@ -119,23 +117,27 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
       }}
     >
       <div className="absolute inset-0 -z-10 overflow-hidden">
-        {tours.map((tour, index) => {
-          const isActive = index === activeIndex;
-          return (
-            <Image
-              key={tour.slug}
-              src={tour.heroImage || settings.heroImage}
-              alt=""
-              fill
-              priority={index === 0}
-              sizes="100vw"
-              className={`object-cover transition-opacity duration-700 ${
-                isActive ? "opacity-100" : "opacity-0"
-              } ${isActive && !prefersReducedMotion ? "animate-kenburns" : ""}`}
-              aria-hidden={!isActive}
-            />
-          );
-        })}
+        <div
+          className="flex h-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+          {tours.map((tour, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <div key={tour.slug} className="relative h-full w-full flex-none">
+                <Image
+                  src={tour.heroImage || settings.heroImage}
+                  alt=""
+                  fill
+                  priority={index === 0}
+                  sizes="100vw"
+                  className={`object-cover ${isActive && !prefersReducedMotion ? "animate-kenburns" : ""}`}
+                  aria-hidden={!isActive}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-950/92 via-brand-950/68 to-brand-950/30" />
       <div className="mx-auto w-full max-w-7xl px-5 pt-20 sm:px-6">
@@ -178,24 +180,6 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
                 }`}
               />
             ))}
-          </div>
-          <div className="ml-auto hidden gap-2 sm:flex">
-            <button
-              type="button"
-              aria-label="Previous featured tour"
-              onClick={() => moveBy(-1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-2xl leading-none text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-950"
-            >
-              <span aria-hidden="true">&lt;</span>
-            </button>
-            <button
-              type="button"
-              aria-label="Next featured tour"
-              onClick={() => moveBy(1)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-2xl leading-none text-white backdrop-blur-sm transition hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-brand-950"
-            >
-              <span aria-hidden="true">&gt;</span>
-            </button>
           </div>
         </div>
       </div>

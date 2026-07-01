@@ -40,9 +40,16 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
   const tours = useMemo(() => featuredTours.slice(0, 6), [featuredTours]);
   const hasCarousel = tours.length >= 2;
   const [activeIndex, setActiveIndex] = useState(0);
+  // Preload one slide ahead of the current one instead of all of them, so
+  // mobile visitors aren't forced to download every hero image up front.
+  const [eagerUpTo, setEagerUpTo] = useState(1);
   const pointerStartX = useRef<number | null>(null);
 
   const activeTour = tours[activeIndex];
+
+  useEffect(() => {
+    setEagerUpTo((prev) => Math.max(prev, activeIndex + 1));
+  }, [activeIndex]);
 
   useEffect(() => {
     if (!hasCarousel || prefersReducedMotion) return;
@@ -129,7 +136,8 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
                   src={tour.heroImage || settings.heroImage}
                   alt=""
                   fill
-                  priority
+                  priority={index === 0}
+                  loading={index <= eagerUpTo ? "eager" : "lazy"}
                   sizes="100vw"
                   className={`object-cover ${isActive && !prefersReducedMotion ? "animate-kenburns" : ""}`}
                   aria-hidden={!isActive}

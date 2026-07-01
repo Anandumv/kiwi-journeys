@@ -8,6 +8,7 @@ import { Reveal } from "@/components/Reveal";
 import { Blob, Frond } from "@/components/OrganicShape";
 import { WhyBookDirect } from "@/components/WhyBookDirect";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
+import { FeaturedTourHero } from "@/components/FeaturedTourHero";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -62,28 +63,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsLd) }} />
-      {/* Hero */}
-      <section className="relative isolate -mt-16 flex min-h-[88vh] items-center overflow-hidden sm:min-h-[92vh]">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <Image src={s.heroImage} alt="" fill priority sizes="100vw" className="animate-kenburns object-cover" />
-        </div>
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-950/90 via-brand-950/65 to-brand-950/30" />
-        <div className="mx-auto w-full max-w-7xl px-5 pt-20 sm:px-6">
-          <p className="eyebrow text-sand-400">{s.tagline}</p>
-          <h1 className="mt-4 max-w-3xl font-serif text-[2.5rem] font-semibold leading-[1.08] text-white text-balance sm:mt-5 sm:text-6xl sm:leading-[1.05] lg:text-7xl">
-            The South Island, at its own pace
-          </h1>
-          <p className="mt-5 max-w-xl text-base text-brand-100/90 sm:text-lg">{s.description}</p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-            <Link href="/tours" className="rounded-full bg-sand-500 px-7 py-3.5 text-center font-semibold text-brand-950 transition hover:bg-sand-400">
-              Explore Tours
-            </Link>
-            <Link href="/contact" className="rounded-full border border-white/40 px-7 py-3.5 text-center font-semibold text-white backdrop-blur-sm transition hover:bg-white/10">
-              Plan a Private Tour
-            </Link>
-          </div>
-        </div>
-      </section>
+      <FeaturedTourHero featuredTours={featured} settings={s} />
 
       {/* Trust strip */}
       <section className="border-b border-ivory-200 bg-white">

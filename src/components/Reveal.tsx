@@ -3,7 +3,10 @@
 import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
-// Tasteful scroll-reveal: fade + rise once in view. Honors reduced-motion via CSS.
+// Tasteful fade + rise on mount. Animates immediately rather than gating on
+// IntersectionObserver-based whileInView, which can leave content stuck at
+// opacity:0 forever if the viewport-enter callback never fires (e.g. under
+// slow/interrupted hydration). Honors reduced-motion via CSS.
 export function Reveal({
   children,
   delay = 0,
@@ -19,8 +22,7 @@ export function Reveal({
     <motion.div
       className={className}
       initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}

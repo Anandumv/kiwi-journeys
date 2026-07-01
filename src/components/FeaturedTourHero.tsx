@@ -129,7 +129,7 @@ export function FeaturedTourHero({ featuredTours, settings }: FeaturedTourHeroPr
                   src={tour.heroImage || settings.heroImage}
                   alt=""
                   fill
-                  priority={index === 0}
+                  priority
                   sizes="100vw"
                   className={`object-cover ${isActive && !prefersReducedMotion ? "animate-kenburns" : ""}`}
                   aria-hidden={!isActive}

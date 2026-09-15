@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
@@ -60,8 +61,8 @@ export default async function CruisePage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(serviceLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       <PageHero title="Cruise Shore Excursions" subtitle="On a cruise? Exclusive tours designed just for cruise passengers — back to the ship, every time." image="/images/general/kaikoura-whale-watch.jpg" />
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6 text-foreground/80 leading-relaxed">
         <p>

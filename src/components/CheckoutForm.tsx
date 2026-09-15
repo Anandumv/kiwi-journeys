@@ -36,11 +36,11 @@ function ContactFields({
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
-        <input className={field} placeholder="Full name" value={contact.fullName} onChange={(e) => setContact({ ...contact, fullName: e.target.value })} required />
-        <input className={field} type="email" placeholder="Email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} required />
+        <input className={field} aria-label="Full name" autoComplete="name" placeholder="Full name" value={contact.fullName} onChange={(e) => setContact({ ...contact, fullName: e.target.value })} required />
+        <input className={field} type="email" aria-label="Email" autoComplete="email" placeholder="Email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} required />
       </div>
-      <input className={field} placeholder="Phone (optional)" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} />
-      <textarea className={field} rows={2} placeholder="Pickup hotel / notes (optional)" value={contact.notes} onChange={(e) => setContact({ ...contact, notes: e.target.value })} />
+      <input className={field} aria-label="Phone (optional)" autoComplete="tel" type="tel" placeholder="Phone (optional)" value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })} />
+      <textarea className={field} rows={2} aria-label="Pickup hotel or notes (optional)" placeholder="Pickup hotel / notes (optional)" value={contact.notes} onChange={(e) => setContact({ ...contact, notes: e.target.value })} />
     </div>
   );
 }
@@ -131,6 +131,7 @@ function PaymentInner({
     setSubmitting(true);
     setError(null);
 
+    try {
     const c = await fetch(`/api/reservations/${reservationId}/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -139,7 +140,7 @@ function PaymentInner({
         marketingConsent,
         promoCodeId: promoResult?.valid ? promoResult.promoId : undefined,
         giftVoucherCode: voucherResult?.valid ? voucherResult.voucherCode : undefined,
-        giftVoucherDiscountCents: voucherResult?.valid ? (voucherResult.discountCents ?? 0) : 0,
+
       }),
     });
     if (!c.ok) {
@@ -149,6 +150,14 @@ function PaymentInner({
       return;
     }
 
+    const quote = await c.json();
+    if (quote.payableCents !== finalCents) {
+      setError("Your discount has changed. Please reapply your codes and review the total before paying.");
+      setSubmitting(false);
+      return;
+    }
+    const refreshed = await elements.fetchUpdates();
+    if (refreshed.error) throw new Error(refreshed.error.message);
     const { error: payErr } = await stripe.confirmPayment({
       elements,
       confirmParams: {
@@ -160,11 +169,15 @@ function PaymentInner({
       setError(payErr.message || "Payment failed. Please try again.");
       setSubmitting(false);
     }
+    } catch {
+      setError("Could not complete checkout. Check your connection and try again.");
+      setSubmitting(false);
+    }
     // On success Stripe redirects to return_url.
   }
 
   const promoDiscount = promoResult?.valid ? (promoResult.discountCents ?? 0) : 0;
-  const voucherDiscount = voucherResult?.valid ? (voucherResult.discountCents ?? 0) : 0;
+  const voucherDiscount = voucherResult?.valid ? Math.min(voucherResult.discountCents ?? 0, Math.max(0, totalCents - promoDiscount - 100)) : 0;
   const discountCents = promoDiscount + voucherDiscount;
   const finalCents = Math.max(100, totalCents - discountCents);
 
@@ -303,13 +316,10 @@ export function CheckoutForm({
   if (!stripeReady || !clientSecret) {
     return (
       <div className="rounded-2xl border border-sand-400/50 bg-sand-400/10 p-6">
-        <h2 className="font-semibold text-brand-900">Payments not configured yet</h2>
+        <h2 className="font-semibold text-brand-900">Online booking is temporarily unavailable</h2>
         <p className="mt-2 text-sm text-foreground/70">
-          Add your Stripe test keys to <code className="rounded bg-white px-1">.env</code>
-          (<code className="rounded bg-white px-1">STRIPE_SECRET_KEY</code>,
-          <code className="rounded bg-white px-1">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code>) and restart the
-          dev server to enable online payment. Your seat hold for <strong>{tourSlug}</strong> is reserved
-          in the meantime.
+          Please contact our team to arrange your tour. No payment has been taken.
+          <a href="/contact" className="mt-3 block font-semibold underline">Contact us about your booking</a>
         </p>
       </div>
     );

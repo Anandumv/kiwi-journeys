@@ -44,7 +44,27 @@
       "Bash(grep -v \"prisma:error\\\\|Validation Error\\\\|Environment variable\\\\|schema.prisma\\\\|provider\\\\|url\\\\|can't reach\\\\|Can't reach\\\\|Invalid \\\\`prisma\")",
       "Bash(grep -v \"^[[:space:]]*$\")",
       "Bash(xargs cat)",
-      "Bash(railway deployment *)"
+      "Bash(railway deployment *)",
+      "Bash(mkdir -p \"/Users/anandumv/Downloads/kiwi-journeys/src/app/api/account/bookings/[ref]/reschedule\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/faq\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/private-tours\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/gift-vouchers\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/gift-vouchers/success\")",
+      "Bash(/usr/bin/curl -s --max-time 15 \"http://localhost:3000/faq\")",
+      "Bash(/usr/bin/curl -s -X POST --max-time 15 -H \"Content-Type: application/json\" -d '{\"name\":\"Test User\",\"email\":\"test@example.com\",\"tours\":[\"queenstown-day\"],\"groupSize\":8,\"message\":\"Testing private tour enquiry endpoint\"}' \"http://localhost:3000/api/contact/private-tour\")",
+      "Bash(/usr/bin/curl -s -X POST --max-time 15 -H \"Content-Type: application/json\" -d '{\"fullName\":\"Test User\",\"email\":\"test@example.com\",\"tours\":[\"queenstown-day\"],\"groupSize\":8,\"message\":\"Testing private tour enquiry endpoint\"}' \"http://localhost:3000/api/contact/private-tour\")",
+      "Bash(/usr/bin/curl -s -X POST --max-time 15 -H \"Content-Type: application/json\" -d '{\"code\":\"NOTREAL123\"}' \"http://localhost:3000/api/gift-vouchers/validate\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/api/cron/abandoned-recovery\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"http://localhost:3000/admin/gift-vouchers\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"https://kiwiglobetours.co.nz/faq\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"https://kiwiglobetours.co.nz/private-tours\")",
+      "Bash(/usr/bin/curl -s -o /dev/null -w \"%{http_code}\" --max-time 15 \"https://kiwiglobetours.co.nz/gift-vouchers\")",
+      "Bash(/usr/bin/curl -s -D - -o /dev/null --max-time 15 \"https://kiwiglobetours.co.nz/faq\")",
+      "mcp__plugin_ecc_playwright__browser_resize"
+    ],
+    "additionalDirectories": [
+      "/Users/anandumv/Downloads/kiwi-journeys/src/app/api/account/bookings/[ref]"
     ]
   }
 }

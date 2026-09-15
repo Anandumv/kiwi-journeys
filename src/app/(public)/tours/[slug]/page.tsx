@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -73,13 +74,6 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     itinerary: tour.itinerary.map((step, i) => ({ "@type": "Place", name: `Stop ${i + 1}`, description: step })),
     provider: { "@id": `${SITE_URL}/#organization` },
     tourOperator: { "@id": `${SITE_URL}/#organization` },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: avgRating,
-      bestRating: 5,
-      worstRating: 1,
-      reviewCount: testimonials.length || 1,
-    },
     offers: {
       "@type": "Offer",
       url: `${pageUrl}/book`,
@@ -107,13 +101,6 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
       availability: "https://schema.org/InStock",
       seller: { "@id": `${SITE_URL}/#organization` },
     },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: avgRating,
-      bestRating: 5,
-      worstRating: 1,
-      reviewCount: testimonials.length || 1,
-    },
   };
 
   const breadcrumbLd = {
@@ -128,9 +115,9 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(tripLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(tripLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(productLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       {/* Title bar */}
       <div className="bg-brand-50 border-b border-brand-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">

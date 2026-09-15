@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { getCurrentCustomer } from "@/lib/customerAuth";
-import { remainingForSessions } from "@/lib/availability";
+import { SoldOutError } from "@/lib/availability";
+import { rescheduleBooking } from "@/lib/reschedule";
 import { Resend } from "resend";
 import { getSiteSettings } from "@/lib/content";
 import { dateLabel, timeLabel } from "@/lib/time";
@@ -78,24 +79,15 @@ export async function POST(
     );
   }
 
-  const remaining = await remainingForSessions([newSessionId], now);
-  const seats = remaining.get(newSessionId) ?? 0;
-  if (seats < booking.seats) {
-    return NextResponse.json(
-      { error: `Only ${seats} seat${seats === 1 ? "" : "s"} available on that date.` },
-      { status: 409 },
-    );
-  }
-
   const oldSessionId = booking.sessionId;
-  await prisma.booking.update({
-    where: { id: booking.id },
-    data: {
-      sessionId: newSessionId,
-      rescheduledFromSessionId: oldSessionId,
-      rescheduledAt: now,
-    },
-  });
+  try {
+    await rescheduleBooking(booking.id, newSessionId, customerSession.email, now);
+  } catch (error) {
+    const message = error instanceof SoldOutError
+      ? `Only ${error.available} seats available on that date.`
+      : "Booking or departure changed. Please refresh and try again.";
+    return NextResponse.json({ error: message }, { status: 409 });
+  }
 
   // Email customer and admin.
   const apiKey = process.env.RESEND_API_KEY;

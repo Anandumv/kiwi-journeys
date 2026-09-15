@@ -90,7 +90,7 @@ export function PrivateTourForm() {
           <input
             className={field}
             required
-            value={form.fullName}
+            aria-label="Full name" value={form.fullName}
             onChange={(e) => setForm({ ...form, fullName: e.target.value })}
             placeholder="Your full name"
           />
@@ -103,7 +103,7 @@ export function PrivateTourForm() {
             className={field}
             type="email"
             required
-            value={form.email}
+            aria-label="Email" value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             placeholder="you@example.com"
           />
@@ -114,7 +114,7 @@ export function PrivateTourForm() {
           </label>
           <input
             className={field}
-            value={form.phone}
+            aria-label="Phone" value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
             placeholder="+1 555 000 0000"
           />
@@ -129,7 +129,7 @@ export function PrivateTourForm() {
             min="1"
             max="500"
             required
-            value={form.groupSize}
+            aria-label="Group size" value={form.groupSize}
             onChange={(e) => setForm({ ...form, groupSize: e.target.value })}
             placeholder="e.g. 8"
           />
@@ -164,7 +164,7 @@ export function PrivateTourForm() {
         </label>
         <input
           className={field}
-          value={form.preferredDates}
+          aria-label="Preferred dates" value={form.preferredDates}
           onChange={(e) => setForm({ ...form, preferredDates: e.target.value })}
           placeholder="e.g. late October, first week of March — flexible on exact dates"
         />
@@ -177,7 +177,7 @@ export function PrivateTourForm() {
         <textarea
           className={field}
           rows={4}
-          value={form.message}
+          aria-label="Tell us more" value={form.message}
           onChange={(e) => setForm({ ...form, message: e.target.value })}
           placeholder="Any special requirements, interests, or questions — the more you share, the better we can tailor your experience."
         />

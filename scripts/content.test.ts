@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {prisma} from '../src/lib/db';
+import {getTour,getTours,getPost,getPosts,getTestimonials} from '../src/lib/content';
+import {tours} from '../src/data/tours';
+import {posts} from '../src/data/blog';
+(prisma.tour.findFirst as any)=async()=>null;
+(prisma.tour.findMany as any)=async()=>[];
+(prisma.blogPost.findFirst as any)=async()=>null;
+(prisma.blogPost.findMany as any)=async()=>[];
+(prisma.testimonial.findMany as any)=async()=>[];
+test('unpublished tour stays unpublished',async()=>assert.equal(await getTour(tours[0].slug),null));
+test('empty tour catalogue stays empty',async()=>assert.deepEqual(await getTours(),[]));
+test('unpublished article stays unpublished',async()=>assert.equal(await getPost(posts[0].slug),null));
+test('empty blog stays empty',async()=>assert.deepEqual(await getPosts(),[]));
+test('no published reviews means no invented testimonials',async()=>assert.deepEqual(await getTestimonials(),[]));

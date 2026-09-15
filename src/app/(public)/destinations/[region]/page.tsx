@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/PageHero";
@@ -125,9 +126,9 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(destinationLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
-      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(destinationLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
+      {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqLd) }} />}
       <PageHero eyebrow="Destination" title={dest.name} subtitle={dest.intro ?? dest.blurb} image={dest.heroImage ?? undefined} />
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <h2 className="font-serif text-3xl font-semibold text-brand-900">Tours in {dest.name}</h2>

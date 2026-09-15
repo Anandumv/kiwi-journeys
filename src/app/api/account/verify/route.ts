@@ -23,7 +23,10 @@ export async function GET(req: Request) {
     return new Response("This link has expired or already been used. Please request a new one.", { status: 400 });
   }
 
-  await prisma.magicToken.update({ where: { id: magic.id }, data: { usedAt: new Date() } });
+  const consumed = await prisma.magicToken.updateMany({
+    where: { id: magic.id, usedAt: null, expiresAt: { gt: new Date() } }, data: { usedAt: new Date() },
+  });
+  if (consumed.count !== 1) return new Response("This link has already been used. Please request a new one.", { status: 400 });
 
   // Get the customer's name from their most recent booking.
   const customer = await prisma.customer.findFirst({

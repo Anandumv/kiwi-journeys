@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { getSiteSettings } from "@/lib/content";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
@@ -12,6 +13,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  if (!process.env.RESEND_API_KEY) return NextResponse.json({ error: "Email is temporarily unavailable. Please contact us directly." }, { status: 503 });
   // 5 messages per IP per hour.
   const { allowed } = rateLimit(rateLimitKey(req, "contact"), { limit: 5, windowMs: 60 * 60 * 1000 });
   if (!allowed) {
@@ -32,7 +34,7 @@ export async function POST(req: Request) {
     try {
       const resend = new Resend(apiKey);
       const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
-      await resend.emails.send({
+      await sendEmail(resend, {
         from,
         to: site.email,
         replyTo: email,
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
         text: `From: ${name} <${email}>\n\n${message}`,
       });
       // Auto-responder so the sender knows their message arrived.
-      await resend.emails.send({
+      await sendEmail(resend, {
         from,
         to: email,
         subject: `We received your message — ${site.name}`,

@@ -38,11 +38,11 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <input name="name" required placeholder="Your name" className={field} />
-        <input name="email" type="email" required placeholder="Email address" className={field} />
+        <input name="name" aria-label="Your name" required placeholder="Your name" className={field} />
+        <input name="email" aria-label="Email address" type="email" required placeholder="Email address" className={field} />
       </div>
-      <input name="subject" placeholder="Subject (e.g. private tour enquiry)" className={field} />
-      <textarea name="message" required rows={5} placeholder="How can we help?" className={field} />
+      <input name="subject" aria-label="Subject" placeholder="Subject (e.g. private tour enquiry)" className={field} />
+      <textarea name="message" aria-label="Your message" required rows={5} placeholder="How can we help?" className={field} />
       <button
         type="submit"
         disabled={status === "sending"}
@@ -50,7 +50,7 @@ export function ContactForm() {
       >
         {status === "sending" ? "Sending…" : "Send message"}
       </button>
-      {status === "error" && <p className="text-sm text-red-600">Something went wrong. Please email us directly.</p>}
+      {status === "error" && <p role="alert" className="text-sm text-red-600">Something went wrong. Please email us directly.</p>}
     </form>
   );
 }

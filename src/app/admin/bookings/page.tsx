@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { formatNZD } from "@/lib/money";
 import { dateLabel, timeLabel } from "@/lib/time";
 import { RefundButton } from "@/components/AdminActions";
-import { StatusPill } from "../page";
+import { StatusPill } from "@/components/admin/StatusPill";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Bookings" };

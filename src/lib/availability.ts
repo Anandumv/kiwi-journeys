@@ -245,14 +245,11 @@ export async function createHold(args: {
 
 /** Mark stale HELD reservations as EXPIRED. Returns affected count. */
 export async function expireStaleHolds(now: Date = new Date()): Promise<string[]> {
-  const stale = await prisma.reservation.findMany({
-    where: { status: "HELD", expiresAt: { lt: now } },
-    select: { id: true, stripePaymentIntentId: true },
-  });
-  if (stale.length === 0) return [];
-  await prisma.reservation.updateMany({
-    where: { id: { in: stale.map((s) => s.id) } },
-    data: { status: "EXPIRED" },
-  });
-  return stale.map((s) => s.stripePaymentIntentId).filter((x): x is string => !!x);
+  // Change and return rows atomically: a concurrent conversion must never be expired.
+  const stale = await prisma.$queryRaw<{ stripePaymentIntentId: string | null }[]>(
+    Prisma.sql`UPDATE "Reservation" SET status = 'EXPIRED'
+      WHERE status = 'HELD' AND "expiresAt" <= ${now}
+      RETURNING "stripePaymentIntentId"`,
+  );
+  return stale.map(s => s.stripePaymentIntentId).filter((id): id is string => !!id);
 }

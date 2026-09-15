@@ -22,6 +22,12 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
+  if (!isStripeConfigured()) {
+    return NextResponse.json(
+      { error: "Online payments are temporarily unavailable. Please contact us to book." },
+      { status: 503 },
+    );
+  }
   const { sessionId, items } = parsed.data;
 
   // Load the session + its tour's price options (authoritative pricing).

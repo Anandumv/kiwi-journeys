@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { ContactForm } from "@/components/ContactForm";
@@ -42,7 +43,7 @@ export default async function ContactPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(contactLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(contactLd) }} />
       <PageHero eyebrow="Get in touch" title="Contact Us" subtitle="Have questions or want a bespoke private tour? We'd love to help." image="/images/general/tekapo-church-sunset.jpg" />
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2">
         <div>

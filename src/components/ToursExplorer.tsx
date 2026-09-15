@@ -19,6 +19,7 @@ export function ToursExplorer({ tours }: { tours: Tour[] }) {
   const [destination, setDestination] = useState("all");
   const [duration, setDuration] = useState("all");
   const [type, setType] = useState(params.get("type") ?? "all");
+  const [query, setQuery] = useState(params.get("q") ?? "");
   const [price, setPrice] = useState("all");
   const [count, setCount] = useState(PAGE);
 
@@ -35,12 +36,13 @@ export function ToursExplorer({ tours }: { tours: Tour[] }) {
     const band = priceBands.find((b) => b.key === price)!;
     return tours.filter(
       (t) =>
+        (!query.trim() || `${t.title} ${t.destination} ${t.summary}`.toLowerCase().includes(query.trim().toLowerCase())) &&
         (destination === "all" || t.destination === destination) &&
         (duration === "all" || t.durationLabel === duration) &&
         (type === "all" || t.category === type) &&
         band.test(t.priceFromCents),
     );
-  }, [tours, destination, duration, type, price]);
+  }, [tours, destination, duration, type, price, query]);
 
   const visible = filtered.slice(0, count);
 
@@ -49,25 +51,27 @@ export function ToursExplorer({ tours }: { tours: Tour[] }) {
 
   return (
     <div>
+      <label htmlFor="tour-search" className="mb-2 block text-sm font-medium text-brand-800">Find your day out</label>
+      <input id="tour-search" type="search" value={query} onChange={e => { setQuery(e.target.value); setCount(PAGE); }} placeholder="Search tours or destinations" className="mb-4 w-full rounded-lg border border-brand-200 bg-white px-4 py-3 text-sm" />
       <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
-        <select className={select} value={destination} onChange={(e) => { setDestination(e.target.value); setCount(PAGE); }}>
+        <select aria-label="Destination" className={select} value={destination} onChange={(e) => { setDestination(e.target.value); setCount(PAGE); }}>
           <option value="all">All destinations</option>
           {allDestinations.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
-        <select className={select} value={duration} onChange={(e) => { setDuration(e.target.value); setCount(PAGE); }}>
+        <select aria-label="Duration" className={select} value={duration} onChange={(e) => { setDuration(e.target.value); setCount(PAGE); }}>
           <option value="all">Any duration</option>
           {allDurations.map((d) => <option key={d} value={d}>{d}</option>)}
         </select>
-        <select className={select} value={type} onChange={(e) => { setType(e.target.value); setCount(PAGE); }}>
+        <select aria-label="Experience type" className={select} value={type} onChange={(e) => { setType(e.target.value); setCount(PAGE); }}>
           <option value="all">All types</option>
           {categories.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
         </select>
-        <select className={select} value={price} onChange={(e) => { setPrice(e.target.value); setCount(PAGE); }}>
+        <select aria-label="Price range" className={select} value={price} onChange={(e) => { setPrice(e.target.value); setCount(PAGE); }}>
           {priceBands.map((b) => <option key={b.key} value={b.key}>{b.label}</option>)}
         </select>
       </div>
 
-      <p className="mt-4 text-sm text-foreground/60">{filtered.length} tour{filtered.length === 1 ? "" : "s"}</p>
+      <p role="status" className="mt-4 text-sm text-foreground/60">{filtered.length} tour{filtered.length === 1 ? "" : "s"}</p>
 
       {visible.length === 0 ? (
         <p className="mt-10 text-center text-foreground/60">No tours match your filters. Try widening your search.</p>

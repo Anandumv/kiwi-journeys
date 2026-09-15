@@ -324,3 +324,36 @@ model GiftVoucher {
   @@index([code])
   @@index([purchaserEmail])
 }
+
+
+// Immutable delivery payload; created in the same transaction as its booking.
+model EmailJob {
+  id String @id
+  bookingReference String
+  recipient String
+  sender String
+  subject String
+  body String
+  attempts Int @default(0)
+  availableAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'UTC')"))
+  lockedUntil DateTime?
+  leaseToken String?
+  firstAttemptAt DateTime?
+  sentAt DateTime?
+  lastError String?
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'UTC')"))
+
+  @@index([sentAt, availableAt])
+}
+
+// A paid intent that could not be converted needs visible, persistent review.
+model PaymentIssue {
+  paymentIntentId String @id
+  reservationId String
+  amountCents Int
+  currency String
+  reason String
+  resolvedAt DateTime?
+  createdAt DateTime @default(dbgenerated("(now() AT TIME ZONE 'UTC')"))
+  updatedAt DateTime @updatedAt
+}

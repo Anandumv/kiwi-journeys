@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
@@ -38,7 +39,7 @@ export default async function DestinationsPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionLd) }} />
       <PageHero eyebrow="Travel New Zealand Your Way" title="Destinations" subtitle="New Zealand, a captivating land of breathtaking natural beauty and warm, friendly locals." />
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

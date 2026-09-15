@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type PriceOption = { id: string; key: string; label: string; priceCents: number; seatsPerUnit: number };
@@ -37,29 +37,41 @@ export function BookingWidget({
   const [month, setMonth] = useState(() => Number(now.slice(5, 7))); // 1-12
 
   const [days, setDays] = useState<Record<string, DayAvail>>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(null);
+  const requestVersion = useRef(0);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [qty, setQty] = useState<Record<string, number>>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchMonth = useCallback(async () => {
+  const fetchMonth = useCallback(async (signal?: AbortSignal) => {
+    const version = ++requestVersion.current;
     setLoading(true);
+    setAvailabilityError(null);
     try {
       const m = `${year}-${String(month).padStart(2, "0")}`;
-      const res = await fetch(`/api/tours/${slug}/availability?month=${m}`);
+      const res = await fetch(`/api/tours/${slug}/availability?month=${m}`, { signal });
+      if (!res.ok) throw new Error("Availability unavailable");
       const data = await res.json();
+      if (version !== requestVersion.current || signal?.aborted) return;
       const map: Record<string, DayAvail> = {};
       for (const d of data.days ?? []) map[d.date] = d;
       setDays(map);
+    } catch {
+      if (version !== requestVersion.current || signal?.aborted) return;
+      setDays({});
+      setAvailabilityError("We couldn't load departure dates. Please try again.");
     } finally {
-      setLoading(false);
+      if (version === requestVersion.current && !signal?.aborted) setLoading(false);
     }
   }, [slug, year, month]);
 
   useEffect(() => {
-    fetchMonth();
+    const controller = new AbortController();
+    void fetchMonth(controller.signal);
+    return () => controller.abort();
   }, [fetchMonth]);
 
   // Build the calendar grid (Mon-first) for the visible month.
@@ -92,10 +104,10 @@ export function BookingWidget({
   const seatsRequested = priceOptions.reduce((n, po) => n + (qty[po.id] ?? 0) * po.seatsPerUnit, 0);
   const totalCents = priceOptions.reduce((n, po) => n + (qty[po.id] ?? 0) * po.priceCents, 0);
   const overCapacity = activeSession ? seatsRequested > activeSession.remaining : false;
-  const canContinue = !!activeSession && seatsRequested > 0 && !overCapacity && !submitting;
+  const canContinue = !!activeSession && seatsRequested > 0 && !overCapacity && !submitting && !loading && !availabilityError;
 
   function setQuantity(id: string, delta: number) {
-    setQty((q) => ({ ...q, [id]: Math.max(0, (q[id] ?? 0) + delta) }));
+    setQty((q) => ({ ...q, [id]: Math.min(50, Math.max(0, (q[id] ?? 0) + delta)) }));
   }
 
   async function onContinue() {
@@ -129,7 +141,7 @@ export function BookingWidget({
     }
   }
 
-  const monthIsPast = `${year}-${String(month).padStart(2, "0")}` < now.slice(0, 7);
+  const monthIsPast = `${year}-${String(month).padStart(2, "0")}` <= now.slice(0, 7);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
@@ -153,7 +165,9 @@ export function BookingWidget({
             return (
               <button
                 key={date}
-                disabled={!hasAvail}
+                disabled={!hasAvail || loading}
+                aria-label={`${date}${hasAvail ? `, ${day.remaining} seats available` : ", unavailable"}`}
+                aria-pressed={isSelected}
                 onClick={() => { setSelectedDate(date); setSelectedSession(null); }}
                 className={[
                   "aspect-square rounded-lg text-sm transition",
@@ -168,6 +182,8 @@ export function BookingWidget({
             );
           })}
         </div>
+        {availabilityError && <div role="alert" className="mt-3 text-sm text-red-700">{availabilityError} <button onClick={() => void fetchMonth()} className="font-semibold underline">Retry</button></div>}
+        {!loading && !availabilityError && Object.keys(days).length === 0 && <p className="mt-3 text-sm text-foreground/60">No departures available this month. Try the next month or contact us.</p>}
         {loading && <p className="mt-3 text-center text-xs text-foreground/50">Loading availability…</p>}
         <div className="mt-4 flex items-center gap-4 text-xs text-foreground/55">
           <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-brand-50 border border-brand-100" /> Available</span>

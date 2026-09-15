@@ -35,6 +35,8 @@ export function ProcessingClient() {
     return () => clearInterval(id);
   }, [reservationId, router]);
 
+  if (!reservationId) return <><h1 className="text-xl font-bold">No reservation selected</h1><Link href="/tours" className="mt-4 inline-block underline">Find a tour</Link></>;
+
   if (timedOut) {
     return (
       <>
@@ -45,7 +47,7 @@ export function ProcessingClient() {
         </div>
         <h1 className="mt-6 text-xl font-bold text-brand-900">Taking longer than expected</h1>
         <p className="mt-2 text-sm text-foreground/70">
-          Your payment was received. We&apos;re still confirming your booking — it should arrive by email shortly.
+          We haven&apos;t received your booking confirmation yet. Please check your email or contact us before attempting another payment.
         </p>
         <div className="mt-6 flex flex-col gap-3">
           <Link
@@ -66,11 +68,10 @@ export function ProcessingClient() {
     <>
       <div className="h-12 w-12 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />
       <h1 className="mt-6 text-xl font-bold text-brand-900">Confirming your booking…</h1>
-      <p className="mt-2 text-sm text-foreground/70">Please don&apos;t close this window — payment received, finalising your reservation.</p>
+      <p className="mt-2 text-sm text-foreground/70">Please keep this window open while we check your payment and reservation.</p>
       {slow && (
         <p className="mt-6 text-sm text-foreground/60">
-          This is taking longer than usual. Your payment was successful and we&apos;ll email your
-          confirmation shortly.
+          This is taking longer than usual. We&apos;re still waiting for confirmation from our payment provider.
         </p>
       )}
     </>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { Resend } from "resend";
+import { sendEmail } from "@/lib/email";
 import { getSiteSettings } from "@/lib/content";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
@@ -17,6 +18,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
+  if (!process.env.RESEND_API_KEY) return NextResponse.json({ error: "Email is temporarily unavailable. Please contact us directly." }, { status: 503 });
   const { allowed } = rateLimit(rateLimitKey(req, "private-tour"), {
     limit: 3,
     windowMs: 60 * 60 * 1000,
@@ -45,8 +47,8 @@ export async function POST(req: Request) {
   const adminEmail =
     site.email || process.env.ADMIN_EMAIL || "admin@kiwiglobetours.co.nz";
 
-  await Promise.all([
-    resend.emails.send({
+  const sent = await Promise.all([
+    sendEmail(resend, {
       from,
       to: adminEmail,
       replyTo: d.email,
@@ -62,7 +64,7 @@ export async function POST(req: Request) {
         `\nMessage:\n${d.message || "(none)"}\n\n` +
         `Reply directly to this email to respond to the customer.`,
     }),
-    resend.emails.send({
+    sendEmail(resend, {
       from,
       to: d.email,
       subject: `We've received your private tour enquiry — ${site.name}`,
@@ -76,7 +78,8 @@ export async function POST(req: Request) {
         `In the meantime, feel free to call us at ${site.phone} if you have any urgent questions.\n\n` +
         `We look forward to crafting your perfect New Zealand adventure!\n${site.name}`,
     }),
-  ]).catch((e) => console.error("Private tour email failed:", e));
+  ]).catch((e) => { console.error("Private tour email failed:", e); return null; });
+  if (!sent) return NextResponse.json({ error: "Could not send your enquiry. Please contact us directly." }, { status: 502 });
 
   return NextResponse.json({ ok: true });
 }

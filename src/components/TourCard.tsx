@@ -38,9 +38,6 @@ export function TourCard({ tour }: { tour: Tour }) {
           {tour.title}
         </h3>
         <div className="mt-2 flex items-center gap-2 text-xs text-foreground/55">
-          <span className="text-gold-500" aria-hidden>★★★★★</span>
-          <span>4.9/5</span>
-          <span className="text-ivory-300">·</span>
           <span className="text-teal-600 font-medium">Free cancellation</span>
         </div>
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-foreground/65">{tour.summary}</p>

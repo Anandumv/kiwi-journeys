@@ -1,13 +1,13 @@
-# Kiwi Journeys — NZ Tour Booking Site
+# Kiwi Globe Tours — NZ Tour Booking Site
 
 A New Zealand day-tour booking website (Next.js + TypeScript + Tailwind + Prisma/Postgres + Stripe)
 with a full custom booking engine: calendar availability, package/price options, seat-hold reservations,
 online payment, confirmation emails, and an admin dashboard.
 
-> **Branding is placeholder** ("Kiwi Journeys"). All brand strings live in `src/config/site.ts` —
-> edit that one file to rebrand. Replace placeholder images in `public/images/` with your own
-> **licensed** photography before going public (the bundled photos are from a scraped reference and
-> are not cleared for production use).
+Brand settings are managed through the database-backed CMS with defaults in `src/config/site.ts`.
+See [the audit report](outputs/audit/REPORT.md) for verified behavior and remaining launch requirements.
+
+The bundled reference photographs were not cleared for production in the original project documentation. Replace them with licensed assets or verify rights before publication.
 
 ## Stack
 
@@ -15,7 +15,7 @@ online payment, confirmation emails, and an admin dashboard.
 - **Tailwind CSS v4**
 - **PostgreSQL** via **Prisma 6**
 - **Stripe** (Payment Intents + embedded Payment Element)
-- **Resend** for confirmation/contact email (optional)
+- **Resend** for confirmation/contact email and customer sign-in
 
 ## Local setup
 
@@ -26,7 +26,7 @@ createdb kiwi_journeys                      # if not already created
 # 2. Install + generate + migrate + seed
 npm install
 npx prisma migrate dev
-npm run seed                                # tours, price options, 90-day departures
+npm run seed                                # NEW database only; may overwrite existing content
 
 # 3. Run
 npm run dev                                 # http://localhost:3000
@@ -39,8 +39,9 @@ npm run dev                                 # http://localhost:3000
 | `DATABASE_URL` | Postgres connection string |
 | `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe test/live keys |
 | `STRIPE_WEBHOOK_SECRET` | from `stripe listen` or the dashboard |
-| `RESEND_API_KEY` + `BOOKINGS_FROM_EMAIL` | confirmation emails (optional; logs to console if unset) |
-| `ADMIN_TOKEN` | password for `/admin` |
+| `RESEND_API_KEY` + `BOOKINGS_FROM_EMAIL` | email delivery and customer sign-in; forms return unavailable if unset |
+| `AUTH_SECRET` | signing secret for scoped admin/customer/booking sessions |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | bootstrap admin credentials; login verifies the database password hash |
 | `CRON_SECRET` | protects `/api/cron/*` |
 | `RESERVATION_HOLD_MINUTES` | seat-hold lifetime (default 10) |
 
@@ -65,20 +66,21 @@ npm run dev                                 # http://localhost:3000
 - **Booking flow**: pick date → time slot → guests → `POST /api/reservations` creates a row-locked
   `HELD` reservation (`SELECT … FOR UPDATE` prevents overbooking) + a Stripe PaymentIntent →
   checkout with the Payment Element → the **webhook** commits the `Booking` (idempotent).
-- **Holds expire** after 10 min; `/api/cron/expire-holds` (Vercel Cron, every 5 min) sweeps them and
+- **Holds expire** after 10 min; `/api/cron/expire-holds` (configure a scheduler; suggested every 5 min) sweeps them and
   cancels their PaymentIntents. `/api/cron/generate-departures` (daily) tops up the rolling window.
 - **Abandoned checkout recovery**: `/api/cron/abandoned-recovery` (every 2 min) emails customers whose
   HELD reservation has contact info but is about to expire unpaid (one email per reservation).
 - **Loyalty reward**: `/api/cron/loyalty-reward` (daily) emails a one-time 10%-off promo code to
   customers after their 2nd+ completed tour.
-- **Admin** (`/admin`, token-gated): bookings list, revenue, refunds, departure generation, gift vouchers.
+- **Admin** (`/admin`, authenticated session): bookings list, revenue, refunds, departure generation, gift vouchers.
 
 ## Verification scripts
 
 ```bash
-npm run seed
-npx tsx scripts/verify.ts          # overbooking, live availability, hold expiry
-npx tsx scripts/verify-commit.ts   # booking commit + idempotency (webhook's job)
+npm test
+npm run test:integration          # isolated localhost kiwi_journeys_audit_test database
+npm run build
+npm run typecheck
 ```
 
 ## Key files
@@ -96,6 +98,16 @@ npx tsx scripts/verify-commit.ts   # booking commit + idempotency (webhook's job
 
 ## Before public launch
 
-- Replace placeholder branding (`src/config/site.ts`, `src/components/Logo.tsx`).
+- Verify CMS business details, tour content, prices, and testimonial authenticity.
+- Configure and test payment, email, uploads, and cron services; address the operational gaps in the audit report.
 - Replace all images with your own **licensed** photography; rewrite tour copy as original content.
 - Add real legal text (privacy, terms), production Stripe keys, a custom domain, and GST handling.
+
+
+## Reliable delivery and payment recovery
+
+Booking confirmations, gift voucher emails, and full-refund notifications are stored transactionally in `EmailJob`. The webhook attempts delivery after responding; a scheduler must also invoke `GET /api/cron/deliver-emails` every minute with `Authorization: Bearer <CRON_SECRET>` to recover failed or interrupted work. Alternatively, a scheduler with environment variables supplied can run `npx tsx scripts/cron.ts deliver-emails`.
+
+The protected `/admin/operations` page shows pending email jobs and paid reservations that failed to become bookings. Retrying a payment checks its current state in Stripe; it never creates a new charge. Verified full refunds close the issue. Partial refunds require operator review.
+
+Email retries preserve one immutable payload and idempotency key, stop after eight attempts or 23 hours, and require manual provider-log review after that limit. Resend keeps idempotency keys for 24 hours: https://resend.com/docs/dashboard/emails/idempotency-keys. Configure the sender before accepting bookings. WhatsApp delivery remains best-effort.

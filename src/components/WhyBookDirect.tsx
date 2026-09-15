@@ -1,7 +1,7 @@
 const reasons = [
   {
-    title: "No OTA markup",
-    body: "Booking direct means you pay our actual price — no 20–30% commission added by Viator or GetYourGuide.",
+    title: "Book with your tour operator",
+    body: "See tour prices, choose your departure, and arrange your trip directly with the team running it.",
   },
   {
     title: "Local guides, local knowledge",
@@ -16,7 +16,7 @@ const reasons = [
     body: "Questions before, during or after? You reach us directly — not a call centre. We respond within one business day.",
   },
   {
-    title: "Tiaki Promise certified",
+    title: "Travel with care",
     body: "We travel with care for the land, sea and communities we visit. Your booking supports local family businesses.",
   },
   {
@@ -32,10 +32,10 @@ export function WhyBookDirect() {
         <div className="text-center">
           <p className="eyebrow text-sand-400">Why book direct?</p>
           <h2 className="mt-3 font-serif text-4xl font-semibold">
-            Better than any booking platform
+            Your trip, with a local team
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-brand-100/80">
-            Skip the middleman. When you book with us directly you get lower prices, real local guides, and a team that actually picks up the phone.
+            Choose your day out and talk directly with our team about dates, pickup, and the details that matter to you.
           </p>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

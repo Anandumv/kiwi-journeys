@@ -15,6 +15,7 @@ export type CustomerSessionPayload = { sub: string; email: string; name: string 
 export async function signCustomerSession(payload: CustomerSessionPayload): Promise<string> {
   return new SignJWT({ email: payload.email, name: payload.name })
     .setProtectedHeader({ alg: ALG })
+    .setAudience("kiwi-customer")
     .setSubject(payload.sub)
     .setIssuedAt()
     .setExpirationTime("30d")
@@ -23,9 +24,10 @@ export async function signCustomerSession(payload: CustomerSessionPayload): Prom
 
 export async function verifyCustomerSession(token: string): Promise<CustomerSessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secret());
+    const { payload } = await jwtVerify(token, secret(), { algorithms: [ALG], audience: "kiwi-customer" });
+    if (typeof payload.sub !== "string" || !payload.sub || typeof payload.email !== "string") return null;
     return {
-      sub: String(payload.sub),
+      sub: payload.sub,
       email: String(payload.email ?? ""),
       name: String(payload.name ?? ""),
     };

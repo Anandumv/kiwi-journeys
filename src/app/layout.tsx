@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { Geist, Fraunces } from "next/font/google";
 import Script from "next/script";
@@ -110,13 +111,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       "Hanmer Springs Tours",
       "Small Group Tours New Zealand",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: avgRating,
-      bestRating: 5,
-      worstRating: 1,
-      reviewCount: testimonials.length || 1,
-    },
     sameAs: Object.values(s.social ?? {}).filter(Boolean),
   };
   const siteLd = {
@@ -137,8 +131,8 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="en" className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}>
       <body className="min-h-screen bg-ivory text-foreground">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(siteLd) }} />
         {ga4Id && (
           <>
             <Script src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} strategy="afterInteractive" />

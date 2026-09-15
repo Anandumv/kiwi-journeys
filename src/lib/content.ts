@@ -3,9 +3,8 @@ import type { Tour, PriceOption } from "@/data/tours";
 import { tours as staticTours, destinations as staticDestinations } from "@/data/tours";
 import { posts as staticPosts } from "@/data/blog";
 
-// Content getters. They read from the database when available, and fall back to
-// the bundled static content when there's no DB (e.g. the UI-only Vercel deploy).
-// This keeps every public page rendering with no database connection required.
+// Publication state comes from the CMS. Bundled tours/posts are only an
+// explicitly enabled demo fallback, never a substitute for unpublished records.
 
 export type SiteSettings = {
   name: string;
@@ -35,12 +34,6 @@ export type BlogPostItem = {
 export type TestimonialItem = { name: string; country: string; text: string; rating: number };
 
 // ── Static fallbacks ──────────────────────────────────────────────────────────
-const STATIC_TESTIMONIALS: TestimonialItem[] = [
-  { name: "Maddy R.", country: "Australia", text: "Felt less like a tour and more like a day out with a local mate. Relaxed pace, no rushing, brilliant.", rating: 5 },
-  { name: "Devon & Ana", country: "Canada", text: "The Akaroa dolphin swim was the highlight of our whole trip. The crew were calm, kind and clearly cared.", rating: 5 },
-  { name: "Hiroshi T.", country: "Japan", text: "Small group, comfortable van, and a guide who knew exactly where the best light and fewest crowds were.", rating: 5 },
-];
-
 const STATIC_VALUE_PROPS = [
   { title: "Small-group day trips", body: "Fully guided days out in a small group, led by someone who actually lives here and knows the back roads." },
   { title: "Multi-day journeys", body: "Set-route trips spread over a few days, with the driving, timing and bookings handled for you." },
@@ -109,20 +102,20 @@ function fetchToursRaw() {
 export async function getTours(): Promise<Tour[]> {
   try {
     const rows = await fetchToursRaw();
-    return rows.length ? rows.map(toTour) : staticTours;
+    return rows.map(toTour);
   } catch {
-    return staticTours;
+    return process.env.CONTENT_DEMO_MODE === "true" ? staticTours : [];
   }
 }
 
 export async function getTour(slug: string): Promise<Tour | null> {
   try {
     const t = await prisma.tour.findFirst({ where: { slug, isActive: true }, include: { priceOptions: { orderBy: { sortOrder: "asc" } } } });
-    if (t) return toTour(t);
+    return t ? toTour(t) : null;
   } catch {
     /* fall through to static */
   }
-  return staticTours.find((t) => t.slug === slug) ?? null;
+  return process.env.CONTENT_DEMO_MODE === "true" ? staticTours.find((t) => t.slug === slug) ?? null : null;
 }
 
 export async function getDestinations(): Promise<DestinationItem[]> {
@@ -131,7 +124,7 @@ export async function getDestinations(): Promise<DestinationItem[]> {
       orderBy: { sortOrder: "asc" },
       select: { slug: true, name: true, status: true, blurb: true, intro: true, heroImage: true },
     });
-    return rows.length ? rows : staticDestinationItems;
+    return rows;
   } catch {
     return staticDestinationItems;
   }
@@ -140,29 +133,29 @@ export async function getDestinations(): Promise<DestinationItem[]> {
 export async function getPosts(): Promise<BlogPostItem[]> {
   try {
     const rows = await prisma.blogPost.findMany({ where: { published: true }, orderBy: { date: "desc" } });
-    if (rows.length) return rows.map((p) => ({ slug: p.slug, title: p.title, date: p.date.toISOString(), excerpt: p.excerpt, body: p.body, coverImage: p.coverImage }));
+    return rows.map((p) => ({ slug: p.slug, title: p.title, date: p.date.toISOString(), excerpt: p.excerpt, body: p.body, coverImage: p.coverImage }));
   } catch {
     /* fall through */
   }
-  return staticPostItems;
+  return process.env.CONTENT_DEMO_MODE === "true" ? staticPostItems : [];
 }
 
 export async function getPost(slug: string): Promise<BlogPostItem | null> {
   try {
     const p = await prisma.blogPost.findFirst({ where: { slug, published: true } });
-    if (p) return { slug: p.slug, title: p.title, date: p.date.toISOString(), excerpt: p.excerpt, body: p.body, coverImage: p.coverImage };
+    return p ? { slug: p.slug, title: p.title, date: p.date.toISOString(), excerpt: p.excerpt, body: p.body, coverImage: p.coverImage } : null;
   } catch {
     /* fall through */
   }
-  return staticPostItems.find((p) => p.slug === slug) ?? null;
+  return process.env.CONTENT_DEMO_MODE === "true" ? staticPostItems.find((p) => p.slug === slug) ?? null : null;
 }
 
 export async function getTestimonials(): Promise<TestimonialItem[]> {
   try {
     const rows = await prisma.testimonial.findMany({ where: { published: true }, orderBy: { sortOrder: "asc" }, select: { name: true, country: true, text: true, rating: true } });
-    return rows.length ? rows : STATIC_TESTIMONIALS;
+    return rows;
   } catch {
-    return STATIC_TESTIMONIALS;
+    return [];
   }
 }
 

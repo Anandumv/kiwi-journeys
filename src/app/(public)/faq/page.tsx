@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { faqCategories } from "@/data/faq";
@@ -29,7 +30,7 @@ export default function FaqPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqLd) }}
       />
       <PageHero
         eyebrow="Help & information"

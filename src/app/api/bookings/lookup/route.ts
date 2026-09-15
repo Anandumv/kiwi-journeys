@@ -1,3 +1,4 @@
+import { BOOKING_VIEW_COOKIE, signBookingAccess, bookingCookieOptions } from "@/lib/bookingAccess";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "No booking found with those details. Check your email and reference number." }, { status: 404 });
   }
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     reference: booking.reference,
     status: booking.status,
     seats: booking.seats,
@@ -54,4 +55,6 @@ export async function POST(req: Request) {
     startsAtUtc: booking.session.startsAtUtc.toISOString(),
     createdAt: booking.createdAt.toISOString(),
   });
+  response.cookies.set(BOOKING_VIEW_COOKIE, await signBookingAccess(booking.reference), bookingCookieOptions);
+  return response;
 }

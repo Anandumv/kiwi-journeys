@@ -14,6 +14,13 @@ import { expireStaleHolds } from "../src/lib/availability";
 const job = process.argv[2];
 
 async function run() {
+  if (job === "deliver-emails") {
+    const { processEmailJobs } = await import("../src/lib/email-jobs");
+    console.log(await processEmailJobs(20));
+    const { prisma } = await import("../src/lib/db");
+    await prisma.$disconnect();
+    return;
+  }
   if (job === "expire-holds") {
     console.log("[cron] expire-holds starting");
     const expired = await expireStaleHolds();
@@ -43,7 +50,7 @@ async function run() {
     return;
   }
 
-  console.error(`[cron] Unknown job: ${job}. Use 'expire-holds' or 'gen-departures'.`);
+  console.error(`[cron] Unknown job: ${job}. Use 'expire-holds', 'gen-departures', or 'deliver-emails'.`);
   process.exit(1);
 }
 

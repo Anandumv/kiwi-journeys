@@ -23,7 +23,7 @@ export function Footer({
   social?: Record<string, string>;
 }) {
   return (
-    <footer className="mt-24 bg-brand-950 text-brand-100">
+    <footer className="relative z-[100] mt-24 bg-brand-950 text-brand-100">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="grid gap-10 md:grid-cols-4">
           <div className="md:col-span-1">

@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/PageHero";
@@ -38,7 +39,7 @@ export default async function BlogIndex() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(blogLd) }} />
       <PageHero eyebrow="Journal" title="Travel Insights" subtitle="Tips, guides and stories to help you plan your New Zealand journey." image="/images/general/waipara-plains.jpg" />
       <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
         <div className="space-y-6">

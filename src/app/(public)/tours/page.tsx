@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
@@ -42,7 +43,7 @@ export default async function ToursPage() {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListLd) }} />
       <PageHero
         eyebrow="Exciting Experiences"
         title="Our Tours"

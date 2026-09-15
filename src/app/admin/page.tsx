@@ -1,3 +1,4 @@
+import { StatusPill } from "@/components/admin/StatusPill";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { formatNZD } from "@/lib/money";
@@ -61,9 +62,4 @@ function Stat({ label, value }: { label: string; value: string }) {
       <div className="mt-1 text-xs text-foreground/55">{label}</div>
     </div>
   );
-}
-
-export function StatusPill({ status }: { status: string }) {
-  const cls = status === "CONFIRMED" ? "bg-brand-100 text-brand-700" : status === "REFUNDED" ? "bg-amber-100 text-amber-700" : "bg-gray-100 text-gray-600";
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${cls}`}>{status}</span>;
 }

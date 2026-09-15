@@ -15,6 +15,7 @@ export type SessionPayload = { sub: string; email: string; name: string; role: s
 export async function signSession(payload: SessionPayload): Promise<string> {
   return new SignJWT({ email: payload.email, name: payload.name, role: payload.role })
     .setProtectedHeader({ alg: ALG })
+    .setAudience("kiwi-admin")
     .setSubject(payload.sub)
     .setIssuedAt()
     .setExpirationTime("8h")
@@ -23,12 +24,14 @@ export async function signSession(payload: SessionPayload): Promise<string> {
 
 export async function verifySession(token: string): Promise<SessionPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, secret());
+    const { payload } = await jwtVerify(token, secret(), { algorithms: [ALG], audience: "kiwi-admin" });
+    if (typeof payload.sub !== "string" || !payload.sub || typeof payload.email !== "string") return null;
+    if (typeof payload.role !== "string" || !payload.role) return null;
     return {
-      sub: String(payload.sub),
+      sub: payload.sub,
       email: String(payload.email ?? ""),
       name: String(payload.name ?? ""),
-      role: String(payload.role ?? "admin"),
+      role: String(payload.role),
     };
   } catch {
     return null;

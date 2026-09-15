@@ -1,3 +1,4 @@
+import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { PageHero } from "@/components/PageHero";
 import { getSiteSettings } from "@/lib/content";
@@ -42,8 +43,8 @@ export default async function AboutPage() {
   };
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       <PageHero eyebrow="Our Story" title="A small team, big country" subtitle="Small-group South Island day trips, run by people who actually live here." image="/images/general/view-over-Hanmer-from-Conical-Hill.jpg" />
       <article className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
         <div className="space-y-5 text-lg text-foreground/80 leading-relaxed">

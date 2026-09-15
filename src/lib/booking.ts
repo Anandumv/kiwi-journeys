@@ -1,6 +1,6 @@
 import { prisma } from "./db";
 import { Prisma } from "@prisma/client";
-import { Resend } from "resend";
+import { enqueueBookingEmails } from "./email-jobs";
 import { getSiteSettings } from "@/lib/content";
 import { formatNZD } from "./money";
 import { dateLabel, timeLabel } from "./time";
@@ -16,6 +16,7 @@ type Contact = {
   promoCodeId?: string;
   giftVoucherCode?: string;
   giftVoucherDiscountCents?: number;
+  payableCents?: number;
 };
 
 const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
@@ -33,107 +34,74 @@ function makeReference(): string {
 export async function commitReservation(
   reservationId: string,
   paymentIntentId: string,
+  payment?: { amountReceived: number; currency: string },
 ): Promise<{ reference: string; alreadyExisted: boolean }> {
-  // Idempotency: existing booking for this PI?
-  const existing = await prisma.booking.findUnique({
-    where: { stripePaymentIntentId: paymentIntentId },
-    select: { reference: true },
-  });
-  if (existing) return { reference: existing.reference, alreadyExisted: true };
-
-  const reservation = await prisma.reservation.findUnique({
-    where: { id: reservationId },
-    include: { session: { include: { tour: true } } },
-  });
-  if (!reservation) throw new Error(`Reservation ${reservationId} not found`);
-
-  const lines = (reservation.cartSnapshot as unknown as CartLine[]) ?? [];
-  const contact = (reservation.contactSnapshot as unknown as Contact | null) ?? {
-    fullName: "Guest",
-    email: "unknown@example.com",
-  };
-
-  const reference = makeReference();
-
-  await prisma.$transaction(async (tx) => {
-    // Dedup by email so repeat customers don't get duplicate Customer rows.
-    let customer = await tx.customer.findFirst({ where: { email: contact.email } });
-    if (!customer) {
-      customer = await tx.customer.create({
-        data: {
-          email: contact.email,
-          fullName: contact.fullName,
-          phone: contact.phone || null,
-          marketingConsent: contact.marketingConsent ?? false,
-        },
-      });
+  const result = await prisma.$transaction(async (tx) => {
+    const initial = await tx.reservation.findUnique({ where: { id: reservationId } });
+    if (!initial) throw new Error(`Reservation ${reservationId} not found`);
+    // Share the same inventory lock as hold creation and rescheduling.
+    await tx.$queryRaw(Prisma.sql`SELECT id FROM "Session" WHERE id = ${initial.sessionId} FOR UPDATE`);
+    await tx.$queryRaw(Prisma.sql`SELECT id FROM "Reservation" WHERE id = ${reservationId} FOR UPDATE`);
+    const existing = await tx.booking.findUnique({ where: { stripePaymentIntentId: paymentIntentId } });
+    if (existing) {
+      if (existing.reservationId !== reservationId) throw new Error("Payment belongs to another reservation");
+      return { reference: existing.reference, alreadyExisted: true } as const;
     }
-    await tx.booking.create({
-      data: {
-        reference,
-        sessionId: reservation.sessionId,
-        customerId: customer.id,
-        reservationId: reservation.id,
-        seats: reservation.seats,
-        totalCents: reservation.totalCents,
-        currency: "NZD",
-        stripePaymentIntentId: paymentIntentId,
-        status: "CONFIRMED",
-        notes: contact.notes || null,
-        items: {
-          create: lines.map((l) => ({
-            priceOptionId: l.priceOptionId,
-            label: l.label,
-            unitPriceCents: l.unitPriceCents,
-            qty: l.qty,
-            seats: l.seats,
-          })),
-        },
-      },
+    const reservation = await tx.reservation.findUniqueOrThrow({
+      where: { id: reservationId }, include: { session: { include: { tour: true } } },
     });
-    await tx.reservation.update({ where: { id: reservation.id }, data: { status: "CONVERTED" } });
-
-    // Deduct gift voucher balance if one was applied at checkout.
-    if (contact.giftVoucherCode && contact.giftVoucherDiscountCents && contact.giftVoucherDiscountCents > 0) {
-      await tx.giftVoucher.updateMany({
-        where: {
-          code: contact.giftVoucherCode,
-          isActive: true,
-          balanceCents: { gte: contact.giftVoucherDiscountCents },
-        },
-        data: { balanceCents: { decrement: contact.giftVoucherDiscountCents } },
-      });
+    if (reservation.stripePaymentIntentId !== paymentIntentId) throw new Error("Payment intent mismatch");
+    if (reservation.status === "CONVERTED" || reservation.status === "CANCELLED") throw new Error("Reservation is not payable");
+    if (reservation.session.status !== "SCHEDULED") throw new Error("Departure is cancelled");
+    const now = new Date();
+    const [booked, held] = await Promise.all([
+      tx.booking.aggregate({ where: { sessionId: reservation.sessionId, status: "CONFIRMED" }, _sum: { seats: true } }),
+      tx.reservation.aggregate({ where: { sessionId: reservation.sessionId, id: { not: reservationId }, status: "HELD", expiresAt: { gt: now } }, _sum: { seats: true } }),
+    ]);
+    if (reservation.seats > reservation.session.capacity - (booked._sum.seats ?? 0) - (held._sum.seats ?? 0)) {
+      throw new Error("Paid reservation no longer has capacity; payment requires reconciliation");
     }
+    const lines = reservation.cartSnapshot as unknown as CartLine[];
+    const contact = reservation.contactSnapshot as unknown as Contact | null;
+    if (!contact?.fullName || !contact?.email) throw new Error("Passenger details are missing");
+    if (payment && (payment.currency.toLowerCase() !== "nzd" || payment.amountReceived !== (contact.payableCents ?? reservation.totalCents))) {
+      throw new Error("Payment amount or currency mismatch; payment requires reconciliation");
+    }
+    const reference = makeReference();
+    let customer = await tx.customer.findFirst({ where: { email: contact.email } });
+    if (!customer) customer = await tx.customer.create({ data: {
+      email: contact.email, fullName: contact.fullName, phone: contact.phone || null,
+      marketingConsent: contact.marketingConsent ?? false,
+    } });
+    await tx.booking.create({ data: {
+      reference, sessionId: reservation.sessionId, customerId: customer.id,
+      reservationId, seats: reservation.seats, totalCents: contact.payableCents ?? reservation.totalCents,
+      currency: "NZD", stripePaymentIntentId: paymentIntentId, status: "CONFIRMED", notes: contact.notes || null,
+      items: { create: lines.map(l => ({ priceOptionId: l.priceOptionId, label: l.label, unitPriceCents: l.unitPriceCents, qty: l.qty, seats: l.seats })) },
+    } });
+    if (contact.giftVoucherCode && (contact.giftVoucherDiscountCents ?? 0) > 0) {
+      const debit = await tx.giftVoucher.updateMany({
+        where: { code: contact.giftVoucherCode, isActive: true, balanceCents: { gte: contact.giftVoucherDiscountCents! } },
+        data: { balanceCents: { decrement: contact.giftVoucherDiscountCents! } },
+      });
+      if (debit.count !== 1) throw new Error("Voucher balance changed; payment requires reconciliation");
+    }
+    if (contact.promoCodeId) {
+      await tx.$queryRaw(Prisma.sql`SELECT id FROM "PromoCode" WHERE id = ${contact.promoCodeId} FOR UPDATE`);
+      const promo = await tx.promoCode.findUniqueOrThrow({ where: { id: contact.promoCodeId } });
+      if (promo.maxUses !== null && promo.usedCount >= promo.maxUses) throw new Error("Promo limit reached; payment requires reconciliation");
+      await tx.promoCode.update({ where: { id: promo.id }, data: { usedCount: { increment: 1 } } });
+    }
+    await enqueueBookingEmails(tx, {
+      reference, to: contact.email, customerName: contact.fullName,
+      tourTitle: reservation.session.tour.title, startsAtUtc: reservation.session.startsAtUtc,
+      totalCents: contact.payableCents ?? reservation.totalCents, seats: reservation.seats,
+    });
+    await tx.reservation.update({ where: { id: reservationId }, data: { status: "CONVERTED" } });
+    return { reference, alreadyExisted: false, reservation, contact, lines } as const;
   });
-
-  // Increment promo code usage counter so maxUses limits are enforced.
-  if (contact.promoCodeId) {
-    void prisma.promoCode.update({
-      where: { id: contact.promoCodeId },
-      data: { usedCount: { increment: 1 } },
-    }).catch((e) => console.error("Promo usedCount increment failed:", e));
-  }
-
-  // Fire-and-forget confirmation email (don't block the webhook response).
-  void sendConfirmationEmail({
-    reference,
-    to: contact.email,
-    tourTitle: reservation.session.tour.title,
-    startsAtUtc: reservation.session.startsAtUtc,
-    totalCents: reservation.totalCents,
-    lines,
-  }).catch((e) => console.error("Confirmation email failed:", e));
-
-  // Fire-and-forget admin alert for the new booking.
-  void sendAdminBookingAlert({
-    reference,
-    tourTitle: reservation.session.tour.title,
-    startsAtUtc: reservation.session.startsAtUtc,
-    seats: reservation.seats,
-    totalCents: reservation.totalCents,
-    customerName: contact.fullName,
-    customerEmail: contact.email,
-  }).catch((e) => console.error("Admin booking alert failed:", e));
+  if (result.alreadyExisted) return { reference: result.reference, alreadyExisted: true };
+  const { reference, reservation, contact, lines } = result;
 
   // WhatsApp notifications (fire-and-forget, no-op if env vars absent).
   void getSiteSettings().then((site) => {
@@ -174,71 +142,6 @@ export async function commitReservation(
   }
 
   return { reference, alreadyExisted: false };
-}
-
-async function sendConfirmationEmail(args: {
-  reference: string;
-  to: string;
-  tourTitle: string;
-  startsAtUtc: Date;
-  totalCents: number;
-  lines: CartLine[];
-}) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.log(`[booking] (no RESEND_API_KEY) confirmation ${args.reference} for ${args.to}`);
-    return;
-  }
-  const resend = new Resend(apiKey);
-  const site = await getSiteSettings();
-  const itemsText = args.lines.map((l) => `  ${l.qty} × ${l.label} — ${formatNZD(l.unitPriceCents * l.qty)}`).join("\n");
-  await resend.emails.send({
-    from: process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`,
-    to: args.to,
-    subject: `Booking confirmed: ${args.tourTitle} (${args.reference})`,
-    text:
-      `Thank you for booking with ${site.name}!\n\n` +
-      `Booking reference: ${args.reference}\n` +
-      `Tour: ${args.tourTitle}\n` +
-      `Date: ${dateLabel(args.startsAtUtc)}\n` +
-      `Departs: ${timeLabel(args.startsAtUtc)} (NZ time)\n\n` +
-      `${itemsText}\n\n` +
-      `Total paid: ${formatNZD(args.totalCents)} NZD\n\n` +
-      `We look forward to seeing you!\n${site.name}\n${site.phone}`,
-  });
-}
-
-async function sendAdminBookingAlert(args: {
-  reference: string;
-  tourTitle: string;
-  startsAtUtc: Date;
-  seats: number;
-  totalCents: number;
-  customerName: string;
-  customerEmail: string;
-}) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.log(`[booking] (no RESEND_API_KEY) new booking alert ${args.reference}`);
-    return;
-  }
-  const resend = new Resend(apiKey);
-  const site = await getSiteSettings();
-  const adminEmail = site.email || process.env.ADMIN_EMAIL || "admin@kiwiglobetours.co.nz";
-  await resend.emails.send({
-    from: process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`,
-    to: adminEmail,
-    subject: `New booking: ${args.tourTitle} (${args.reference})`,
-    text:
-      `A new booking was confirmed.\n\n` +
-      `Reference: ${args.reference}\n` +
-      `Tour: ${args.tourTitle}\n` +
-      `Date: ${dateLabel(args.startsAtUtc)}\n` +
-      `Departs: ${timeLabel(args.startsAtUtc)} (NZ time)\n` +
-      `Seats: ${args.seats}\n` +
-      `Total paid: ${formatNZD(args.totalCents)} NZD\n\n` +
-      `Customer: ${args.customerName} (${args.customerEmail})\n`,
-  });
 }
 
 export { Prisma };

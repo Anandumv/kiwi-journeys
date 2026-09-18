@@ -1,6 +1,7 @@
 import { prisma } from "./db";
 import { Prisma } from "@prisma/client";
 import { aucklandLocalToUtc, aucklandDateOnly, ymdInAuckland, todayInAuckland } from "./time";
+import { sessionsOverlap } from "./vehicles";
 
 // ─── Session generation ──────────────────────────────────────────────────────
 
@@ -9,9 +10,16 @@ export type GenerateParams = {
   times: string[]; // ["08:30", ...] Auckland local
   weekdays: number[]; // 1=Mon..7=Sun
   capacity: number;
+  durationMins: number;
+  vehicleId?: string;
   horizonDays: number;
   closedMonths?: number[]; // 1-12 (Auckland month) the tour does not run
   fromDate?: string; // YYYY-MM-DD Auckland; defaults to today
+};
+
+export type GenerateResult = {
+  created: number;
+  conflicts: { startsAtUtc: string; conflictingTour: string }[];
 };
 
 /** Iterate Auckland calendar dates from `start` for `days`, yielding "YYYY-MM-DD". */
@@ -38,27 +46,55 @@ function isoWeekday(ymd: string): number {
 /**
  * Idempotently create Session rows over the horizon. Re-running is safe thanks
  * to the unique (tourId, startsAtUtc) constraint — existing sessions are skipped.
- * Returns the number of newly created sessions.
+ * When `vehicleId` is set, candidate departures that would overlap an existing
+ * SCHEDULED session already using that vehicle are skipped and reported in
+ * `conflicts` instead of being created.
  */
-export async function generateSessions(params: GenerateParams): Promise<number> {
+export async function generateSessions(params: GenerateParams): Promise<GenerateResult> {
   const start = params.fromDate ?? todayInAuckland();
-  const rows: Prisma.SessionCreateManyInput[] = [];
+  const candidates: { startsAtUtc: Date; localDate: Date }[] = [];
   for (const ymd of aucklandDateRange(start, params.horizonDays)) {
     if (!params.weekdays.includes(isoWeekday(ymd))) continue;
     const month = Number(ymd.split("-")[1]);
     if (params.closedMonths?.includes(month)) continue;
     for (const t of params.times) {
-      rows.push({
-        tourId: params.tourId,
-        startsAtUtc: aucklandLocalToUtc(ymd, t),
-        localDate: aucklandDateOnly(ymd),
-        capacity: params.capacity,
-      });
+      candidates.push({ startsAtUtc: aucklandLocalToUtc(ymd, t), localDate: aucklandDateOnly(ymd) });
     }
   }
-  if (rows.length === 0) return 0;
-  const res = await prisma.session.createMany({ data: rows, skipDuplicates: true });
-  return res.count;
+  if (candidates.length === 0) return { created: 0, conflicts: [] };
+
+  const conflicts: { startsAtUtc: string; conflictingTour: string }[] = [];
+  let rows = candidates;
+
+  if (params.vehicleId) {
+    const busy = await prisma.session.findMany({
+      where: { vehicleId: params.vehicleId, status: "SCHEDULED" },
+      select: { startsAtUtc: true, tour: { select: { title: true, durationMins: true } } },
+    });
+    rows = candidates.filter((c) => {
+      const conflict = busy.find((b) =>
+        sessionsOverlap(c.startsAtUtc, params.durationMins, b.startsAtUtc, b.tour.durationMins),
+      );
+      if (conflict) {
+        conflicts.push({ startsAtUtc: c.startsAtUtc.toISOString(), conflictingTour: conflict.tour.title });
+        return false;
+      }
+      return true;
+    });
+  }
+
+  if (rows.length === 0) return { created: 0, conflicts };
+  const res = await prisma.session.createMany({
+    data: rows.map((r) => ({
+      tourId: params.tourId,
+      startsAtUtc: r.startsAtUtc,
+      localDate: r.localDate,
+      capacity: params.capacity,
+      vehicleId: params.vehicleId ?? null,
+    })),
+    skipDuplicates: true,
+  });
+  return { created: res.count, conflicts };
 }
 
 // ─── Remaining-seats computation ───────────────────────────────────────────────

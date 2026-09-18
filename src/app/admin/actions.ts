@@ -99,14 +99,20 @@ export async function deleteTour(fd: FormData) {
 
 export async function regenerateDepartures(fd: FormData) {
   await assertAdmin();
-  const tour = await prisma.tour.findUnique({ where: { id: str(fd, "id") } });
+  const id = str(fd, "id");
+  const tour = await prisma.tour.findUnique({ where: { id } });
+  let conflicts = 0;
   if (tour) {
-    await generateSessions({
+    const result = await generateSessions({
       tourId: tour.id, times: tour.departureTimes, weekdays: tour.departureWeekdays,
-      capacity: tour.capacityPerDeparture, horizonDays: 90, closedMonths: tour.closedMonths,
+      capacity: tour.capacityPerDeparture, durationMins: tour.durationMins,
+      vehicleId: tour.defaultVehicleId ?? undefined,
+      horizonDays: 90, closedMonths: tour.closedMonths,
     });
+    conflicts = result.conflicts.length;
   }
-  revalidatePath(`/admin/tours/${str(fd, "id")}`);
+  revalidatePath(`/admin/tours/${id}`);
+  redirect(`/admin/tours/${id}${conflicts > 0 ? `?vehicleConflicts=${conflicts}` : ""}`);
 }
 
 export async function cancelSession(fd: FormData) {

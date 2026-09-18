@@ -65,11 +65,12 @@ async function main() {
       });
     }
 
-    const created = await generateSessions({
+    const { created } = await generateSessions({
       tourId: tour.id,
       times: t.departureTimes,
       weekdays: t.departureWeekdays,
       capacity: t.capacityPerDeparture,
+      durationMins: t.durationMins,
       horizonDays: 90,
       closedMonths: t.closedMonths,
     });

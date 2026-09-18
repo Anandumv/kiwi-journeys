@@ -13,18 +13,20 @@ export async function POST() {
   }
   const tours = await prisma.tour.findMany({ where: { isActive: true } });
   let total = 0;
-  const results: { tour: string; created: number }[] = [];
+  const results: { tour: string; created: number; conflicts: number }[] = [];
   for (const t of tours) {
-    const created = await generateSessions({
+    const { created, conflicts } = await generateSessions({
       tourId: t.id,
       times: t.departureTimes,
       weekdays: t.departureWeekdays,
       capacity: t.capacityPerDeparture,
+      durationMins: t.durationMins,
+      vehicleId: t.defaultVehicleId ?? undefined,
       horizonDays: 90,
       closedMonths: t.closedMonths,
     });
     total += created;
-    results.push({ tour: t.title, created });
+    results.push({ tour: t.title, created, conflicts: conflicts.length });
   }
   return NextResponse.json({ total, results });
 }

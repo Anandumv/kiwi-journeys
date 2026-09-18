@@ -18,15 +18,20 @@ export async function GET(req: Request) {
 
   const tours = await prisma.tour.findMany({ where: { isActive: true } });
   let total = 0;
+  let totalConflicts = 0;
   for (const t of tours) {
-    total += await generateSessions({
+    const { created, conflicts } = await generateSessions({
       tourId: t.id,
       times: t.departureTimes,
       weekdays: t.departureWeekdays,
       capacity: t.capacityPerDeparture,
+      durationMins: t.durationMins,
+      vehicleId: t.defaultVehicleId ?? undefined,
       horizonDays: 90,
       closedMonths: t.closedMonths,
     });
+    total += created;
+    totalConflicts += conflicts.length;
   }
-  return NextResponse.json({ created: total });
+  return NextResponse.json({ created: total, conflicts: totalConflicts });
 }

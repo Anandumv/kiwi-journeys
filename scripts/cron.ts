@@ -35,17 +35,22 @@ async function run() {
     const { generateSessions } = await import("../src/lib/availability");
     const tours = await prisma.tour.findMany({ where: { isActive: true } });
     let total = 0;
+    let totalConflicts = 0;
     for (const t of tours) {
-      total += await generateSessions({
+      const { created, conflicts } = await generateSessions({
         tourId: t.id,
         times: t.departureTimes,
         weekdays: t.departureWeekdays,
         capacity: t.capacityPerDeparture,
+        durationMins: t.durationMins,
+        vehicleId: t.defaultVehicleId ?? undefined,
         horizonDays: 90,
         closedMonths: t.closedMonths,
       });
+      total += created;
+      totalConflicts += conflicts.length;
     }
-    console.log(`[cron] gen-departures: ${total} sessions created`);
+    console.log(`[cron] gen-departures: ${total} sessions created, ${totalConflicts} vehicle conflicts skipped`);
     await prisma.$disconnect();
     return;
   }

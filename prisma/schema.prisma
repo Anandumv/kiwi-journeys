@@ -39,6 +39,8 @@ model Tour {
   departureTimes String[]    @default([])
   departureWeekdays Int[]    @default([])
   capacityPerDeparture Int   @default(12)
+  defaultVehicleId String?
+  defaultVehicle   Vehicle? @relation(fields: [defaultVehicleId], references: [id])
   sortOrder    Int           @default(0)
   isActive     Boolean       @default(true)
   priceOptions PriceOption[]
@@ -137,6 +139,15 @@ model PriceOption {
   @@index([tourId])
 }
 
+model Vehicle {
+  id       String    @id @default(cuid())
+  name     String
+  seats    Int
+  isActive Boolean   @default(true)
+  tours    Tour[]
+  sessions Session[]
+}
+
 enum SessionStatus {
   SCHEDULED
   CANCELLED
@@ -149,6 +160,8 @@ model Session {
   startsAtUtc  DateTime
   localDate    DateTime      @db.Date // Auckland calendar date for fast calendar queries
   capacity     Int
+  vehicleId    String?
+  vehicle      Vehicle?      @relation(fields: [vehicleId], references: [id])
   status       SessionStatus @default(SCHEDULED)
   bookings     Booking[]
   reservations Reservation[]

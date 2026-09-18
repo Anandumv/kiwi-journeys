@@ -4,15 +4,10 @@ import { prisma } from "@/lib/db";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getSiteSettings } from "@/lib/content";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
+import { makeVoucherCode } from "@/lib/codes";
 
 export const dynamic = "force-dynamic";
 
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-function makeVoucherCode(): string {
-  let s = "";
-  for (let i = 0; i < 8; i++) s += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
-  return `GV-${s}`;
-}
 
 const schema = z.object({
   amountCents: z.number().int().min(5000).max(200000),

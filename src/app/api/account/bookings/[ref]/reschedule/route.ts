@@ -4,8 +4,8 @@ import { prisma } from "@/lib/db";
 import { getCurrentCustomer } from "@/lib/customerAuth";
 import { SoldOutError } from "@/lib/availability";
 import { rescheduleBooking } from "@/lib/reschedule";
-import { Resend } from "resend";
 import { getSiteSettings } from "@/lib/content";
+import { enqueueEmails } from "@/lib/email-jobs";
 import { dateLabel, timeLabel } from "@/lib/time";
 
 export const dynamic = "force-dynamic";
@@ -89,44 +89,38 @@ export async function POST(
     return NextResponse.json({ error: message }, { status: 409 });
   }
 
-  // Email customer and admin.
-  const apiKey = process.env.RESEND_API_KEY;
-  if (apiKey) {
-    const resend = new Resend(apiKey);
-    const site = await getSiteSettings();
-    const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
-    const adminEmail =
-      site.email || process.env.ADMIN_EMAIL || "admin@kiwiglobetours.co.nz";
-
-    await Promise.all([
-      resend.emails.send({
-        from,
-        to: booking.customer.email,
-        subject: `Booking rescheduled: ${booking.session.tour.title} (${booking.reference})`,
-        text:
-          `Hi ${booking.customer.fullName.split(" ")[0]},\n\n` +
-          `Your booking has been rescheduled.\n\n` +
-          `Tour: ${booking.session.tour.title}\n` +
-          `New date: ${dateLabel(newSession.startsAtUtc)}\n` +
-          `New departure: ${timeLabel(newSession.startsAtUtc)} (NZ time)\n` +
-          `Reference: ${booking.reference}\n\n` +
-          `If you didn't request this change, contact us immediately at ${site.phone}.\n\n` +
-          `${site.name}`,
-      }),
-      resend.emails.send({
-        from,
-        to: adminEmail,
-        subject: `Booking rescheduled — ${booking.reference}`,
-        text:
-          `Customer rescheduled a booking.\n\n` +
-          `Reference: ${booking.reference}\n` +
-          `Customer: ${booking.customer.fullName} (${booking.customer.email})\n` +
-          `Tour: ${booking.session.tour.title}\n` +
-          `Old session ID: ${oldSessionId}\n` +
-          `New date: ${dateLabel(newSession.startsAtUtc)} ${timeLabel(newSession.startsAtUtc)}\n`,
-      }),
-    ]).catch((e) => console.error("Reschedule emails failed:", e));
-  }
+  // Queued, not sent inline: a Resend outage must not silently lose the
+  // customer's only notice that their departure date moved.
+  const site = await getSiteSettings();
+  const adminEmail = site.email || process.env.ADMIN_EMAIL || "admin@kiwiglobetours.co.nz";
+  await enqueueEmails(prisma, "reschedule", [
+    {
+      to: booking.customer.email,
+      bookingReference: booking.reference,
+      subject: `Booking rescheduled: ${booking.session.tour.title} (${booking.reference})`,
+      body:
+        `Hi ${booking.customer.fullName.split(" ")[0]},\n\n` +
+        `Your booking has been rescheduled.\n\n` +
+        `Tour: ${booking.session.tour.title}\n` +
+        `New date: ${dateLabel(newSession.startsAtUtc)}\n` +
+        `New departure: ${timeLabel(newSession.startsAtUtc)} (NZ time)\n` +
+        `Reference: ${booking.reference}\n\n` +
+        `If you didn't request this change, contact us immediately at ${site.phone}.\n\n` +
+        `${site.name}`,
+    },
+    {
+      to: adminEmail,
+      bookingReference: booking.reference,
+      subject: `Booking rescheduled — ${booking.reference}`,
+      body:
+        `Customer rescheduled a booking.\n\n` +
+        `Reference: ${booking.reference}\n` +
+        `Customer: ${booking.customer.fullName} (${booking.customer.email})\n` +
+        `Tour: ${booking.session.tour.title}\n` +
+        `Old session ID: ${oldSessionId}\n` +
+        `New date: ${dateLabel(newSession.startsAtUtc)} ${timeLabel(newSession.startsAtUtc)}\n`,
+    },
+  ]);
 
   return NextResponse.json({
     ok: true,

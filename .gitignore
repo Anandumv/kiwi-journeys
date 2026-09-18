@@ -43,3 +43,6 @@ next-env.d.ts
 .gstack/
 
 .worktrees/
+
+# audit + verification artifacts
+outputs/

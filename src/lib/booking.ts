@@ -5,6 +5,7 @@ import { getSiteSettings } from "@/lib/content";
 import { formatNZD } from "./money";
 import { dateLabel, timeLabel } from "./time";
 import { sendAdminWhatsApp, sendCustomerWhatsApp } from "./whatsapp";
+import { makeBookingReference } from "./codes";
 
 type CartLine = { priceOptionId: string; label: string; unitPriceCents: number; qty: number; seats: number };
 type Contact = {
@@ -19,12 +20,6 @@ type Contact = {
   payableCents?: number;
 };
 
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no ambiguous chars
-function makeReference(): string {
-  let s = "";
-  for (let i = 0; i < 6; i++) s += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
-  return `KJ-${s}`;
-}
 
 /**
  * Commit a paid reservation into a Booking. Idempotent: if a booking already
@@ -67,7 +62,7 @@ export async function commitReservation(
     if (payment && (payment.currency.toLowerCase() !== "nzd" || payment.amountReceived !== (contact.payableCents ?? reservation.totalCents))) {
       throw new Error("Payment amount or currency mismatch; payment requires reconciliation");
     }
-    const reference = makeReference();
+    const reference = makeBookingReference();
     let customer = await tx.customer.findFirst({ where: { email: contact.email } });
     if (!customer) customer = await tx.customer.create({ data: {
       email: contact.email, fullName: contact.fullName, phone: contact.phone || null,

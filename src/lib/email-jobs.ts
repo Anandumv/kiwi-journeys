@@ -24,6 +24,37 @@ export async function enqueueBookingEmails(tx: Prisma.TransactionClient, args: {
   ] });
 }
 
+export type OutboundEmail = { to: string; subject: string; body: string; bookingReference: string };
+
+/**
+ * Queue one-off notification emails (reschedule confirmations, cancellation
+ * requests) for durable delivery.
+ *
+ * Sending these straight through Resend meant a provider blip lost the message
+ * with nothing to retry from — the customer was told nothing and no record
+ * survived. Ids carry a random suffix because, unlike booking confirmations,
+ * the same booking can legitimately produce several of these.
+ */
+export async function enqueueEmails(
+  client: Prisma.TransactionClient | typeof prisma,
+  kind: string,
+  emails: OutboundEmail[],
+) {
+  if (emails.length === 0) return;
+  const site = await getSiteSettings();
+  const sender = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
+  await client.emailJob.createMany({
+    data: emails.map((email) => ({
+      id: `${kind}-${randomUUID()}`,
+      bookingReference: email.bookingReference,
+      recipient: email.to,
+      sender,
+      subject: email.subject,
+      body: email.body,
+    })),
+  });
+}
+
 async function deliverEmail(job: EmailJob) {
   if (!process.env.RESEND_API_KEY) throw new Error("Email provider is not configured");
   const result = await new Resend(process.env.RESEND_API_KEY).emails.send({

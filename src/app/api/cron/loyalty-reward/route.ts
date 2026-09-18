@@ -3,15 +3,10 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 import { getSiteSettings } from "@/lib/content";
 import { cronAuthorized } from "@/lib/cron";
+import { randomCode as randomSuffix } from "@/lib/codes";
 
 export const dynamic = "force-dynamic";
 
-const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-function randomSuffix(len: number): string {
-  let s = "";
-  for (let i = 0; i < len; i++) s += ALPHABET[Math.floor(Math.random() * ALPHABET.length)];
-  return s;
-}
 
 // Run daily. Rewards customers who completed their 2nd+ tour 2–4 days ago
 // with a personal 10%-off promo code valid for 60 days.

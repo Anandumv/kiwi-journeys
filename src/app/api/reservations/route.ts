@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { createHold, SoldOutError, type CartLine } from "@/lib/availability";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getSiteSettings } from "@/lib/content";
+import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,22 @@ const schema = z.object({
 const HOLD_MINUTES = Number(process.env.RESERVATION_HOLD_MINUTES || "10");
 
 export async function POST(req: Request) {
+  // This is the only unauthenticated endpoint that takes inventory: each call
+  // holds seats for RESERVATION_HOLD_MINUTES and opens a Stripe PaymentIntent.
+  // Unmetered, a loop here sells out every departure and burns Stripe quota.
+  // A real buyer needs a handful of attempts; 8 per 10 minutes leaves room for
+  // retries and cart edits without leaving the door open.
+  const { allowed } = rateLimit(rateLimitKey(req, "reservation"), {
+    limit: 8,
+    windowMs: 10 * 60 * 1000,
+  });
+  if (!allowed) {
+    return NextResponse.json(
+      { error: "Too many booking attempts. Please wait a few minutes and try again." },
+      { status: 429 },
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {

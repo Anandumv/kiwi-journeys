@@ -1,20 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
+import { cronAuthorized } from "@/lib/cron";
 
 export const dynamic = "force-dynamic";
 
-function authorized(req: Request): boolean {
-  const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  const auth = req.headers.get("authorization");
-  const url = new URL(req.url);
-  return auth === `Bearer ${secret}` || url.searchParams.get("secret") === secret;
-}
-
 // Keep the rolling 90-day departure window topped up. Run daily.
 export async function GET(req: Request) {
-  if (!authorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!cronAuthorized(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const tours = await prisma.tour.findMany({ where: { isActive: true } });
   let total = 0;

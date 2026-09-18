@@ -41,6 +41,14 @@ export async function saveTour(fd: FormData) {
   });
   const priceFromCents = priceOptions.length ? Math.min(...priceOptions.map((p) => p.priceCents)) : num(fd, "priceFromCents") * 100;
 
+  const defaultVehicleId = str(fd, "defaultVehicleId") || null;
+  const [vehicleSeats, existingTour] = await Promise.all([
+    defaultVehicleId
+      ? prisma.vehicle.findUnique({ where: { id: defaultVehicleId }, select: { seats: true } }).then((v) => v?.seats)
+      : Promise.resolve(undefined),
+    id ? prisma.tour.findUnique({ where: { id }, select: { capacityPerDeparture: true } }) : Promise.resolve(null),
+  ]);
+
   const data = {
     slug: str(fd, "slug"),
     code: str(fd, "code"),
@@ -67,7 +75,8 @@ export async function saveTour(fd: FormData) {
     closedMonths: csvNums(fd, "closedMonths"),
     departureTimes: str(fd, "departureTimes").split(",").map((s) => s.trim()).filter(Boolean),
     departureWeekdays: csvNums(fd, "departureWeekdays"),
-    capacityPerDeparture: num(fd, "capacityPerDeparture", 12),
+    defaultVehicleId,
+    capacityPerDeparture: vehicleSeats ?? existingTour?.capacityPerDeparture ?? 12,
     sortOrder: num(fd, "sortOrder"),
     isActive: bool(fd, "isActive"),
   };

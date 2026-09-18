@@ -50,7 +50,7 @@ async function run() {
       total += created;
       totalConflicts += conflicts.length;
     }
-    console.log(`[cron] gen-departures: ${total} sessions created, ${totalConflicts} vehicle conflicts skipped`);
+    console.log(`[cron] gen-departures: ${total} sessions created, ${totalConflicts} vehicle conflicts (created anyway, review needed)`);
     await prisma.$disconnect();
     return;
   }

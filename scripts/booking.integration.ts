@@ -6,7 +6,7 @@ import { processEmailJobs } from '../src/lib/email-jobs';
 import { confirmFullRefund } from '../src/lib/refund';
 import { processPaidReservation } from '../src/lib/payment-reconciliation';
 import { prisma } from '../src/lib/db';
-import { createHold, SoldOutError, remainingForSessions } from '../src/lib/availability';
+import { createHold, SoldOutError, remainingForSessions, generateSessions } from '../src/lib/availability';
 import { POST as checkoutContact } from '../src/app/api/reservations/[id]/contact/route';
 import { rescheduleBooking } from '../src/lib/reschedule';
 import { commitReservation } from '../src/lib/booking';
@@ -145,5 +145,29 @@ test('missing email configuration preserves retry attempts',async()=>{
  assert.equal(result.unavailable,true);
  const pending=await prisma.emailJob.findUniqueOrThrow({where:{id:job.id}});
  assert.equal(pending.attempts,0);assert.equal(pending.firstAttemptAt,null);
+});
+test('regenerating an already-fully-generated tour reports zero conflicts against itself',async()=>{
+ const vehicle=await prisma.vehicle.create({data:{name:`Audit Van ${randomUUID()}`,seats:12,isActive:true}});
+ const tour=await prisma.tour.create({data:{slug:`audit-self-${randomUUID()}`,title:'Audit self-regen tour',summary:'Test',destination:'Test',durationMins:60,capacityPerDeparture:12,defaultVehicleId:vehicle.id,departureTimes:['09:00'],departureWeekdays:[1,2,3,4,5,6,7]}});
+ const genParams={tourId:tour.id,times:['09:00'],weekdays:[1,2,3,4,5,6,7],capacity:12,durationMins:60,vehicleId:vehicle.id,horizonDays:5};
+ const first=await generateSessions(genParams);
+ assert.ok(first.created>0);
+ assert.equal(first.conflicts.length,0);
+ const second=await generateSessions(genParams);
+ assert.equal(second.created,0);
+ assert.equal(second.conflicts.length,0);
+});
+test('two tours sharing a vehicle with overlapping departures both get created, conflict reported',async()=>{
+ const vehicle=await prisma.vehicle.create({data:{name:`Audit Shared Van ${randomUUID()}`,seats:12,isActive:true}});
+ const tourA=await prisma.tour.create({data:{slug:`audit-shared-a-${randomUUID()}`,title:'Audit shared vehicle tour A',summary:'Test',destination:'Test',durationMins:60,capacityPerDeparture:12,defaultVehicleId:vehicle.id,departureTimes:['09:00'],departureWeekdays:[1,2,3,4,5,6,7]}});
+ const tourB=await prisma.tour.create({data:{slug:`audit-shared-b-${randomUUID()}`,title:'Audit shared vehicle tour B',summary:'Test',destination:'Test',durationMins:60,capacityPerDeparture:12,defaultVehicleId:vehicle.id,departureTimes:['09:00'],departureWeekdays:[1,2,3,4,5,6,7]}});
+ const resultA=await generateSessions({tourId:tourA.id,times:['09:00'],weekdays:[1,2,3,4,5,6,7],capacity:12,durationMins:60,vehicleId:vehicle.id,horizonDays:5});
+ assert.ok(resultA.created>0);
+ const resultB=await generateSessions({tourId:tourB.id,times:['09:00'],weekdays:[1,2,3,4,5,6,7],capacity:12,durationMins:60,vehicleId:vehicle.id,horizonDays:5});
+ assert.equal(resultB.created,resultA.created);
+ assert.equal(resultB.conflicts.length,resultA.created);
+ assert.ok(resultB.conflicts.every(c=>c.conflictingTour===tourA.title));
+ assert.equal(await prisma.session.count({where:{tourId:tourA.id}}),resultA.created);
+ assert.equal(await prisma.session.count({where:{tourId:tourB.id}}),resultB.created);
 });
 test.after(async()=>{await prisma.$disconnect();});

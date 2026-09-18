@@ -123,7 +123,7 @@ export default async function TourEditor({
 
           {vehicleConflicts && Number(vehicleConflicts) > 0 && (
             <p className="mt-3 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
-              {vehicleConflicts} departure{Number(vehicleConflicts) === 1 ? "" : "s"} skipped — the assigned vehicle was already booked at that time.
+              {vehicleConflicts} departure{Number(vehicleConflicts) === 1 ? "" : "s"} created with a vehicle conflict — the assigned vehicle is already booked at that time. Review and reassign if needed.
             </p>
           )}
           {vehicleError && (

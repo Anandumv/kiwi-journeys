@@ -46,9 +46,10 @@ function isoWeekday(ymd: string): number {
 /**
  * Idempotently create Session rows over the horizon. Re-running is safe thanks
  * to the unique (tourId, startsAtUtc) constraint — existing sessions are skipped.
- * When `vehicleId` is set, candidate departures that would overlap an existing
- * SCHEDULED session already using that vehicle are skipped and reported in
- * `conflicts` instead of being created.
+ * When `vehicleId` is set, every candidate departure is still created; any that
+ * would overlap an existing SCHEDULED session on another tour already using that
+ * vehicle is additionally reported (non-blocking) in `conflicts`, for admin
+ * visibility only — this bulk/automated path never withholds a departure.
  */
 export async function generateSessions(params: GenerateParams): Promise<GenerateResult> {
   const start = params.fromDate ?? todayInAuckland();
@@ -64,23 +65,37 @@ export async function generateSessions(params: GenerateParams): Promise<Generate
   if (candidates.length === 0) return { created: 0, conflicts: [] };
 
   const conflicts: { startsAtUtc: string; conflictingTour: string }[] = [];
-  let rows = candidates;
+  const rows = candidates;
 
   if (params.vehicleId) {
     const busy = await prisma.session.findMany({
-      where: { vehicleId: params.vehicleId, status: "SCHEDULED" },
+      where: {
+        vehicleId: params.vehicleId,
+        status: "SCHEDULED",
+        tourId: { not: params.tourId },
+      },
       select: { startsAtUtc: true, tour: { select: { title: true, durationMins: true } } },
     });
-    rows = candidates.filter((c) => {
-      const conflict = busy.find((b) =>
+    // In-memory record of candidates already accepted this batch, so within-batch
+    // overlaps (same tour+vehicle, closer together than durationMins) are also
+    // flagged, not just conflicts against DB-resident sessions.
+    const acceptedThisBatch: { startsAtUtc: Date; durationMins: number }[] = [];
+    for (const c of candidates) {
+      const dbConflict = busy.find((b) =>
         sessionsOverlap(c.startsAtUtc, params.durationMins, b.startsAtUtc, b.tour.durationMins),
       );
-      if (conflict) {
-        conflicts.push({ startsAtUtc: c.startsAtUtc.toISOString(), conflictingTour: conflict.tour.title });
-        return false;
+      if (dbConflict) {
+        conflicts.push({ startsAtUtc: c.startsAtUtc.toISOString(), conflictingTour: dbConflict.tour.title });
+      } else {
+        const batchConflict = acceptedThisBatch.find((a) =>
+          sessionsOverlap(c.startsAtUtc, params.durationMins, a.startsAtUtc, a.durationMins),
+        );
+        if (batchConflict) {
+          conflicts.push({ startsAtUtc: c.startsAtUtc.toISOString(), conflictingTour: "this tour (same batch)" });
+        }
       }
-      return true;
-    });
+      acceptedThisBatch.push({ startsAtUtc: c.startsAtUtc, durationMins: params.durationMins });
+    }
   }
 
   if (rows.length === 0) return { created: 0, conflicts };

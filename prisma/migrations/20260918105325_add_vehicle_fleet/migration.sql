@@ -43,3 +43,10 @@ UPDATE "Tour" SET "defaultVehicleId" = 'veh_sprinter' WHERE "defaultVehicleId" I
 UPDATE "Session" s SET "vehicleId" = t."defaultVehicleId"
 FROM "Tour" t
 WHERE s."tourId" = t.id;
+
+-- Reconcile capacityPerDeparture with the vehicle assigned above, so the two
+-- never silently disagree (previously this only got fixed on a tour's next
+-- unrelated admin save, which was a surprise capacity cut).
+UPDATE "Tour" t SET "capacityPerDeparture" = v.seats
+FROM "Vehicle" v
+WHERE t."defaultVehicleId" = v.id;

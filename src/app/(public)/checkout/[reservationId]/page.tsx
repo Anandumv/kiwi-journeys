@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { CheckoutForm } from "@/components/CheckoutForm";
-import { formatNZD } from "@/lib/money";
+import { formatNZD, gstSummary } from "@/lib/money";
 import { timeLabel, dateLabel } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Checkout" };
@@ -31,6 +31,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
     );
   }
 
+  const gstGst = gstSummary(reservation.totalCents);
   const expired = reservation.status !== "HELD" || reservation.expiresAt <= new Date();
   if (expired) {
     return (
@@ -78,6 +79,12 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
           <div className="mt-4 flex justify-between border-t border-brand-50 pt-4 text-lg font-bold text-brand-700">
             <span>Total</span><span>{formatNZD(reservation.totalCents)}</span>
           </div>
+          {/* GST is contained in the total shown above, never added to it. */}
+          {gstGst && (
+            <div className="mt-2 flex justify-between text-xs text-foreground/55">
+              <span>Includes GST (15%)</span><span>{formatNZD(gstGst.gstCents)}</span>
+            </div>
+          )}
           <p className="mt-2 text-xs text-foreground/50">Charged in NZD. Seats held until {timeLabel(reservation.expiresAt)}.</p>
         </div>
 

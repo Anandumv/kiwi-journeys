@@ -3,7 +3,7 @@ import { Prisma, type EmailJob } from "@prisma/client";
 import { Resend } from "resend";
 import { prisma } from "./db";
 import { getSiteSettings } from "./content";
-import { formatNZD } from "./money";
+import { formatNZD, gstSummary } from "./money";
 import { dateLabel, timeLabel } from "./time";
 
 export async function enqueueBookingEmails(tx: Prisma.TransactionClient, args: {
@@ -12,7 +12,14 @@ export async function enqueueBookingEmails(tx: Prisma.TransactionClient, args: {
 }) {
   const site = await getSiteSettings();
   const sender = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
-  const details = `Reference: ${args.reference}\nTour: ${args.tourTitle}\nDate: ${dateLabel(args.startsAtUtc)} at ${timeLabel(args.startsAtUtc)} (NZ time)\nGuests: ${args.seats}\nTotal paid: ${formatNZD(args.totalCents)} NZD\n`;
+  // Prices are GST-inclusive, so this breaks the total down rather than adding
+  // to it. Omitted entirely when GST_NUMBER is unset: without a GST number this
+  // is a receipt, not taxable supply information, and must not read as one.
+  const gst = gstSummary(args.totalCents);
+  const gstLines = gst
+    ? `Subtotal (excl. GST): ${formatNZD(gst.exGstCents)} NZD\nGST (15%): ${formatNZD(gst.gstCents)} NZD\nGST number: ${gst.number}\n`
+    : "";
+  const details = `Reference: ${args.reference}\nTour: ${args.tourTitle}\nDate: ${dateLabel(args.startsAtUtc)} at ${timeLabel(args.startsAtUtc)} (NZ time)\nGuests: ${args.seats}\nTotal paid: ${formatNZD(args.totalCents)} NZD\n${gstLines}`;
   await tx.emailJob.createMany({ data: [
     { id: `booking-${args.reference}-customer`, bookingReference: args.reference,
       recipient: args.to, sender, subject: `Booking confirmed: ${args.tourTitle} (${args.reference})`,

@@ -19,9 +19,15 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
   // Use DB price options (with real ids) when available; fall back to the static
   // content's options (UI-only deploy) so the page still renders without a DB.
   let priceOptions = content.priceOptions.map((p) => ({ id: p.key, key: p.key, label: p.label, priceCents: p.priceCents, seatsPerUnit: p.seatsPerUnit }));
+  // Null without a DB, which also correctly disables the waitlist: there would
+  // be no tour row to attach a waitlist entry to.
+  let tourId: string | null = null;
   try {
     const tour = await prisma.tour.findUnique({ where: { slug }, include: { priceOptions: { orderBy: { sortOrder: "asc" } } } });
-    if (tour) priceOptions = tour.priceOptions.map((p) => ({ id: p.id, key: p.key, label: p.label, priceCents: p.priceCents, seatsPerUnit: p.seatsPerUnit }));
+    if (tour) {
+      tourId = tour.id;
+      priceOptions = tour.priceOptions.map((p) => ({ id: p.id, key: p.key, label: p.label, priceCents: p.priceCents, seatsPerUnit: p.seatsPerUnit }));
+    }
   } catch {
     /* no DB — keep static fallback options */
   }
@@ -32,7 +38,7 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
       <h1 className="mt-3 font-serif text-4xl font-semibold text-brand-900">Book: {content.title}</h1>
       <p className="mt-2 text-foreground/70">Choose your date, departure time and number of guests.</p>
       <div className="mt-8">
-        <BookingWidget slug={slug} title={content.title} priceOptions={priceOptions} />
+        <BookingWidget slug={slug} title={content.title} priceOptions={priceOptions} tourId={tourId} />
       </div>
     </div>
   );

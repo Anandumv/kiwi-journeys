@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { WaitlistForm } from "./WaitlistForm";
 
 type PriceOption = { id: string; key: string; label: string; priceCents: number; seatsPerUnit: number };
 type SessionAvail = { sessionId: string; startsAtUtc: string; remaining: number; capacity: number };
@@ -26,10 +27,13 @@ export function BookingWidget({
   slug,
   title,
   priceOptions,
+  tourId = null,
 }: {
   slug: string;
   title: string;
   priceOptions: PriceOption[];
+  /** Null when rendering without a database; the waitlist is hidden. */
+  tourId?: string | null;
 }) {
   const router = useRouter();
   const now = useMemo(() => todayNZ(), []);
@@ -104,6 +108,10 @@ export function BookingWidget({
   const seatsRequested = priceOptions.reduce((n, po) => n + (qty[po.id] ?? 0) * po.seatsPerUnit, 0);
   const totalCents = priceOptions.reduce((n, po) => n + (qty[po.id] ?? 0) * po.priceCents, 0);
   const overCapacity = activeSession ? seatsRequested > activeSession.remaining : false;
+  // Every departure on the chosen day is full. Sold-out time buttons are
+  // disabled, so the customer cannot select one to discover this — offer the
+  // waitlist for the day instead of letting them leave.
+  const dayIsSoldOut = daySessions.length > 0 && daySessions.every((s) => s.remaining <= 0);
   const canContinue = !!activeSession && seatsRequested > 0 && !overCapacity && !submitting && !loading && !availabilityError;
 
   function setQuantity(id: string, delta: number) {
@@ -220,6 +228,15 @@ export function BookingWidget({
                 );
               })}
             </div>
+
+            {tourId && dayIsSoldOut && (
+              <WaitlistForm
+                tourId={tourId}
+                sessionId={daySessions[0]?.sessionId}
+                dateLabel={selectedDate ?? undefined}
+                defaultSeats={Math.max(1, seatsRequested || 1)}
+              />
+            )}
 
             {activeSession && (
               <>

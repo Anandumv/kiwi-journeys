@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { categories, type Tour } from "@/data/tours";
 import { TourCard } from "@/components/TourCard";
 
@@ -16,12 +16,32 @@ const priceBands = [
 
 export function ToursExplorer({ tours }: { tours: Tour[] }) {
   const params = useSearchParams();
-  const [destination, setDestination] = useState("all");
-  const [duration, setDuration] = useState("all");
+  const router = useRouter();
+  const pathname = usePathname();
+  // Every filter is seeded from the URL, not just type and q, so a shared or
+  // bookmarked link restores the exact result set the sender was looking at.
+  const [destination, setDestination] = useState(params.get("destination") ?? "all");
+  const [duration, setDuration] = useState(params.get("duration") ?? "all");
   const [type, setType] = useState(params.get("type") ?? "all");
   const [query, setQuery] = useState(params.get("q") ?? "");
-  const [price, setPrice] = useState("all");
+  const [price, setPrice] = useState(params.get("price") ?? "all");
   const [count, setCount] = useState(PAGE);
+
+  // Mirror the filters back into the URL. Filtering used to be invisible to the
+  // address bar, so a filtered list could not be shared, bookmarked or returned
+  // to with the back button. replace(), not push(), so typing in the search box
+  // does not bury the previous page under one history entry per keystroke.
+  useEffect(() => {
+    const next = new URLSearchParams();
+    if (query.trim()) next.set("q", query.trim());
+    if (destination !== "all") next.set("destination", destination);
+    if (duration !== "all") next.set("duration", duration);
+    if (type !== "all") next.set("type", type);
+    if (price !== "all") next.set("price", price);
+    const qs = next.toString();
+    const current = params.toString();
+    if (qs !== current) router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [query, destination, duration, type, price, params, pathname, router]);
 
   const allDestinations = useMemo(
     () => Array.from(new Set(tours.map((t) => t.destination))).sort(),

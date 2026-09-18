@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { rateLimit, rateLimitKey, __resetRateLimits } from "../src/lib/rate-limit";
 import { randomCode, makeBookingReference, makeVoucherCode } from "../src/lib/codes";
 import { safeName } from "../src/lib/upload";
+import { gstComponentCents, exGstCents, gstSummary } from "../src/lib/money";
 
 test("rate limiter blocks once the window limit is reached", () => {
   __resetRateLimits();
@@ -75,4 +76,27 @@ test("upload names strip path traversal and keep a usable base", () => {
 test("upload names are unique for the same source filename", () => {
   const names = new Set(Array.from({ length: 500 }, () => safeName("beach.jpg", "image/jpeg")));
   assert.equal(names.size, 500);
+});
+
+test("GST is extracted from an inclusive price, not added to it", () => {
+  // NZ prices are advertised GST-inclusive, so a $115.00 tour contains $15.00
+  // of GST — it does not become $132.25 at checkout.
+  assert.equal(gstComponentCents(11500), 1500);
+  assert.equal(exGstCents(11500), 10000);
+});
+
+test("GST component and ex-GST portion always reconstruct the total", () => {
+  for (const total of [0, 1, 99, 100, 18500, 29999, 1234567]) {
+    assert.equal(gstComponentCents(total) + exGstCents(total), total, `failed for ${total}`);
+  }
+});
+
+test("GST summary is withheld when no GST number is configured", () => {
+  const prior = process.env.GST_NUMBER;
+  delete process.env.GST_NUMBER;
+  assert.equal(gstSummary(11500), null);
+  process.env.GST_NUMBER = "123-456-789";
+  assert.deepEqual(gstSummary(11500), { number: "123-456-789", gstCents: 1500, exGstCents: 10000 });
+  if (prior === undefined) delete process.env.GST_NUMBER;
+  else process.env.GST_NUMBER = prior;
 });

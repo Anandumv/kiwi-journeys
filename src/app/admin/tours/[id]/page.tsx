@@ -27,8 +27,16 @@ function Area({ label, name, defaultValue, rows = 4, hint }: { label: string; na
   );
 }
 
-export default async function TourEditor({ params }: { params: Promise<{ id: string }> }) {
+export default async function TourEditor({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ vehicleConflicts?: string; vehicleError?: string }>;
+}) {
   const { id } = await params;
+  const { vehicleConflicts, vehicleError } = await searchParams;
+  const vehicles = await prisma.vehicle.findMany({ where: { isActive: true }, orderBy: { seats: "asc" } });
   const isNew = id === "new";
   const tour = isNew ? null : await prisma.tour.findUnique({ where: { id }, include: { priceOptions: { orderBy: { sortOrder: "asc" } } } });
   if (!isNew && !tour) notFound();
@@ -78,7 +86,15 @@ export default async function TourEditor({ params }: { params: Promise<{ id: str
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field label="Departure times" name="departureTimes" defaultValue={(tour?.departureTimes ?? []).join(", ")} placeholder="08:30, 13:30" />
             <Field label="Weekdays (1=Mon..7=Sun)" name="departureWeekdays" defaultValue={(tour?.departureWeekdays ?? []).join(", ")} placeholder="1,2,3,4,5,6,7" />
-            <Field label="Capacity per departure" name="capacityPerDeparture" type="number" defaultValue={tour?.capacityPerDeparture ?? 12} />
+            <label className="block">
+              <span className={labelCls}>Vehicle</span>
+              <select name="defaultVehicleId" defaultValue={tour?.defaultVehicleId ?? ""} className={`${input} mt-1`}>
+                <option value="">No vehicle assigned (manual capacity)</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name} ({v.seats} seats)</option>
+                ))}
+              </select>
+            </label>
             <Field label="Closed months (1-12)" name="closedMonths" defaultValue={(tour?.closedMonths ?? []).join(", ")} placeholder="5,6,7,8" />
           </div>
           <p className="mt-2 text-xs text-foreground/50">After saving, use “Regenerate departures” below to create sessions from this schedule.</p>
@@ -105,11 +121,27 @@ export default async function TourEditor({ params }: { params: Promise<{ id: str
             </form>
           </div>
 
+          {vehicleConflicts && Number(vehicleConflicts) > 0 && (
+            <p className="mt-3 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">
+              {vehicleConflicts} departure{Number(vehicleConflicts) === 1 ? "" : "s"} skipped — the assigned vehicle was already booked at that time.
+            </p>
+          )}
+          {vehicleError && (
+            <p className="mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{vehicleError}</p>
+          )}
+
           <form action={addSession} className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-ivory-200 bg-white p-4">
             <input type="hidden" name="tourId" value={tour!.id} />
             <label className="text-sm">Date<input type="date" name="date" defaultValue={todayInAuckland()} className={`${input} mt-1`} /></label>
             <label className="text-sm">Time<input type="time" name="time" defaultValue="08:30" className={`${input} mt-1`} /></label>
-            <label className="text-sm">Capacity<input type="number" name="capacity" defaultValue={tour!.capacityPerDeparture} className={`${input} mt-1 w-24`} /></label>
+            <label className="text-sm">Vehicle
+              <select name="vehicleId" defaultValue={tour!.defaultVehicleId ?? ""} className={`${input} mt-1`}>
+                <option value="">No vehicle ({tour!.capacityPerDeparture} seats)</option>
+                {vehicles.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name} ({v.seats} seats)</option>
+                ))}
+              </select>
+            </label>
             <button className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Add one-off</button>
           </form>
 

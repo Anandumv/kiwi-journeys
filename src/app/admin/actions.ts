@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { Resend } from "resend";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
+import { sessionsOverlap } from "@/lib/vehicles";
 import { aucklandLocalToUtc, aucklandDateOnly, dateLabel, timeLabel } from "@/lib/time";
 import { getCurrentAdmin } from "@/lib/auth";
 import { getSiteSettings } from "@/lib/content";
@@ -169,14 +170,44 @@ export async function addSession(fd: FormData) {
   const tourId = str(fd, "tourId");
   const date = str(fd, "date"); // YYYY-MM-DD (Auckland)
   const time = str(fd, "time"); // HH:mm
-  const capacity = num(fd, "capacity", 12);
-  if (date && time) {
-    await prisma.session.upsert({
-      where: { tourId_startsAtUtc: { tourId, startsAtUtc: aucklandLocalToUtc(date, time) } },
-      create: { tourId, startsAtUtc: aucklandLocalToUtc(date, time), localDate: aucklandDateOnly(date), capacity },
-      update: { capacity, status: "SCHEDULED" },
+  const vehicleId = str(fd, "vehicleId") || null;
+  if (!date || !time) return;
+
+  const startsAtUtc = aucklandLocalToUtc(date, time);
+  const [tour, vehicle, existing] = await Promise.all([
+    prisma.tour.findUnique({ where: { id: tourId }, select: { durationMins: true, capacityPerDeparture: true } }),
+    vehicleId ? prisma.vehicle.findUnique({ where: { id: vehicleId }, select: { seats: true } }) : null,
+    prisma.session.findUnique({ where: { tourId_startsAtUtc: { tourId, startsAtUtc } }, select: { id: true } }),
+  ]);
+  if (!tour) return;
+  const capacity = vehicle?.seats ?? tour.capacityPerDeparture;
+
+  if (vehicleId) {
+    const busy = await prisma.session.findMany({
+      where: {
+        vehicleId,
+        status: "SCHEDULED",
+        id: existing ? { not: existing.id } : undefined,
+      },
+      select: { startsAtUtc: true, tour: { select: { title: true, durationMins: true } } },
     });
+    const conflict = busy.find((b) =>
+      sessionsOverlap(startsAtUtc, tour.durationMins, b.startsAtUtc, b.tour.durationMins),
+    );
+    if (conflict) {
+      redirect(
+        `/admin/tours/${tourId}?vehicleError=${encodeURIComponent(
+          `Vehicle already booked for ${conflict.tour.title} at that time`,
+        )}`,
+      );
+    }
   }
+
+  await prisma.session.upsert({
+    where: { tourId_startsAtUtc: { tourId, startsAtUtc } },
+    create: { tourId, startsAtUtc, localDate: aucklandDateOnly(date), capacity, vehicleId },
+    update: { capacity, vehicleId, status: "SCHEDULED" },
+  });
   revalidatePath(`/admin/tours/${tourId}`);
 }
 

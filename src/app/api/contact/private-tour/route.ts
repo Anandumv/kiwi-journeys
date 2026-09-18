@@ -4,6 +4,8 @@ import { Resend } from "resend";
 import { sendEmail } from "@/lib/email";
 import { getSiteSettings } from "@/lib/content";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
+import { prisma } from "@/lib/db";
+import { suggestVehicleName } from "@/lib/vehicles";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,8 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input." }, { status: 400 });
 
   const d = parsed.data;
+  const fleet = await prisma.vehicle.findMany({ where: { isActive: true }, select: { name: true, seats: true } });
+  const suggestedVehicle = suggestVehicleName(fleet, d.groupSize);
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.log("[private-tour] enquiry from", d.email, "(no RESEND_API_KEY)");
@@ -59,6 +63,7 @@ export async function POST(req: Request) {
         `Email: ${d.email}\n` +
         `Phone: ${d.phone || "not provided"}\n` +
         `Group size: ${d.groupSize}\n` +
+        `Suggested vehicle: ${suggestedVehicle}\n` +
         `Tours of interest: ${d.tours.join(", ")}\n` +
         `Preferred dates: ${d.preferredDates || "flexible"}\n` +
         `\nMessage:\n${d.message || "(none)"}\n\n` +
@@ -71,7 +76,7 @@ export async function POST(req: Request) {
       text:
         `Hi ${d.fullName},\n\n` +
         `Thank you for your interest in a private tour with ${site.name}!\n\n` +
-        `We've received your enquiry for a group of ${d.groupSize} and will be in touch within one business day to discuss dates, itinerary, and pricing.\n\n` +
+        `We've received your enquiry for a group of ${d.groupSize} (likely vehicle: ${suggestedVehicle}) and will be in touch within one business day to discuss dates, itinerary, and pricing.\n\n` +
         `Your enquiry details:\n` +
         `Tours of interest: ${d.tours.join(", ")}\n` +
         `Preferred dates: ${d.preferredDates || "flexible"}\n\n` +

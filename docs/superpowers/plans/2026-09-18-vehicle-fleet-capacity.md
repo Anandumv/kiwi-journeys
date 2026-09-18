@@ -590,13 +590,18 @@ git commit -m "feat: derive one-off session capacity from assigned vehicle, chec
 
 - [ ] **Step 1: Add the vehicle lookup and update the `data` object in `saveTour`**
 
+Task 7 removes the "Capacity per departure" text field from the form entirely, so `saveTour` can no longer read a typed capacity when no vehicle is selected. Falling back to a hardcoded default would silently reset an existing tour's capacity if an admin ever clears its vehicle. Instead, fall back to the tour's current DB value when editing, and only use the schema default (12) for a brand-new tour.
+
 In `src/app/admin/actions.ts`, directly above the `const data = {` line inside `saveTour` (currently line 43), add:
 
 ```typescript
   const defaultVehicleId = str(fd, "defaultVehicleId") || null;
-  const vehicleSeats = defaultVehicleId
-    ? (await prisma.vehicle.findUnique({ where: { id: defaultVehicleId }, select: { seats: true } }))?.seats
-    : undefined;
+  const [vehicleSeats, existingTour] = await Promise.all([
+    defaultVehicleId
+      ? prisma.vehicle.findUnique({ where: { id: defaultVehicleId }, select: { seats: true } }).then((v) => v?.seats)
+      : Promise.resolve(undefined),
+    id ? prisma.tour.findUnique({ where: { id }, select: { capacityPerDeparture: true } }) : Promise.resolve(null),
+  ]);
 ```
 
 Then replace this block inside `data` (currently lines 67-69):
@@ -613,10 +618,10 @@ with:
     departureTimes: str(fd, "departureTimes").split(",").map((s) => s.trim()).filter(Boolean),
     departureWeekdays: csvNums(fd, "departureWeekdays"),
     defaultVehicleId,
-    capacityPerDeparture: vehicleSeats ?? num(fd, "capacityPerDeparture", 12),
+    capacityPerDeparture: vehicleSeats ?? existingTour?.capacityPerDeparture ?? 12,
 ```
 
-`data`'s `defaultVehicleId` reuses the variable computed above — do not call `str(fd, "defaultVehicleId")` a second time inside `data`.
+`data`'s `defaultVehicleId` reuses the variable computed above — do not call `str(fd, "defaultVehicleId")` a second time inside `data`. `num` is still used elsewhere in `saveTour` (e.g. `durationMins`, `sortOrder`) — only the `capacityPerDeparture` line changes.
 
 - [ ] **Step 2: Typecheck**
 

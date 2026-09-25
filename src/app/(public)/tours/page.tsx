@@ -45,7 +45,8 @@ export default async function ToursPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListLd) }} />
       <PageHero
-        eyebrow="The day trips"
+        eyebrow="Day tours from Christchurch"
+        compact
         title="A day well spent"
         subtitle="Small-group days out across the South Island — pick a date and book online in minutes."
         image="/images/tours/jet-boating-waimakariri/7395a4_190a72a3a4994cf293a93975bd1bedfc-mv2_1.jpg"

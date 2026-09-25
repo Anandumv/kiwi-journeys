@@ -7,10 +7,10 @@ const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.
 export const metadata: Metadata = {
   title: "Gift Vouchers",
   description:
-    "Give the gift of a New Zealand South Island adventure. Kiwi Journeys gift vouchers are valid for one year and redeemable on any tour.",
+    "Give the gift of a New Zealand South Island adventure. Kiwi Globe Tours gift vouchers are valid for one year and redeemable on any tour.",
   alternates: { canonical: `${SITE_URL}/gift-vouchers` },
   openGraph: {
-    title: "Gift Vouchers — Kiwi Journeys",
+    title: "Gift Vouchers — Kiwi Globe Tours",
     description: "Give the gift of a New Zealand adventure.",
     url: `${SITE_URL}/gift-vouchers`,
   },
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 const HOW_IT_WORKS = [
   { title: "Valid for 1 year", body: "The recipient has a year to choose a date." },
-  { title: "Redeemable on any tour", body: "Apply on any Kiwi Journeys day tour — full or partial balance." },
+  { title: "Redeemable on any tour", body: "Apply on any Kiwi Globe Tours day tour — full or partial balance." },
   { title: "Delivery by email", body: "The code is sent by email after payment is confirmed." },
   { title: "Any amount from $50", body: "Choose a preset value or enter your own custom amount." },
 ];

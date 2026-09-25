@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
+import { serializeJsonLd } from "@/lib/json-ld";
 import { PageHero } from "@/components/PageHero";
 import { PrivateTourForm } from "@/components/PrivateTourForm";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
 export const metadata: Metadata = {
-  title: "Your day, your way",
+  title: "Private Day Tours from Christchurch",
   description:
     "Book a bespoke private tour of New Zealand's South Island for your group. Custom itineraries, flexible dates, expert local guides. Get a personalised quote.",
   alternates: { canonical: `${SITE_URL}/private-tours` },
   openGraph: {
-    title: "Your day, your way — Kiwi Journeys",
+    title: "Private Day Tours from Christchurch | Kiwi Globe Tours",
     description: "Craft a bespoke South Island experience for your group.",
     url: `${SITE_URL}/private-tours`,
   },
@@ -35,11 +36,34 @@ const WHY = [
   },
 ];
 
+const serviceLd = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "@id": `${SITE_URL}/private-tours#service`,
+  name: "Private Day Tours from Christchurch",
+  description: "Private South Island day trips with your own driver-guide and vehicle, routed around your group's stops, pace and pickup.",
+  url: `${SITE_URL}/private-tours`,
+  provider: { "@id": `${SITE_URL}/#organization` },
+  serviceType: "Private tour",
+  areaServed: { "@type": "Place", name: "Canterbury, South Island, New Zealand" },
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: "Private tours", item: `${SITE_URL}/private-tours` },
+  ],
+};
+
 export default function PrivateToursPage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(serviceLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       <PageHero
-        eyebrow="Tailored for you"
+        eyebrow="Private tours from Christchurch"
         title="Your day, your way"
         subtitle="A private day trip with your own guide and a route shaped around your group."
         image="/images/tours/christchurch-city-sightseeing/7395a4_a8f740b4a88b4e619592b9ba71877df9-mv2_1.jpg"

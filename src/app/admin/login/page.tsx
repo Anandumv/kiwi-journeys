@@ -49,7 +49,7 @@ function LoginForm() {
 export default function AdminLogin() {
   return (
     <div className="mx-auto flex min-h-screen max-w-sm flex-col justify-center px-4">
-      <h1 className="font-serif text-3xl font-semibold text-brand-900">Kiwi Journeys Admin</h1>
+      <h1 className="font-serif text-3xl font-semibold text-brand-900">Kiwi Globe Tours Admin</h1>
       <p className="mt-2 text-sm text-foreground/60">Sign in to manage tours, content and bookings.</p>
       <Suspense fallback={null}><LoginForm /></Suspense>
       <p className="mt-4 text-xs text-foreground/60">Seeded from ADMIN_EMAIL / ADMIN_PASSWORD in .env.</p>

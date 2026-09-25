@@ -53,7 +53,7 @@ export default async function AboutPage() {
         <EditorialSection number={1} label="Who we are" title="A closer look at the South Island" id="who">
           <div className={editorial.prose}>
             <p>
-              Kiwi Journeys is a young, Christchurch-based outfit with a simple idea: that the best way
+              Kiwi Globe Tours is a young, Christchurch-based outfit with a simple idea: that the best way
               to see the South Island is slowly, in a small group, with someone local doing the driving
               and the talking. No 50-seat coaches, no rushing between photo stops — just good days out.
             </p>

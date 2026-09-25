@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: `${s.name} — New Zealand Small-Group Day Tours`,
       description: s.description,
       url: SITE_URL,
-      images: s.heroImage ? [{ url: s.heroImage, width: 1200, height: 630, alt: "Kiwi Journeys — South Island Day Tours" }] : undefined,
+      images: s.heroImage ? [{ url: s.heroImage, width: 1200, height: 630, alt: "Kiwi Globe Tours — South Island Day Tours" }] : undefined,
     },
   };
 }

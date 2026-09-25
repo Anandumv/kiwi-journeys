@@ -7,15 +7,18 @@ export function PageHero({
   eyebrow,
   image = "/images/general/arthurs-pass-landscape.jpg",
   caption = "South Island, New Zealand",
+  compact = false,
 }: {
   title: string;
   subtitle?: string;
   eyebrow?: string;
   image?: string;
   caption?: string;
+  /** Listing pages: keep the first results within the first phone screen. */
+  compact?: boolean;
 }) {
   return (
-    <section className={styles.hero} aria-labelledby="page-heading">
+    <section className={compact ? `${styles.hero} ${styles.compact}` : styles.hero} aria-labelledby="page-heading">
       <div className={styles.inner}>
         <div className={styles.copy}>
           <p className={styles.top}>{eyebrow || "South Island / New Zealand"}</p>

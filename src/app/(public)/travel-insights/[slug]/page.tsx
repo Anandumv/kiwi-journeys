@@ -1,4 +1,4 @@
-import { serializeJsonLd } from "@/lib/json-ld";
+import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -42,7 +42,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     url: pageUrl,
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(),
-    image: post.coverImage ?? `${SITE_URL}/images/brand/Hero-Ocean-Alps.jpg`,
+    image: absoluteUrl(SITE_URL, post.coverImage) ?? `${SITE_URL}/images/brand/Hero-Ocean-Alps.jpg`,
     author: { "@type": "Person", name: "Kiwi Globe Tours Editorial", url: `${SITE_URL}/about` },
     publisher: {
       "@type": "Organization",

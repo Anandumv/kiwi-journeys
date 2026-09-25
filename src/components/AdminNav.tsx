@@ -63,7 +63,7 @@ export function AdminNav({ email }: { email: string }) {
     <>
       {/* Mobile top bar */}
       <div className="flex items-center justify-between border-b border-ivory-200 bg-white p-4 lg:hidden">
-        <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Journeys</Link>
+        <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Globe Tours</Link>
         <button
           onClick={() => setOpen(true)}
           aria-label="Open admin menu"
@@ -83,7 +83,7 @@ export function AdminNav({ email }: { email: string }) {
           <aside className="relative flex h-full w-64 max-w-[80vw] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-ivory-200 p-5">
               <div>
-                <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Journeys</Link>
+                <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Globe Tours</Link>
                 <p className="mt-0.5 text-xs text-foreground/50">Admin</p>
               </div>
               <button onClick={() => setOpen(false)} aria-label="Close admin menu" className="rounded-md p-1 text-foreground/50">
@@ -101,7 +101,7 @@ export function AdminNav({ email }: { email: string }) {
       {/* Desktop sidebar */}
       <aside className="hidden w-56 shrink-0 flex-col border-r border-ivory-200 bg-white lg:flex">
         <div className="border-b border-ivory-200 p-5">
-          <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Journeys</Link>
+          <Link href="/" className="font-serif text-lg font-semibold text-brand-800">Kiwi Globe Tours</Link>
           <p className="mt-0.5 text-xs text-foreground/50">Admin</p>
         </div>
         {navLinks}

@@ -121,7 +121,7 @@ export function CinematicHero({ settings, views = [] }: { settings: SiteSettings
           <Link href="/private-tours">Private journeys ↗</Link>
         </div>
         <div className={styles.heroContent}>
-          <p className={styles.heroIntro}>South Island day tours & private day trips</p>
+          <p className={styles.heroIntro}>Day tours & private trips from Christchurch</p>
           <h1 id="home-title" className={styles.heroTitle}>Take the<br /><span>window seat.</span></h1>
           <div className={styles.heroBottom}>
             <p>Coastal roads, alpine towns and days on the water.<br />Come see our part of New Zealand.</p>

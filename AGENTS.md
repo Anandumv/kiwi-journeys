@@ -110,3 +110,13 @@ This version has breaking changes — APIs, conventions, and file structure may 
 - Safari engine check: Playwright WebKit (`/tmp/kiwi-audit-tools`, `playwright install webkit`) passes 11 routes at iPhone 14 and 1440px, plus the booking widget flow. A just-restarted server can serve the loading placeholder on its first request; re-sample before calling it a bug.
 - Dependency advisory resolved with `overrides: { "deepmerge-ts": "^8.0.2" }` under Prisma 6.19.3 (`npm audit`: 0 vulnerabilities; prisma validate/generate/migrate status pass). Remove the override once Prisma ships it.
 - The homepage sections below the hero use `.defer-render` (`content-visibility: auto` with an intrinsic size). Lighthouse mobile is 93–94 across three runs, with LCP 3.1–3.2s simulated and ~0.1s observed; the remainder is framework JS and fonts.
+
+## Search and booking pass (2026-09-25)
+
+- The brand is Kiwi Globe Tours everywhere (titles, schema `settings.name`, copy). "Kiwi Journeys" is only the repo name; do not use it in public or admin copy.
+- JSON-LD image URLs must be absolute; pass CMS paths through `absoluteUrl(SITE_URL, path)` from `lib/json-ld.ts`. Tour `itinerary` is an `ItemList` of step descriptions (steps have no place names, so never invent "Stop N" Places). No `aggregateRating`: testimonials are unverified.
+- Tour meta descriptions are trimmed to ~158 chars and end with the from-price and the 72-hour refund term. Destination descriptions pad short CMS blurbs with the real tour count.
+- Booking widget: choosing a date auto-selects the only open departure, choosing a departure pre-fills one of the first price option, and on phones step 02 scrolls into view. The book-page header shows the tour's `priceFromCents` (the adult from-price, matching the tour page), never the cheapest child fare.
+- `PageHero compact` shortens the hero on phones for listing pages (`/tours`) so filters show on the first screen.
+- Phone LCP experiments that made it worse, do not repeat: Geist `preload: false` (LCP 3.3s, score 92) and `experimental.inlineCss` (FCP 0.9s but LCP 3.3s). Baseline stays 93–94 / LCP 3.1–3.2s simulated; the remaining gap needs a hero redesign.
+- The rtk hook rewrites `npx next start` into a filtered wrapper that never starts a server; start the preview with `./node_modules/.bin/next start -p 3101`. Audit tools can be installed anywhere and passed via `AUDIT_TOOLS`.

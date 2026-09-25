@@ -1,9 +1,9 @@
-import { serializeJsonLd } from "@/lib/json-ld";
+import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
-import { getTour, getTours, getSiteSettings, getTestimonials } from "@/lib/content";
+import { getTour, getTours, getSiteSettings } from "@/lib/content";
 import { Gallery } from "@/components/Gallery";
 import { TourCard } from "@/components/TourCard";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
@@ -26,7 +26,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const image = tour.heroImage || tour.gallery?.[0] || "";
   const fromChch = tour.destination !== "Christchurch" ? ` | Day Trip from Christchurch` : ` | Christchurch Day Tour`;
   const seoTitle = `${tour.title}${fromChch}`;
-  const seoDesc = `${tour.summary} Book a South Island day trip online. See the cancellation terms before checkout.`;
+  // Keep the snippet inside Google's ~155-char window, leading with price and refund terms.
+  const terms = ` From ${formatNZD(tour.priceFromCents)} pp. Full refund 72+ hrs before. Book online.`;
+  const room = 158 - terms.length;
+  const lead = tour.summary.length <= room ? tour.summary : `${tour.summary.slice(0, room - 1).replace(/[\s,;:—–-]+\S*$/, "")}…`;
+  const seoDesc = `${lead}${terms}`;
   return {
     title: seoTitle,
     description: seoDesc,
@@ -44,7 +48,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function TourDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [tour, allTours, settings, testimonials] = await Promise.all([getTour(slug), getTours(), getSiteSettings(), getTestimonials()]);
+  const [tour, allTours, settings] = await Promise.all([getTour(slug), getTours(), getSiteSettings()]);
   if (!tour) notFound();
 
   const related = allTours.filter((t) => t.slug !== tour.slug && t.category === tour.category).slice(0, 3);
@@ -58,9 +62,9 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   ];
 
   const pageUrl = `${SITE_URL}/tours/${tour.slug}`;
-  const avgRating = testimonials.length
-    ? +(testimonials.reduce((s, t) => s + t.rating, 0) / testimonials.length).toFixed(1)
-    : 5;
+  const ldImages = (tour.gallery.length ? tour.gallery : [tour.heroImage])
+    .map((src) => absoluteUrl(SITE_URL, src))
+    .filter((src): src is string => Boolean(src));
 
   const tripLd = {
     "@context": "https://schema.org",
@@ -69,10 +73,16 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     name: tour.title,
     description: tour.summary,
     url: pageUrl,
-    image: tour.gallery.length ? tour.gallery : undefined,
+    image: ldImages.length ? ldImages : undefined,
     duration: isoMinutes(tour.durationMins),
     touristType: { "@type": "Audience", audienceType: "Tourists" },
-    itinerary: tour.itinerary.map((step, i) => ({ "@type": "Place", name: `Stop ${i + 1}`, description: step })),
+    itinerary: tour.itinerary.length
+      ? {
+          "@type": "ItemList",
+          numberOfItems: tour.itinerary.length,
+          itemListElement: tour.itinerary.map((step, i) => ({ "@type": "ListItem", position: i + 1, description: step })),
+        }
+      : undefined,
     provider: { "@id": `${SITE_URL}/#organization` },
     tourOperator: { "@id": `${SITE_URL}/#organization` },
     offers: {
@@ -91,7 +101,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
     "@id": `${pageUrl}#product`,
     name: tour.title,
     description: tour.summary,
-    image: tour.gallery.length ? tour.gallery : [tour.heroImage].filter(Boolean),
+    image: ldImages,
     brand: { "@type": "Brand", name: settings.name },
     offers: {
       "@type": "Offer",

@@ -9,7 +9,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.
 export const metadata: Metadata = {
   title: "Frequently Asked Questions",
   description:
-    "Answers to common questions about booking Kiwi Journeys South Island day tours — cancellations, what to bring, group bookings, accessibility and more.",
+    "Answers to common questions about booking Kiwi Globe Tours South Island day tours — cancellations, what to bring, group bookings, accessibility and more.",
   alternates: { canonical: `${SITE_URL}/faq` },
 };
 

@@ -1,4 +1,4 @@
-import { serializeJsonLd } from "@/lib/json-ld";
+import { absoluteUrl, serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PageHero } from "@/components/PageHero";
@@ -58,11 +58,18 @@ const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.
 
 export async function generateMetadata({ params }: { params: Promise<{ region: string }> }): Promise<Metadata> {
   const { region } = await params;
-  const destinations = await getDestinations();
+  const [destinations, tours] = await Promise.all([getDestinations(), getTours()]);
   const dest = destinations.find((d) => d.slug === region);
   if (!dest) return { title: "Destination" };
   const url = `${SITE_URL}/destinations/${dest.slug}`;
-  const description = dest.intro || dest.blurb || `Explore day tours in ${dest.name}, New Zealand.`;
+  const match = regionMatch[region] ?? (() => false);
+  const tourCount = tours.filter((t) => match(t.destination)).length;
+  const lead = (dest.intro || dest.blurb || "").trim();
+  const offer = tourCount
+    ? `${tourCount} small-group ${dest.name} day ${tourCount === 1 ? "tour" : "tours"} with local guides, booked online.`
+    : `Small-group ${dest.name} day tours with local guides.`;
+  // Short CMS blurbs make weak search snippets; pad them with what's actually on offer.
+  const description = lead.length >= 110 ? lead : [lead.replace(/\.?$/, "."), offer].filter((x) => x !== ".").join(" ");
   return {
     title: `${dest.name} Day Tours`,
     description,
@@ -95,7 +102,7 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
     name: dest.name,
     description: dest.intro || dest.blurb,
     url: pageUrl,
-    image: dest.heroImage ?? undefined,
+    image: absoluteUrl(SITE_URL, dest.heroImage),
     touristType: { "@type": "Audience", audienceType: "Tourists" },
     includesAttraction: regionTours.map((t) => ({
       "@type": "TouristAttraction",

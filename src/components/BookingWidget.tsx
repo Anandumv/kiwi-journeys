@@ -114,6 +114,27 @@ export function BookingWidget({
   const dayIsSoldOut = daySessions.length > 0 && daySessions.every((s) => s.remaining <= 0);
   const canContinue = !!activeSession && seatsRequested > 0 && !overCapacity && !submitting && !loading && !availabilityError;
 
+  const selectionRef = useRef<HTMLDivElement>(null);
+
+  // Choosing a departure starts the party at one guest so Continue is one tap away.
+  function pickSession(id: string) {
+    setSelectedSession(id);
+    if (seatsRequested === 0 && priceOptions[0]) setQty({ [priceOptions[0].id]: 1 });
+  }
+
+  function pickDate(date: string) {
+    setSelectedDate(date);
+    setSelectedSession(null);
+    const open = (days[date]?.sessions ?? []).filter((s) => s.remaining > 0);
+    if (open.length === 1) pickSession(open[0].sessionId);
+    // On phones step 02 sits below the calendar; bring it into view so the tap visibly did something.
+    const panel = selectionRef.current;
+    if (panel && panel.getBoundingClientRect().top > window.innerHeight * 0.6) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      requestAnimationFrame(() => panel.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" }));
+    }
+  }
+
   function setQuantity(id: string, delta: number) {
     setQty((q) => ({ ...q, [id]: Math.min(50, Math.max(0, (q[id] ?? 0) + delta)) }));
   }
@@ -179,7 +200,7 @@ export function BookingWidget({
                 disabled={!canSelect || loading}
                 aria-label={`${date}${hasAvail ? `, ${day.remaining} seats available` : canSelect ? ", sold out, join waitlist" : ", unavailable"}`}
                 aria-pressed={isSelected}
-                onClick={() => { setSelectedDate(date); setSelectedSession(null); }}
+                onClick={() => pickDate(date)}
                 className={[
                   "aspect-square text-sm tabular-nums transition",
                   isSelected ? "bg-[#203c33] text-white font-semibold" : "",
@@ -205,7 +226,7 @@ export function BookingWidget({
       </div>
 
       {/* Selection */}
-      <div className="border border-[#202b2626] bg-white p-5 sm:p-7 lg:sticky lg:top-24 lg:h-fit">
+      <div ref={selectionRef} className="scroll-mt-20 border border-[#202b2626] bg-white p-5 sm:p-7 lg:sticky lg:top-24 lg:h-fit">
         <p className="flex items-baseline gap-3 border-b border-[#202b2626] pb-4 text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75"><span className="font-[family-name:var(--font-display)] text-2xl tracking-normal text-foreground">02</span>Time &amp; guests</p>
         <h2 className="mt-4 text-xl font-medium tracking-[-.02em] text-foreground">{title}</h2>
 
@@ -222,7 +243,7 @@ export function BookingWidget({
                     key={s.sessionId}
                     disabled={soldout && !tourId}
                     aria-pressed={s.sessionId === selectedSession}
-                    onClick={() => setSelectedSession(s.sessionId)}
+                    onClick={() => pickSession(s.sessionId)}
                     className={[
                       "min-h-11 border px-4 py-2 text-sm tabular-nums transition",
                       s.sessionId === selectedSession ? "border-[#203c33] bg-[#203c33] text-white" : "border-[#202b2640] hover:border-foreground",

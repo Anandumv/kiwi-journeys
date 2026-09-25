@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getTour } from "@/lib/content";
 import { BookingWidget } from "@/components/BookingWidget";
+import { formatNZD } from "@/lib/money";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -47,6 +48,11 @@ export default async function BookPage({ params }: { params: Promise<{ slug: str
             </nav>
             <h1 className="mt-6 font-[family-name:var(--font-display)] text-[clamp(52px,7vw,104px)] font-medium leading-[.86] tracking-[-.03em] text-foreground">Choose your day</h1>
             <p className="mt-4 max-w-xl text-foreground/75">{content.title} · {content.durationLabel} · {content.startEnd}. Pick a date, then a departure time and your guests.</p>
+            <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-foreground" aria-label="Booking terms">
+              <li><span className="font-semibold">From {formatNZD(content.priceFromCents)}</span> per person</li>
+              <li>Full refund 72+ hours before</li>
+              <li>Secure card payment</li>
+            </ul>
           </div>
           {content.heroImage && (
             <div className="relative hidden aspect-[4/3] overflow-hidden md:block">

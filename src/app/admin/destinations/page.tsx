@@ -42,7 +42,7 @@ export default async function AdminDestinations() {
         </div>
         <div className="space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/55">Existing ({destinations.length})</h2>
-          {destinations.map((d) => <details key={d.id} className="rounded-xl border border-ivory-200 bg-white"><summary className="cursor-pointer px-5 py-3 font-medium text-brand-800">{d.name} <span className="text-xs text-foreground/45">/{d.slug} · {d.status}</span></summary><div className="p-4 pt-0"><DestForm d={d} /></div></details>)}
+          {destinations.map((d) => <details key={d.id} className="rounded-xl border border-ivory-200 bg-white"><summary className="cursor-pointer px-5 py-3 font-medium text-brand-800">{d.name} <span className="text-xs text-foreground/60">/{d.slug} · {d.status}</span></summary><div className="p-4 pt-0"><DestForm d={d} /></div></details>)}
         </div>
       </div>
     </div>

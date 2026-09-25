@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { MediaUrl } from "@/components/admin/MediaUrl";
 import { prisma } from "@/lib/db";
 import { MediaUploader } from "@/components/admin/MediaUploader";
 
@@ -16,7 +17,7 @@ export default async function AdminMedia() {
         {media.map((m) => (
           <div key={m.id} className="group overflow-hidden rounded-lg border border-ivory-200 bg-white">
             <div className="relative aspect-square"><Image src={m.url} alt={m.alt ?? ""} fill className="object-cover" sizes="160px" /></div>
-            <input readOnly value={m.url} className="w-full truncate border-t border-ivory-200 px-2 py-1 text-[10px] text-foreground/50" onFocus={(e) => e.currentTarget.select()} />
+            <MediaUrl url={m.url} />
           </div>
         ))}
         {media.length === 0 && <p className="col-span-full text-sm text-foreground/50">No uploads yet.</p>}

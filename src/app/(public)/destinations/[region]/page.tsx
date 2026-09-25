@@ -20,7 +20,7 @@ const regionFaqs: Record<string, { q: string; a: string }[]> = {
     { q: "What are the best day trips from Christchurch?", a: "The most popular day trips from Christchurch are Akaroa (scenic harbour village, 90 min drive), Kaikōura (whale watching and seals, 2 hrs north), and Hanmer Springs (alpine thermal pools, 1.5 hrs north). All can be done comfortably as a single day." },
     { q: "How long are day tours from Christchurch?", a: "Most Christchurch day tours run 5–8 hours. Full-day trips to Akaroa, Kaikōura, and Hanmer Springs run 8–10 hours. City-based tours like Christchurch City Discovery are typically 5–6 hours." },
     { q: "Do tours include hotel pickup from Christchurch?", a: "Yes — pickup is available from most central Christchurch hotels and accommodation. The exact pickup location is confirmed at booking." },
-    { q: "What is the maximum group size on Christchurch day tours?", a: "All our tours are capped at 16 guests. We deliberately keep groups small so everyone gets a genuine experience, not a coach-tour experience." },
+    { q: "What is the maximum group size on Christchurch day tours?", a: "Group size depends on the vehicle assigned to your departure. Check availability for the date you want or ask us before booking." },
   ],
   akaroa: [
     { q: "How far is Akaroa from Christchurch?", a: "Akaroa is approximately 85km (53 miles) southeast of Christchurch — about a 1.5 hour scenic drive through the Banks Peninsula hills." },
@@ -129,11 +129,11 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(destinationLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       {faqLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(faqLd) }} />}
-      <PageHero eyebrow="Destination" title={dest.name} subtitle={dest.intro ?? dest.blurb} image={dest.heroImage ?? undefined} />
+      <PageHero eyebrow="Destination" title={dest.name} subtitle={dest.intro ?? dest.blurb} image={dest.heroImage || regionTours[0]?.heroImage} />
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <h2 className="font-serif text-3xl font-semibold text-brand-900">Tours in {dest.name}</h2>
+        <h2 className="font-serif text-3xl font-semibold text-foreground">Tours in {dest.name}</h2>
         {regionTours.length === 0 ? (
-          <p className="mt-4 text-foreground/60">New tours for this destination are coming soon.</p>
+          <p className="mt-4 text-foreground/75">New tours for this destination are coming soon.</p>
         ) : (
           <div className="mt-8 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
             {regionTours.map((t) => <TourCard key={t.slug} tour={t} />)}
@@ -142,12 +142,12 @@ export default async function RegionPage({ params }: { params: Promise<{ region:
       </section>
       {faqs.length > 0 && (
         <section className="mx-auto max-w-3xl px-4 pb-16 sm:px-6">
-          <h2 className="font-serif text-2xl font-semibold text-brand-900">Frequently asked questions</h2>
+          <h2 className="font-serif text-2xl font-semibold text-foreground">Frequently asked questions</h2>
           <dl className="mt-6 space-y-4">
             {faqs.map((f) => (
-              <div key={f.q} className="rounded-xl border border-brand-100 bg-white p-5">
-                <dt className="font-semibold text-brand-900">{f.q}</dt>
-                <dd className="mt-2 text-sm leading-relaxed text-foreground/70">{f.a}</dd>
+              <div key={f.q} className="border-t border-[#202b2626] py-5">
+                <dt className="font-semibold text-foreground">{f.q}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-foreground/75">{f.a}</dd>
               </div>
             ))}
           </dl>

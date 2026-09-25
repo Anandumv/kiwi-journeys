@@ -1,5 +1,6 @@
 "use client";
 
+import { TaskShell } from "@/components/TaskShell";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -34,35 +35,31 @@ export default function AccountLoginPage() {
 
   if (sent) {
     return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-100">
-          <svg className="h-8 w-8 text-teal-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <TaskShell eyebrow="Sign in" title="Check your email">
+        <div className="flex h-14 w-14 items-center justify-center border border-[#202b2640]">
+          <svg aria-hidden="true" className="h-7 w-7 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <h1 className="mt-5 font-serif text-2xl font-semibold text-brand-900">Check your email</h1>
-        <p className="mt-3 text-sm text-foreground/60">
-          We sent a sign-in link to <strong className="text-brand-800">{email}</strong>.<br />
+        <p className="mt-6 text-foreground/80">
+          We sent a sign-in link to <strong className="text-foreground">{email}</strong>.<br />
           Click the link to access your bookings. It expires in 15 minutes.
         </p>
-        <p className="mt-6 text-xs text-foreground/40">
+        <p className="mt-6 text-xs text-foreground/75">
           Didn&apos;t receive it?{" "}
-          <button onClick={() => { setSent(false); }} className="text-brand-600 underline">Try again</button>
+          <button onClick={() => { setSent(false); }} className="font-semibold text-foreground underline underline-offset-4">Try again</button>
         </p>
-      </div>
+      </TaskShell>
     );
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-20 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold text-brand-900">My account</h1>
-      <p className="mt-2 text-sm text-foreground/60">
-        Enter your email to receive a secure sign-in link — no password needed.
-      </p>
-      <form onSubmit={onSubmit} className="mt-8 space-y-4">
+    <TaskShell eyebrow="Sign in" title="My account" intro="Enter your email to receive a secure sign-in link. No password needed.">
+      <form onSubmit={onSubmit} className="space-y-4">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-brand-800">Email address</label>
+          <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium text-foreground">Email address</label>
           <input
+            id="login-email"
             type="email"
             required
             autoFocus
@@ -70,24 +67,24 @@ export default function AccountLoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            className="w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            className="w-full border border-[#202b2640] bg-white px-3 py-3 text-sm focus:border-foreground focus:outline-none"
           />
         </div>
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+          <p role="alert" className="border-l-2 border-red-700 bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-full bg-brand-600 px-6 py-3 font-semibold text-white transition hover:bg-brand-700 disabled:opacity-50"
+          className="flex min-h-12 w-full items-center justify-center bg-[#203c33] px-6 font-semibold text-white transition hover:bg-[#315445] disabled:opacity-50"
         >
           {loading ? "Sending link…" : "Send sign-in link"}
         </button>
       </form>
-      <p className="mt-8 text-center text-xs text-foreground/40">
+      <p className="mt-8 border-t border-[#202b2626] pt-5 text-sm text-foreground/80">
         Looking for a booking without signing in?{" "}
-        <Link href="/booking/lookup" className="text-brand-600 underline">Find my booking</Link>
+        <Link href="/booking/lookup" className="font-semibold text-foreground underline underline-offset-4">Find my booking</Link>
       </p>
-    </div>
+    </TaskShell>
   );
 }

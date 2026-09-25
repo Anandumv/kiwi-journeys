@@ -55,9 +55,9 @@ export function WaitlistForm({ tourId, sessionId, dateLabel, defaultSeats = 1 }:
 
   if (state === "done") {
     return (
-      <div role="status" className="mt-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3">
-        <p className="text-sm font-semibold text-brand-800">You&rsquo;re on the waitlist.</p>
-        <p className="mt-1 text-sm text-foreground/70">
+      <div role="status" className="mt-4 rounded-lg border border-[#202b2640] bg-[#eeede6] px-4 py-3">
+        <p className="text-sm font-semibold text-foreground">You&rsquo;re on the waitlist.</p>
+        <p className="mt-1 text-sm text-foreground/75">
           We&rsquo;ll email {email} if a seat opens up{dateLabel ? ` on ${dateLabel}` : ""}. Joining the
           waitlist doesn&rsquo;t charge you or hold a seat.
         </p>
@@ -65,35 +65,35 @@ export function WaitlistForm({ tourId, sessionId, dateLabel, defaultSeats = 1 }:
     );
   }
 
-  const field = "w-full rounded-lg border border-brand-200 bg-white px-3 py-2 text-sm";
+  const field = "w-full rounded-lg border border-[#202b2640] bg-white px-3 py-2 text-sm";
 
   return (
-    <form onSubmit={onSubmit} className="mt-4 rounded-lg border border-brand-200 bg-brand-50/60 p-4">
-      <p className="text-sm font-semibold text-brand-800">
+    <form onSubmit={onSubmit} className="mt-4 rounded-lg border border-[#202b2640] bg-[#eeede6]/60 p-4">
+      <p className="text-sm font-semibold text-foreground">
         Sold out{dateLabel ? ` on ${dateLabel}` : ""} — join the waitlist
       </p>
-      <p className="mt-1 text-sm text-foreground/70">
+      <p className="mt-1 text-sm text-foreground/75">
         We&rsquo;ll email you if a seat frees up. No payment, and no seat is held.
       </p>
 
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
-          <label htmlFor="wl-name" className="mb-1 block text-xs font-medium text-foreground/70">Full name</label>
+          <label htmlFor="wl-name" className="mb-1 block text-xs font-medium text-foreground/75">Full name</label>
           <input id="wl-name" required maxLength={200} value={fullName}
             onChange={(e) => setFullName(e.target.value)} className={field} autoComplete="name" />
         </div>
         <div>
-          <label htmlFor="wl-email" className="mb-1 block text-xs font-medium text-foreground/70">Email</label>
+          <label htmlFor="wl-email" className="mb-1 block text-xs font-medium text-foreground/75">Email</label>
           <input id="wl-email" required type="email" value={email}
             onChange={(e) => setEmail(e.target.value)} className={field} autoComplete="email" />
         </div>
         <div>
-          <label htmlFor="wl-phone" className="mb-1 block text-xs font-medium text-foreground/70">Phone (optional)</label>
+          <label htmlFor="wl-phone" className="mb-1 block text-xs font-medium text-foreground/75">Phone (optional)</label>
           <input id="wl-phone" maxLength={50} value={phone}
             onChange={(e) => setPhone(e.target.value)} className={field} autoComplete="tel" />
         </div>
         <div>
-          <label htmlFor="wl-seats" className="mb-1 block text-xs font-medium text-foreground/70">Seats wanted</label>
+          <label htmlFor="wl-seats" className="mb-1 block text-xs font-medium text-foreground/75">Seats wanted</label>
           <input id="wl-seats" type="number" min={1} max={20} value={seats}
             onChange={(e) => setSeats(Math.min(20, Math.max(1, Number(e.target.value) || 1)))} className={field} />
         </div>

@@ -39,8 +39,8 @@ export default function SurveyPage() {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center sm:px-6">
         <div className="text-5xl">{rating >= 5 ? "🌟" : "🙏"}</div>
-        <h1 className="mt-4 font-serif text-2xl font-semibold text-brand-900">Thank you!</h1>
-        <p className="mt-3 text-sm text-foreground/60">
+        <h1 className="mt-4 font-serif text-2xl font-semibold text-foreground">Thank you!</h1>
+        <p className="mt-3 text-sm text-foreground/75">
           {rating >= 5
             ? "We're thrilled you had a great time! We'll send you a link to share your experience online."
             : "Your feedback helps us improve. We truly appreciate you taking the time."}
@@ -56,15 +56,15 @@ export default function SurveyPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-16 sm:px-6">
-      <h1 className="font-serif text-3xl font-semibold text-brand-900">How was your tour?</h1>
-      <p className="mt-2 text-sm text-foreground/60">
+      <h1 className="font-serif text-3xl font-semibold text-foreground">How was your tour?</h1>
+      <p className="mt-2 text-sm text-foreground/75">
         Your feedback takes less than a minute and helps us and other travellers.
       </p>
 
       <form onSubmit={submit} className="mt-8 space-y-6">
         {/* Star rating */}
         <div>
-          <p className="mb-3 text-sm font-medium text-brand-800">Overall rating</p>
+          <p className="mb-3 text-sm font-medium text-foreground">Overall rating</p>
           <div className="flex gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
@@ -83,7 +83,7 @@ export default function SurveyPage() {
             ))}
           </div>
           {display > 0 && (
-            <p className="mt-2 text-sm text-foreground/50">
+            <p className="mt-2 text-sm text-foreground/75">
               {["", "Poor", "Fair", "Good", "Great", "Excellent!"][display]}
             </p>
           )}
@@ -91,7 +91,7 @@ export default function SurveyPage() {
 
         {/* Would return */}
         <div>
-          <p className="mb-3 text-sm font-medium text-brand-800">Would you book with us again?</p>
+          <p className="mb-3 text-sm font-medium text-foreground">Would you book with us again?</p>
           <div className="flex gap-3">
             {[true, false].map((v) => (
               <button
@@ -101,7 +101,7 @@ export default function SurveyPage() {
                 className={`rounded-full border px-5 py-2 text-sm font-medium transition ${
                   wouldReturn === v
                     ? "border-brand-600 bg-brand-600 text-white"
-                    : "border-brand-200 text-foreground/70 hover:border-brand-400"
+                    : "border-[#202b2640] text-foreground/75 hover:border-brand-400"
                 }`}
               >
                 {v ? "Yes, definitely!" : "Probably not"}
@@ -112,11 +112,11 @@ export default function SurveyPage() {
 
         {/* Feedback */}
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-brand-800">
-            Tell us more <span className="font-normal text-foreground/40">(optional)</span>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">
+            Tell us more <span className="font-normal text-foreground/75">(optional)</span>
           </label>
           <textarea
-            className="w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            className="w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none"
             rows={4}
             placeholder="What was the highlight of your day? Any suggestions for improvement?"
             value={feedback}

@@ -1,8 +1,9 @@
 import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { PageHero } from "@/components/PageHero";
-import { getDestinations } from "@/lib/content";
+import { getDestinations, getTours } from "@/lib/content";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DestinationsPage() {
-  const destinations = await getDestinations();
+  const [destinations, tours] = await Promise.all([getDestinations(), getTours()]);
   const collectionLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
@@ -40,23 +41,29 @@ export default async function DestinationsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(collectionLd) }} />
-      <PageHero eyebrow="Travel New Zealand Your Way" title="Destinations" subtitle="New Zealand, a captivating land of breathtaking natural beauty and warm, friendly locals." />
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {destinations.map((d) => (
-            <div
-              key={d.slug}
-              className={`rounded-2xl border p-6 ${d.status === "active" ? "border-brand-200 bg-white" : "border-dashed border-brand-100 bg-brand-50/50"}`}
-            >
-              <h2 className="font-serif text-xl font-semibold text-brand-900">{d.name}</h2>
-              <p className="mt-2 text-sm text-foreground/70">{d.status === "active" ? d.blurb : "Coming Soon"}</p>
-              {d.status === "active" && (
-                <Link href={`/destinations/${d.slug}`} className="mt-4 inline-block text-sm font-semibold text-brand-600 hover:underline">
-                  Explore tours →
-                </Link>
-              )}
-            </div>
-          ))}
+      <PageHero eyebrow="Places to go" title="Destinations" subtitle="Find a day trip by the place you want to see." image="/images/general/arthurs-pass-landscape.jpg"
+        caption="Arthur's Pass National Park"
+      />
+      <section className="mx-auto max-w-[1500px] px-5 py-16 sm:px-8 lg:py-24">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-5 border-b border-[#202b2626] pb-6">
+          <p className="eyebrow text-foreground">Day trips / South Island</p>
+          <p className="max-w-md text-sm leading-relaxed text-foreground/75">Choose a place first. Each route returns the same day.</p>
+        </div>
+        <div className="grid gap-x-8 gap-y-14 md:grid-cols-2 xl:grid-cols-3">
+          {destinations.filter(d => d.status === "active").map((d, index) => {
+            const key = d.slug === "kaikoura" ? "Kaik" : d.slug === "hanmer-springs" ? "Hanmer" : d.slug === "tekapo" ? "Tekapo" : d.slug === "akaroa" ? "Akaroa" : d.slug === "waipara" ? "Waipara" : "Christchurch";
+            const photo = d.heroImage || tours.find(t => t.destination.includes(key))?.heroImage;
+            return <Link key={d.slug} href={`/destinations/${d.slug}`} className="group block border-b border-[#202b2626] pb-5">
+              <div className="relative aspect-[3/2] overflow-hidden bg-brand-100">
+                {photo && <Image src={photo} alt="" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 motion-safe:group-hover:scale-[1.025]" />}
+              </div>
+              <div className="mt-5 flex items-start gap-5">
+                <span className="pt-1 text-xs text-foreground/75">{String(index+1).padStart(2,"0")}</span>
+                <div className="flex-1"><h2 className="text-2xl font-medium tracking-tight text-foreground">{d.name}</h2><p className="mt-2 text-sm leading-relaxed text-foreground/75">{d.blurb}</p></div>
+                <span aria-hidden="true" className="text-lg text-foreground">↗</span>
+              </div>
+            </Link>;
+          })}
         </div>
       </section>
     </>

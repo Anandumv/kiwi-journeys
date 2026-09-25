@@ -40,20 +40,27 @@ export default async function BlogIndex() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(blogLd) }} />
-      <PageHero eyebrow="Journal" title="Travel Insights" subtitle="Tips, guides and stories to help you plan your New Zealand journey." image="/images/general/waipara-plains.jpg" />
-      <section className="mx-auto max-w-4xl px-4 py-14 sm:px-6">
-        <div className="space-y-6">
-          {posts.map((p) => (
-            <Link key={p.slug} href={`/travel-insights/${p.slug}`} className="block rounded-2xl border border-ivory-200 bg-white p-6 transition hover:shadow-md">
-              <time className="text-xs font-medium text-brand-500">
-                {new Date(p.date).toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" })}
-              </time>
-              <h2 className="mt-1 font-serif text-2xl font-semibold text-brand-900">{p.title}</h2>
-              <p className="mt-2 text-sm text-foreground/70">{p.excerpt}</p>
-              <span className="mt-3 inline-block text-sm font-semibold text-brand-600">Read more →</span>
-            </Link>
+      <PageHero eyebrow="Journal" title="Travel Insights" subtitle="Notes on places, routes and practical details for a South Island day out." image="/images/tours/waipara-wine-trail/7395a4_e62d70f255354f47b42c80ff4c81ed08-mv2_1.jpg"
+        caption="Waipara Valley vineyards"
+      />
+      <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20" aria-label="Articles">
+        <ol className="border-b border-[#202b2626]">
+          {posts.map((p, i) => (
+            <li key={p.slug}>
+              <Link href={`/travel-insights/${p.slug}`} className="group grid gap-x-8 gap-y-3 border-t border-[#202b2626] py-8 sm:grid-cols-[64px_150px_minmax(0,1fr)_28px] sm:py-10">
+                <span className="font-[family-name:var(--font-display)] text-3xl leading-none text-foreground/75" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <time dateTime={new Date(p.date).toISOString()} className="pt-1 text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75">
+                  {new Date(p.date).toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" })}
+                </time>
+                <div>
+                  <h2 className="text-[clamp(26px,3vw,40px)] font-medium leading-[1.05] tracking-[-.03em] text-foreground underline decoration-transparent decoration-1 underline-offset-[6px] transition-colors group-hover:decoration-current">{p.title}</h2>
+                  <p className="mt-3 max-w-2xl leading-relaxed text-foreground/72">{p.excerpt}</p>
+                </div>
+                <span aria-hidden="true" className="hidden text-2xl transition-transform duration-300 group-hover:-translate-y-1 group-hover:translate-x-1 sm:block">↗</span>
+              </Link>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
     </>
   );

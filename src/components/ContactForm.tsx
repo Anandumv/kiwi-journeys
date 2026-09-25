@@ -24,13 +24,13 @@ export function ContactForm() {
     }
   }
 
-  const field = "w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none";
+  const field = "w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none";
 
   if (status === "sent") {
     return (
-      <div className="rounded-2xl border border-brand-200 bg-brand-50 p-8 text-center">
-        <p className="text-lg font-semibold text-brand-800">Thanks — we&apos;ve received your message.</p>
-        <p className="mt-2 text-sm text-foreground/70">Our team will be in touch shortly.</p>
+      <div className="rounded-2xl border border-[#202b2640] bg-[#eeede6] p-8 text-center">
+        <p className="text-lg font-semibold text-foreground">Thanks — we&apos;ve received your message.</p>
+        <p className="mt-2 text-sm text-foreground/75">Our team will be in touch shortly.</p>
       </div>
     );
   }

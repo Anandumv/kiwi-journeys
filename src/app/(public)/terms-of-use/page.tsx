@@ -12,8 +12,8 @@ export default async function TermsPage() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
-      <h1 className="font-serif text-4xl font-semibold text-brand-900">Terms &amp; Conditions</h1>
-      <p className="mt-2 text-sm text-foreground/50">Last updated: {updated}</p>
+      <h1 className="font-serif text-4xl font-semibold text-foreground">Terms &amp; Conditions</h1>
+      <p className="mt-2 text-sm text-foreground/75">Last updated: {updated}</p>
 
       <div className="mt-8 space-y-8 text-foreground/80 leading-relaxed">
         <section>
@@ -24,7 +24,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">1. Bookings and payment</h2>
+          <h2 className="text-xl font-semibold text-foreground">1. Bookings and payment</h2>
           <ul className="mt-3 list-disc pl-6 space-y-2 text-sm">
             <li>All bookings are subject to availability and are only confirmed once payment has been received in full.</li>
             <li>Prices are in New Zealand Dollars (NZD) and include GST where applicable.</li>
@@ -40,14 +40,14 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">2. Cancellation and refund policy</h2>
+          <h2 className="text-xl font-semibold text-foreground">2. Cancellation and refund policy</h2>
           <p className="mt-3">The following cancellation policy applies to all bookings:</p>
-          <div className="mt-4 overflow-hidden rounded-xl border border-brand-100">
+          <div className="mt-4 overflow-hidden rounded-xl border border-[#202b2626]">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-brand-100 bg-brand-50">
-                  <th className="px-4 py-3 text-left font-semibold text-brand-900">Notice given</th>
-                  <th className="px-4 py-3 text-left font-semibold text-brand-900">Refund</th>
+                <tr className="border-b border-[#202b2626] bg-[#eeede6]">
+                  <th className="px-4 py-3 text-left font-semibold text-foreground">Notice given</th>
+                  <th className="px-4 py-3 text-left font-semibold text-foreground">Refund</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-50">
@@ -55,15 +55,15 @@ export default async function TermsPage() {
                   <td className="px-4 py-3">More than 72 hours before departure</td>
                   <td className="px-4 py-3 font-medium text-teal-700">Full refund</td>
                 </tr>
-                <tr className="bg-brand-50/40">
+                <tr className="bg-[#eeede6]/40">
                   <td className="px-4 py-3">24–72 hours before departure</td>
-                  <td className="px-4 py-3 font-medium text-amber-700">50% refund</td>
+                  <td className="px-4 py-3 font-medium text-amber-800">50% refund</td>
                 </tr>
                 <tr>
                   <td className="px-4 py-3">Less than 24 hours before departure</td>
                   <td className="px-4 py-3 font-medium text-red-700">No refund</td>
                 </tr>
-                <tr className="bg-brand-50/40">
+                <tr className="bg-[#eeede6]/40">
                   <td className="px-4 py-3">No-show on the day</td>
                   <td className="px-4 py-3 font-medium text-red-700">No refund</td>
                 </tr>
@@ -85,7 +85,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">3. Operator cancellation</h2>
+          <h2 className="text-xl font-semibold text-foreground">3. Operator cancellation</h2>
           <p className="mt-3">
             {site.name} reserves the right to cancel or modify a tour due to unsafe weather conditions, insufficient
             passenger numbers, mechanical issues, or other circumstances beyond our control.
@@ -104,7 +104,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">4. Promo codes and discounts</h2>
+          <h2 className="text-xl font-semibold text-foreground">4. Promo codes and discounts</h2>
           <ul className="mt-3 list-disc pl-6 space-y-1 text-sm">
             <li>Promo codes are subject to their stated terms, expiry dates, and usage limits.</li>
             <li>Only one promo code may be applied per booking.</li>
@@ -114,7 +114,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">5. Guest responsibilities</h2>
+          <h2 className="text-xl font-semibold text-foreground">5. Guest responsibilities</h2>
           <ul className="mt-3 list-disc pl-6 space-y-2 text-sm">
             <li>
               Guests must arrive at the designated meeting point by the stated departure time. We cannot delay departures
@@ -140,7 +140,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">6. Limitation of liability</h2>
+          <h2 className="text-xl font-semibold text-foreground">6. Limitation of liability</h2>
           <p className="mt-3">
             To the maximum extent permitted by law, {site.name}&apos;s liability for any claim arising from a booking is
             limited to the total amount paid for that booking. We are not liable for indirect, consequential, or special
@@ -153,7 +153,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">7. Privacy</h2>
+          <h2 className="text-xl font-semibold text-foreground">7. Privacy</h2>
           <p className="mt-3">
             Your personal information is handled in accordance with our{" "}
             <a href="/privacy-policy" className="text-brand-600 underline">Privacy Policy</a> and the New Zealand Privacy
@@ -162,7 +162,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">8. Governing law</h2>
+          <h2 className="text-xl font-semibold text-foreground">8. Governing law</h2>
           <p className="mt-3">
             These terms are governed by the laws of New Zealand. Any disputes will be subject to the exclusive jurisdiction
             of the courts of New Zealand.
@@ -170,7 +170,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">9. Changes to these terms</h2>
+          <h2 className="text-xl font-semibold text-foreground">9. Changes to these terms</h2>
           <p className="mt-3">
             We may update these terms from time to time. The &ldquo;last updated&rdquo; date at the top of this page
             shows when they were last revised. Bookings made before any revision are governed by the terms in effect at
@@ -179,7 +179,7 @@ export default async function TermsPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">10. Contact</h2>
+          <h2 className="text-xl font-semibold text-foreground">10. Contact</h2>
           <p className="mt-3">
             Questions about these terms? Contact us at{" "}
             <a href={`mailto:${site.email}`} className="text-brand-600 underline">{site.email}</a>

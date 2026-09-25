@@ -152,15 +152,16 @@ export function BookingWidget({
   const monthIsPast = `${year}-${String(month).padStart(2, "0")}` <= now.slice(0, 7);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_1fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8">
       {/* Calendar */}
-      <div className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
+      <div className="border border-[#202b2626] bg-white p-5 sm:p-7">
+        <p className="mb-5 flex items-baseline gap-3 border-b border-[#202b2626] pb-4 text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75"><span className="font-[family-name:var(--font-display)] text-2xl tracking-normal text-foreground">01</span>Date</p>
         <div className="flex items-center justify-between">
-          <button onClick={() => changeMonth(-1)} disabled={monthIsPast} className="rounded-lg p-2 text-brand-700 hover:bg-brand-50 disabled:opacity-30" aria-label="Previous month">‹</button>
-          <h3 className="text-lg font-semibold text-brand-900">{MONTHS[month - 1]} {year}</h3>
-          <button onClick={() => changeMonth(1)} className="rounded-lg p-2 text-brand-700 hover:bg-brand-50" aria-label="Next month">›</button>
+          <button onClick={() => changeMonth(-1)} disabled={monthIsPast} className="flex h-11 w-11 items-center justify-center border border-[#202b2640] text-lg text-foreground hover:border-foreground disabled:opacity-30" aria-label="Previous month">‹</button>
+          <h2 className="font-[family-name:var(--font-display)] text-3xl font-medium text-foreground" aria-live="polite">{MONTHS[month - 1]} {year}</h2>
+          <button onClick={() => changeMonth(1)} className="flex h-11 w-11 items-center justify-center border border-[#202b2640] text-lg text-foreground hover:border-foreground" aria-label="Next month">›</button>
         </div>
-        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs font-medium text-foreground/50">
+        <div className="mt-4 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-[.08em] text-foreground/70">
           {WEEKDAYS.map((d) => <div key={d}>{d}</div>)}
         </div>
         <div className="mt-1 grid grid-cols-7 gap-1">
@@ -168,22 +169,25 @@ export function BookingWidget({
             if (!date) return <div key={i} />;
             const day = days[date];
             const isPast = date < now;
-            const hasAvail = !!day && day.remaining > 0 && !isPast;
+            const hasDeparture = !!day && day.sessions.length > 0 && !isPast;
+            const hasAvail = hasDeparture && day.remaining > 0;
+            const canSelect = hasDeparture && (hasAvail || !!tourId);
             const isSelected = date === selectedDate;
             return (
               <button
                 key={date}
-                disabled={!hasAvail || loading}
-                aria-label={`${date}${hasAvail ? `, ${day.remaining} seats available` : ", unavailable"}`}
+                disabled={!canSelect || loading}
+                aria-label={`${date}${hasAvail ? `, ${day.remaining} seats available` : canSelect ? ", sold out, join waitlist" : ", unavailable"}`}
                 aria-pressed={isSelected}
                 onClick={() => { setSelectedDate(date); setSelectedSession(null); }}
                 className={[
-                  "aspect-square rounded-lg text-sm transition",
-                  isSelected ? "bg-brand-600 text-white font-semibold" : "",
-                  !isSelected && hasAvail ? "bg-brand-50 text-brand-800 hover:bg-brand-100 font-medium" : "",
-                  !hasAvail ? "text-foreground/25 cursor-not-allowed" : "",
+                  "aspect-square text-sm tabular-nums transition",
+                  isSelected ? "bg-[#203c33] text-white font-semibold" : "",
+                  !isSelected && hasAvail ? "border border-[#203c33] font-semibold text-foreground hover:bg-[#203c33] hover:text-white" : "",
+                  !isSelected && canSelect && !hasAvail ? "border border-dashed border-[#202b2680] text-foreground/75 hover:border-foreground" : "",
+                  !canSelect ? "text-foreground/35 cursor-not-allowed" : "",
                 ].join(" ")}
-                title={hasAvail ? `${day.remaining} seats available` : "Unavailable"}
+                title={hasAvail ? `${day.remaining} seats available` : canSelect ? "Sold out — join waitlist" : "Unavailable"}
               >
                 {Number(date.slice(8, 10))}
               </button>
@@ -191,80 +195,85 @@ export function BookingWidget({
           })}
         </div>
         {availabilityError && <div role="alert" className="mt-3 text-sm text-red-700">{availabilityError} <button onClick={() => void fetchMonth()} className="font-semibold underline">Retry</button></div>}
-        {!loading && !availabilityError && Object.keys(days).length === 0 && <p className="mt-3 text-sm text-foreground/60">No departures available this month. Try the next month or contact us.</p>}
-        {loading && <p className="mt-3 text-center text-xs text-foreground/50">Loading availability…</p>}
-        <div className="mt-4 flex items-center gap-4 text-xs text-foreground/55">
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-brand-50 border border-brand-100" /> Available</span>
-          <span className="flex items-center gap-1"><span className="h-3 w-3 rounded bg-brand-600" /> Selected</span>
+        {!loading && !availabilityError && Object.keys(days).length === 0 && <p className="mt-3 text-sm text-foreground/75">No departures available this month. Try the next month or contact us.</p>}
+        {loading && <p className="mt-3 text-center text-xs text-foreground/70">Loading availability…</p>}
+        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#202b2626] pt-4 text-xs text-foreground/75">
+          <span className="flex items-center gap-2"><span className="h-3 w-3 border border-[#203c33]" /> Available</span>
+          <span className="flex items-center gap-2"><span className="h-3 w-3 bg-[#203c33]" /> Selected</span>
+          {tourId && <span className="flex items-center gap-2"><span className="h-3 w-3 border border-dashed border-[#202b2680]" /> Sold out · waitlist</span>}
         </div>
       </div>
 
       {/* Selection */}
-      <div className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
-        <h3 className="text-lg font-semibold text-brand-900">{title}</h3>
+      <div className="border border-[#202b2626] bg-white p-5 sm:p-7 lg:sticky lg:top-24 lg:h-fit">
+        <p className="flex items-baseline gap-3 border-b border-[#202b2626] pb-4 text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75"><span className="font-[family-name:var(--font-display)] text-2xl tracking-normal text-foreground">02</span>Time &amp; guests</p>
+        <h2 className="mt-4 text-xl font-medium tracking-[-.02em] text-foreground">{title}</h2>
 
-        {!selectedDate && <p className="mt-4 text-sm text-foreground/60">Select an available date to see departure times.</p>}
+        {!selectedDate && <p className="mt-2 text-sm text-foreground/75">Select a date to see departure times{tourId ? " or join a sold-out departure’s waitlist" : ""}.</p>}
 
         {selectedDate && (
           <>
-            <p className="mt-3 text-sm font-medium text-foreground/70">Departure time</p>
+            <p className="mt-4 text-sm font-medium text-foreground/75">{new Date(`${selectedDate}T12:00:00`).toLocaleDateString("en-NZ", { weekday: "long", day: "numeric", month: "long" })} · departure time</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {daySessions.map((s) => {
                 const soldout = s.remaining <= 0;
                 return (
                   <button
                     key={s.sessionId}
-                    disabled={soldout}
+                    disabled={soldout && !tourId}
+                    aria-pressed={s.sessionId === selectedSession}
                     onClick={() => setSelectedSession(s.sessionId)}
                     className={[
-                      "rounded-lg border px-3 py-2 text-sm transition",
-                      s.sessionId === selectedSession ? "border-brand-600 bg-brand-600 text-white" : "border-brand-200 hover:border-brand-400",
-                      soldout ? "opacity-40 line-through cursor-not-allowed" : "",
+                      "min-h-11 border px-4 py-2 text-sm tabular-nums transition",
+                      s.sessionId === selectedSession ? "border-[#203c33] bg-[#203c33] text-white" : "border-[#202b2640] hover:border-foreground",
+                      soldout && !tourId ? "opacity-40 cursor-not-allowed" : "",
                     ].join(" ")}
                   >
                     {timeLabel(s.startsAtUtc)}
-                    <span className="ml-1 text-xs opacity-75">{soldout ? "Sold out" : s.remaining <= 3 ? `Only ${s.remaining} left!` : `${s.remaining} left`}</span>
+                    <span className="ml-2 text-xs opacity-80">{soldout ? "Sold out · waitlist" : `${s.remaining} left`}</span>
                   </button>
                 );
               })}
             </div>
 
-            {tourId && dayIsSoldOut && (
+            {tourId && activeSession && activeSession.remaining <= 0 && (
               <WaitlistForm
+                key={activeSession.sessionId}
                 tourId={tourId}
-                sessionId={daySessions[0]?.sessionId}
-                dateLabel={selectedDate ?? undefined}
+                sessionId={activeSession.sessionId}
+                dateLabel={`${selectedDate} at ${timeLabel(activeSession.startsAtUtc)}`}
                 defaultSeats={Math.max(1, seatsRequested || 1)}
               />
             )}
 
-            {activeSession && (
+            {dayIsSoldOut && !activeSession && <p className="mt-3 text-sm text-brand-800">Select a departure time to join its waitlist.</p>}
+            {activeSession && activeSession.remaining > 0 && (
               <>
                 {activeSession.remaining <= 4 && (
-                  <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
-                    Only {activeSession.remaining} spot{activeSession.remaining !== 1 ? "s" : ""} left on this departure!
+                  <p className="mt-3 border-l-2 border-amber-600 pl-3 text-sm font-medium text-amber-800">
+                    {activeSession.remaining} seat{activeSession.remaining !== 1 ? "s" : ""} left on this departure.
                   </p>
                 )}
-                <p className="mt-5 text-sm font-medium text-foreground/70">Guests</p>
-                <div className="mt-2 space-y-2">
+                <p className="mt-6 text-sm font-medium text-foreground/75">Guests</p>
+                <div className="mt-2 border-t border-[#202b2626]">
                   {priceOptions.map((po) => (
-                    <div key={po.id} className="flex items-center justify-between rounded-lg border border-brand-50 px-3 py-2">
+                    <div key={po.id} className="flex items-center justify-between border-b border-[#202b2626] py-3">
                       <div>
-                        <div className="text-sm font-medium text-brand-800">{po.label}</div>
-                        <div className="text-xs text-foreground/55">{nzd(po.priceCents)}{po.seatsPerUnit > 1 ? ` · ${po.seatsPerUnit} seats` : ""}</div>
+                        <div className="text-sm font-medium text-foreground">{po.label}</div>
+                        <div className="text-xs text-foreground/75">{nzd(po.priceCents)}{po.seatsPerUnit > 1 ? ` · ${po.seatsPerUnit} seats` : ""}</div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <button onClick={() => setQuantity(po.id, -1)} className="h-10 w-10 rounded-full border border-brand-200 text-lg text-brand-700 hover:bg-brand-50" aria-label={`Decrease ${po.label}`}>−</button>
-                        <span className="w-6 text-center text-sm font-semibold">{qty[po.id] ?? 0}</span>
-                        <button onClick={() => setQuantity(po.id, 1)} className="h-10 w-10 rounded-full border border-brand-200 text-lg text-brand-700 hover:bg-brand-50" aria-label={`Increase ${po.label}`}>+</button>
+                        <button onClick={() => setQuantity(po.id, -1)} className="h-11 w-11 border border-[#202b2640] text-lg text-foreground hover:border-foreground" aria-label={`Decrease ${po.label}`}>−</button>
+                        <span className="w-6 text-center text-sm font-semibold tabular-nums" aria-live="polite">{qty[po.id] ?? 0}</span>
+                        <button onClick={() => setQuantity(po.id, 1)} className="h-11 w-11 border border-[#202b2640] text-lg text-foreground hover:border-foreground" aria-label={`Increase ${po.label}`}>+</button>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-5 flex items-center justify-between border-t border-brand-50 pt-4">
-                  <span className="text-sm text-foreground/60">Total</span>
-                  <span className="text-xl font-bold text-brand-700">{nzd(totalCents)}</span>
+                <div className="mt-5 flex items-baseline justify-between">
+                  <span className="text-sm text-foreground/75">Total (NZD)</span>
+                  <span className="font-[family-name:var(--font-display)] text-4xl font-medium tabular-nums text-foreground">{nzd(totalCents)}</span>
                 </div>
                 {overCapacity && <p className="mt-2 text-sm text-red-600">Only {activeSession.remaining} seats left on this departure.</p>}
                 {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
@@ -272,11 +281,11 @@ export function BookingWidget({
                 <button
                   onClick={onContinue}
                   disabled={!canContinue}
-                  className="mt-4 w-full rounded-full bg-sand-500 px-6 py-3.5 font-semibold text-white shadow-sm transition hover:bg-sand-700 disabled:opacity-50"
+                  className="mt-4 flex min-h-[52px] w-full items-center justify-center bg-[#203c33] px-6 font-semibold text-white transition hover:bg-[#315445] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? "Reserving…" : "Continue to payment"}
                 </button>
-                <p className="mt-2 text-center text-xs text-foreground/50">Seats are held for a few minutes while you pay.</p>
+                <p className="mt-2 text-center text-xs text-foreground/75">Seats are held for a few minutes while you pay.</p>
               </>
             )}
           </>

@@ -45,8 +45,8 @@ export function ProcessingClient() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
           </svg>
         </div>
-        <h1 className="mt-6 text-xl font-bold text-brand-900">Taking longer than expected</h1>
-        <p className="mt-2 text-sm text-foreground/70">
+        <h1 className="mt-6 text-xl font-bold text-foreground">Taking longer than expected</h1>
+        <p className="mt-2 text-sm text-foreground/75">
           We haven&apos;t received your booking confirmation yet. Please check your email or contact us before attempting another payment.
         </p>
         <div className="mt-6 flex flex-col gap-3">
@@ -56,7 +56,7 @@ export function ProcessingClient() {
           >
             Find my booking by email
           </Link>
-          <Link href="/" className="text-sm text-foreground/60 hover:underline">
+          <Link href="/" className="text-sm text-foreground/75 hover:underline">
             Return home
           </Link>
         </div>
@@ -66,11 +66,11 @@ export function ProcessingClient() {
 
   return (
     <>
-      <div className="h-12 w-12 animate-spin rounded-full border-4 border-brand-100 border-t-brand-600" />
-      <h1 className="mt-6 text-xl font-bold text-brand-900">Confirming your booking…</h1>
-      <p className="mt-2 text-sm text-foreground/70">Please keep this window open while we check your payment and reservation.</p>
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#202b2626] border-t-brand-600" />
+      <h1 className="mt-6 text-xl font-bold text-foreground">Confirming your booking…</h1>
+      <p className="mt-2 text-sm text-foreground/75">Please keep this window open while we check your payment and reservation.</p>
       {slow && (
-        <p className="mt-6 text-sm text-foreground/60">
+        <p className="mt-6 text-sm text-foreground/75">
           This is taking longer than usual. We&apos;re still waiting for confirmation from our payment provider.
         </p>
       )}

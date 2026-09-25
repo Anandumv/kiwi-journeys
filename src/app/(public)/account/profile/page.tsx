@@ -76,10 +76,10 @@ export default function ProfilePage() {
     }
   }
 
-  const field = "w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none";
+  const field = "w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none";
 
   if (loading) {
-    return <div className="mx-auto max-w-lg px-4 py-20 text-center text-sm text-foreground/40">Loading…</div>;
+    return <div className="mx-auto max-w-lg px-4 py-20 text-center text-sm text-foreground/75">Loading…</div>;
   }
 
   return (
@@ -88,14 +88,14 @@ export default function ProfilePage() {
         ← My bookings
       </Link>
 
-      <h1 className="mt-6 font-serif text-3xl font-semibold text-brand-900">Travel preferences</h1>
-      <p className="mt-1 text-sm text-foreground/60">
+      <h1 className="mt-6 font-serif text-3xl font-semibold text-foreground">Travel preferences</h1>
+      <p className="mt-1 text-sm text-foreground/75">
         Help us personalise your experience and send you relevant offers.
       </p>
 
       <form onSubmit={save} className="mt-8 space-y-6">
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-brand-800">Country</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">Country</label>
           <input
             className={field}
             placeholder="e.g. Australia"
@@ -105,7 +105,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-brand-800">Travel style (select all that apply)</p>
+          <p className="mb-2 text-sm font-medium text-foreground">Travel style (select all that apply)</p>
           <div className="flex flex-wrap gap-2">
             {TRAVEL_STYLES.map((s) => {
               const active = (profile.travelStyle ?? []).includes(s.key);
@@ -117,7 +117,7 @@ export default function ProfilePage() {
                   className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                     active
                       ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-brand-200 text-foreground/70 hover:border-brand-400"
+                      : "border-[#202b2640] text-foreground/75 hover:border-brand-400"
                   }`}
                 >
                   {s.label}
@@ -128,7 +128,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-brand-800">Who do you usually travel with?</p>
+          <p className="mb-2 text-sm font-medium text-foreground">Who do you usually travel with?</p>
           <div className="flex flex-wrap gap-2">
             {GROUP_TYPES.map((g) => {
               const active = profile.groupType === g;
@@ -140,7 +140,7 @@ export default function ProfilePage() {
                   className={`rounded-full border px-4 py-1.5 text-sm font-medium capitalize transition ${
                     active
                       ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-brand-200 text-foreground/70 hover:border-brand-400"
+                      : "border-[#202b2640] text-foreground/75 hover:border-brand-400"
                   }`}
                 >
                   {g}
@@ -151,7 +151,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-brand-800">Age group</p>
+          <p className="mb-2 text-sm font-medium text-foreground">Age group</p>
           <div className="flex flex-wrap gap-2">
             {AGE_GROUPS.map((a) => {
               const active = profile.ageGroup === a;
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                   className={`rounded-full border px-4 py-1.5 text-sm font-medium transition ${
                     active
                       ? "border-brand-600 bg-brand-600 text-white"
-                      : "border-brand-200 text-foreground/70 hover:border-brand-400"
+                      : "border-[#202b2640] text-foreground/75 hover:border-brand-400"
                   }`}
                 >
                   {a}
@@ -174,7 +174,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-medium text-brand-800">How did you hear about us?</label>
+          <label className="mb-1.5 block text-sm font-medium text-foreground">How did you hear about us?</label>
           <select
             className={field}
             value={profile.referralSource ?? ""}
@@ -187,24 +187,24 @@ export default function ProfilePage() {
           </select>
         </div>
 
-        <div className="space-y-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+        <div className="space-y-3 rounded-xl border border-[#202b2626] bg-[#eeede6]/50 p-4">
           <label className="flex cursor-pointer items-center gap-3">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-brand-300 text-brand-600"
+              className="h-4 w-4 rounded border-[#202b2640] text-brand-600"
               checked={profile.isCruisePassenger ?? false}
               onChange={(e) => { setProfile((p) => ({ ...p, isCruisePassenger: e.target.checked })); setSaved(false); }}
             />
-            <span className="text-sm text-foreground/70">I am arriving on a cruise ship</span>
+            <span className="text-sm text-foreground/75">I am arriving on a cruise ship</span>
           </label>
           <label className="flex cursor-pointer items-center gap-3">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-brand-300 text-brand-600"
+              className="h-4 w-4 rounded border-[#202b2640] text-brand-600"
               checked={profile.marketingConsent ?? false}
               onChange={(e) => { setProfile((p) => ({ ...p, marketingConsent: e.target.checked })); setSaved(false); }}
             />
-            <span className="text-sm text-foreground/70">
+            <span className="text-sm text-foreground/75">
               Send me travel inspiration and tour news (unsubscribe any time)
             </span>
           </label>

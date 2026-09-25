@@ -23,15 +23,25 @@ export function Footer({
   social?: Record<string, string>;
 }) {
   return (
-    <footer className="relative z-[100] mt-24 bg-brand-950 text-brand-100">
-      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="grid gap-10 md:grid-cols-4">
+    <footer className="relative z-[100] bg-[#16231d] text-[#d9e0d6]">
+      <div className="mx-auto max-w-7xl px-5 pt-16 sm:px-6 sm:pt-20">
+        <div className="flex flex-col gap-8 border-b border-white/15 pb-12 sm:pb-16 lg:flex-row lg:items-end lg:justify-between">
+          <p className="max-w-4xl font-[family-name:var(--font-display)] text-[clamp(56px,8.5vw,132px)] font-medium leading-[.84] tracking-[-.03em] text-[#f3f1e8]">
+            Pick a day.<br />We&apos;ll do the driving.
+          </p>
+          <Link href="/tours" className="group inline-flex min-h-12 shrink-0 items-center justify-between gap-10 bg-[#f3f1e8] px-5 text-sm font-semibold text-[#16231d] transition hover:bg-white">
+            See all day tours <span aria-hidden="true" className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span>
+          </Link>
+        </div>
+      </div>
+      <div className="mx-auto max-w-7xl px-5 py-14 sm:px-6">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="md:col-span-1">
             <Logo name={name} logoImage={logoImage} light />
-            <p className="mt-4 max-w-xs text-sm text-brand-200">{footerTagline}</p>
+            <p className="mt-4 max-w-xs text-sm text-white/70">{footerTagline}</p>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-white">Explore</h3>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[.13em] text-white/60">Explore</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/tours" className="hover:text-white">Tours</Link></li>
               <li><Link href="/destinations" className="hover:text-white">Destinations</Link></li>
@@ -43,7 +53,7 @@ export function Footer({
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-white">Company</h3>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[.13em] text-white/60">Company</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li><Link href="/about" className="hover:text-white">About</Link></li>
               <li><Link href="/sustainability" className="hover:text-white">Sustainability</Link></li>
@@ -55,10 +65,10 @@ export function Footer({
             </ul>
           </div>
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-white">Contact</h3>
+            <h3 className="text-[11px] font-semibold uppercase tracking-[.13em] text-white/60">Contact</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>Phone: <a href={phoneHref} className="hover:text-white">{phone}</a></li>
-              <li>Email: <a href={`mailto:${email}`} className="hover:text-white">{email}</a></li>
+              <li>Email: <a href={`mailto:${email}`} className="break-words hover:text-white">{email}</a></li>
               <li>{address}</li>
             </ul>
           </div>

@@ -1,3 +1,4 @@
+import { csvCell } from "@/lib/csv";
 import { BookingStatus } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -8,10 +9,6 @@ export const dynamic = "force-dynamic";
 // Route is protected by proxy.ts admin middleware — no extra session check needed.
 
 const STATUSES: BookingStatus[] = ["CONFIRMED", "REFUNDED", "CANCELLED"];
-
-function csvCell(value: string): string {
-  return `"${value.replace(/"/g, '""')}"`;
-}
 
 function csvRow(fields: string[]): string {
   return fields.map(csvCell).join(",");

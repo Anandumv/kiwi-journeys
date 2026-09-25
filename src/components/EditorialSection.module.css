@@ -1,0 +1,25 @@
+/* Long-form public pages share the tour page's numbered, ruled sections. */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 24px clamp(20px, 4.5vw, 72px) 88px; }
+.section { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; padding: 48px 0; border-bottom: 1px solid #202b2626; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: #4c5751; }
+.label b { display: block; margin-bottom: 6px; font-family: var(--font-display); font-size: 30px; font-weight: 500; letter-spacing: 0; color: #202723; }
+.heading { max-width: 760px; font-size: clamp(28px, 3vw, 44px); font-weight: 500; line-height: 1.05; letter-spacing: -.03em; color: #202723; text-wrap: balance; }
+.prose { margin-top: 18px; max-width: 680px; font-size: 17px; line-height: 1.7; color: #34403a; }
+.prose p + p { margin-top: 14px; }
+.list { margin-top: 22px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; max-width: 760px; }
+.list li { display: flex; gap: 12px; padding: 13px 0; border-top: 1px solid #202b2626; line-height: 1.45; }
+.list li::before { content: '—'; color: #203c33; }
+.figures { margin-top: 26px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #202b2626; }
+.figures div { padding: 18px 16px 4px 0; }
+.figures div + div { padding-left: 16px; border-left: 1px solid #202b2626; }
+.figures dd { font-family: var(--font-display); font-size: clamp(44px, 5vw, 72px); font-weight: 500; line-height: .9; color: #202723; }
+.figures dt { margin-top: 8px; font-size: 13px; color: #4c5751; }
+.figures { display: grid; }
+.figures div { display: flex; flex-direction: column-reverse; justify-content: flex-end; }
+@media (max-width: 800px) {
+  .section { grid-template-columns: 1fr; gap: 12px; padding: 36px 0; }
+  .label b { display: inline; margin-right: 10px; font-size: 24px; }
+  .list { grid-template-columns: 1fr; }
+  .figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .figures div:nth-child(3) { padding-left: 0; border-left: 0; }
+}

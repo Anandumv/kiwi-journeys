@@ -34,7 +34,7 @@ export function PrivateTourForm() {
   }
 
   const field =
-    "w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none";
+    "w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -71,8 +71,8 @@ export function PrivateTourForm() {
     return (
       <div className="rounded-2xl border border-teal-200 bg-teal-50 p-8 text-center">
         <p className="text-3xl mb-3">✓</p>
-        <h3 className="font-serif text-xl font-semibold text-brand-900">Enquiry received!</h3>
-        <p className="mt-2 text-sm text-foreground/70">
+        <h3 className="font-serif text-xl font-semibold text-foreground">Enquiry received!</h3>
+        <p className="mt-2 text-sm text-foreground/75">
           Thank you, {form.fullName}. We'll be in touch within one business day with a
           personalised quote.
         </p>
@@ -84,7 +84,7 @@ export function PrivateTourForm() {
     <form onSubmit={submit} className="space-y-5">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
             Full name <span className="text-red-500">*</span>
           </label>
           <input
@@ -96,7 +96,7 @@ export function PrivateTourForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
             Email <span className="text-red-500">*</span>
           </label>
           <input
@@ -109,7 +109,7 @@ export function PrivateTourForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
             Phone
           </label>
           <input
@@ -120,7 +120,7 @@ export function PrivateTourForm() {
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
             Group size <span className="text-red-500">*</span>
           </label>
           <input
@@ -137,18 +137,18 @@ export function PrivateTourForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-2">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-2">
           Tours of interest <span className="text-red-500">*</span>
         </label>
         <div className="grid gap-2 sm:grid-cols-2">
           {TOUR_OPTIONS.map((t) => (
             <label
               key={t}
-              className="flex cursor-pointer items-center gap-3 rounded-lg border border-brand-100 bg-brand-50/50 px-4 py-2.5 text-sm transition hover:border-brand-300"
+              className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#202b2626] bg-[#eeede6]/50 px-4 py-2.5 text-sm transition hover:border-[#202b2640]"
             >
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+                className="h-4 w-4 rounded border-[#202b2640] text-brand-600 focus:ring-brand-500"
                 checked={selectedTours.includes(t)}
                 onChange={() => toggleTour(t)}
               />
@@ -159,7 +159,7 @@ export function PrivateTourForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
           Preferred dates
         </label>
         <input
@@ -171,7 +171,7 @@ export function PrivateTourForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-1">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-1">
           Tell us more
         </label>
         <textarea

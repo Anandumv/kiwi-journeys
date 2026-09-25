@@ -44,27 +44,28 @@ export default async function ContactPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(contactLd) }} />
-      <PageHero eyebrow="Get in touch" title="Contact Us" subtitle="Have questions or want a bespoke private tour? We'd love to help." image="/images/general/tekapo-church-sunset.jpg" />
+      <PageHero eyebrow="Get in touch" title="Get in touch" subtitle="Ask about a day trip, a departure, or planning a day just for your group." image="/images/tours/christchurch-city-sightseeing/7395a4_0f0c66ba88ab4145877047056c87fbea-mv2_1.jpg"
+        caption="Tram line, central Christchurch"
+      />
       <div className="mx-auto grid max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2">
         <div>
-          <h2 className="font-serif text-3xl font-semibold text-brand-900">Send us a message</h2>
-          <p className="mt-2 text-sm text-foreground/70">We typically respond within one business day.</p>
+          <h2 className="font-serif text-3xl font-semibold text-foreground">Send us a message</h2>
+          <p className="mt-2 text-sm text-foreground/75">We typically respond within one business day.</p>
           <div className="mt-6"><ContactForm /></div>
         </div>
         <div className="space-y-6">
-          <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6">
-            <h3 className="font-semibold text-brand-800">Contact details</h3>
+          <div className="border-t border-[#202b2626] py-6">
+            <h3 className="font-semibold text-foreground">Contact details</h3>
             <ul className="mt-3 space-y-2 text-sm text-foreground/80">
               <li>Phone: <a href={site.phoneHref} className="text-brand-600 hover:underline">{site.phone}</a></li>
               <li>Email: <a href={`mailto:${site.email}`} className="text-brand-600 hover:underline">{site.email}</a></li>
               <li>{site.address}</li>
             </ul>
           </div>
-          <div className="rounded-2xl border border-brand-100 p-6">
-            <h3 className="font-semibold text-brand-800">Bespoke private tours</h3>
-            <p className="mt-2 text-sm text-foreground/70">
-              Let us craft a journey that&apos;s uniquely yours — complete flexibility, comfort and
-              exclusivity, built around what matters most to you.
+          <div className="border-t border-[#202b2626] py-6">
+            <h3 className="font-semibold text-foreground">Bespoke private tours</h3>
+            <p className="mt-2 text-sm text-foreground/75">
+              Tell us where you would like to go, your date and group size. We can suggest a private day trip.
             </p>
           </div>
         </div>

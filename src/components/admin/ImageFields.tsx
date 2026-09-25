@@ -16,16 +16,19 @@ async function uploadFile(file: File): Promise<string> {
 export function SingleImageField({ name, label, defaultValue = "" }: { name: string; label: string; defaultValue?: string }) {
   const [url, setUrl] = useState(defaultValue);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0];
     if (!f) return;
+    setError("");
     setBusy(true);
-    try { setUrl(await uploadFile(f)); } finally { setBusy(false); }
+    try { setUrl(await uploadFile(f)); } catch (error) { setError(error instanceof Error ? error.message : "Upload failed. Try again."); } finally { setBusy(false); }
   }
 
   return (
     <div>
+      {error && <p role="alert" className="mb-2 text-sm text-red-700">{error}</p>}
       <label className="block text-sm font-medium text-foreground/80">{label}</label>
       <input type="hidden" name={name} value={url} />
       <div className="mt-2 flex items-center gap-4">
@@ -48,16 +51,18 @@ export function SingleImageField({ name, label, defaultValue = "" }: { name: str
 export function MultiImageField({ name, label, defaultValue = [] }: { name: string; label: string; defaultValue?: string[] }) {
   const [urls, setUrls] = useState<string[]>(defaultValue);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
+    setError("");
     setBusy(true);
     try {
       const added: string[] = [];
       for (const f of files) added.push(await uploadFile(f));
       setUrls((u) => [...u, ...added]);
-    } finally { setBusy(false); }
+    } catch (error) { setError(error instanceof Error ? error.message : "Upload failed. Try again."); } finally { setBusy(false); }
   }
   const move = (i: number, d: number) => setUrls((u) => {
     const n = [...u]; const j = i + d; if (j < 0 || j >= n.length) return u;
@@ -67,7 +72,8 @@ export function MultiImageField({ name, label, defaultValue = [] }: { name: stri
 
   return (
     <div>
-      <label className="block text-sm font-medium text-foreground/80">{label} <span className="text-xs text-foreground/45">(first image is the hero)</span></label>
+      {error && <p role="alert" className="mb-2 text-sm text-red-700">{error}</p>}
+      <label className="block text-sm font-medium text-foreground/80">{label} <span className="text-xs text-foreground/60">(first image is the hero)</span></label>
       <input type="hidden" name={name} value={urls.join("\n")} />
       <div className="mt-2 grid grid-cols-3 gap-3 sm:grid-cols-4">
         {urls.map((u, i) => (

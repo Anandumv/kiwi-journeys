@@ -12,8 +12,8 @@ export default async function PrivacyPage() {
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
-      <h1 className="font-serif text-4xl font-semibold text-brand-900">Privacy Policy</h1>
-      <p className="mt-2 text-sm text-foreground/50">Last updated: {updated}</p>
+      <h1 className="font-serif text-4xl font-semibold text-foreground">Privacy Policy</h1>
+      <p className="mt-2 text-sm text-foreground/75">Last updated: {updated}</p>
 
       <div className="mt-8 space-y-8 text-foreground/80 leading-relaxed">
         <section>
@@ -25,7 +25,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">1. What information we collect</h2>
+          <h2 className="text-xl font-semibold text-foreground">1. What information we collect</h2>
           <p className="mt-3">We collect personal information that you provide when:</p>
           <ul className="mt-3 list-disc pl-6 space-y-1 text-sm">
             <li>Making a tour booking — name, email address, phone number, pickup location, and special requests</li>
@@ -41,7 +41,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">2. Why we collect it</h2>
+          <h2 className="text-xl font-semibold text-foreground">2. Why we collect it</h2>
           <p className="mt-3">We use your personal information to:</p>
           <ul className="mt-3 list-disc pl-6 space-y-1 text-sm">
             <li>Process and confirm your booking and communicate about it</li>
@@ -55,7 +55,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">3. Marketing communications</h2>
+          <h2 className="text-xl font-semibold text-foreground">3. Marketing communications</h2>
           <p className="mt-3">
             We will only send you marketing emails (tour news, offers, travel inspiration) if you have explicitly opted in
             at the time of booking or newsletter signup. Each marketing email includes an unsubscribe link. You can also
@@ -69,7 +69,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">4. Who we share your information with</h2>
+          <h2 className="text-xl font-semibold text-foreground">4. Who we share your information with</h2>
           <p className="mt-3">We share your information only where necessary:</p>
           <ul className="mt-3 list-disc pl-6 space-y-1 text-sm">
             <li>
@@ -90,7 +90,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">5. How long we keep your information</h2>
+          <h2 className="text-xl font-semibold text-foreground">5. How long we keep your information</h2>
           <p className="mt-3">
             We retain booking records for seven years to meet our tax and legal obligations under New Zealand law.
             Newsletter subscribers are retained until they unsubscribe. Contact form enquiries are retained for two years.
@@ -98,7 +98,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">6. Your rights under the Privacy Act 2020</h2>
+          <h2 className="text-xl font-semibold text-foreground">6. Your rights under the Privacy Act 2020</h2>
           <p className="mt-3">Under the New Zealand Privacy Act 2020 you have the right to:</p>
           <ul className="mt-3 list-disc pl-6 space-y-1 text-sm">
             <li>Ask whether we hold personal information about you</li>
@@ -115,7 +115,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">7. Cookies and analytics</h2>
+          <h2 className="text-xl font-semibold text-foreground">7. Cookies and analytics</h2>
           <p className="mt-3">
             Our website may use cookies and similar technologies to improve your browsing experience and to understand
             how visitors use our site. Analytics data is aggregated and does not identify you personally. You can disable
@@ -124,7 +124,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">8. Security</h2>
+          <h2 className="text-xl font-semibold text-foreground">8. Security</h2>
           <p className="mt-3">
             We take reasonable steps to protect your personal information from unauthorised access, loss, or misuse.
             Payment transactions are encrypted via TLS and handled by Stripe, which is PCI DSS compliant.
@@ -132,7 +132,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">9. Changes to this policy</h2>
+          <h2 className="text-xl font-semibold text-foreground">9. Changes to this policy</h2>
           <p className="mt-3">
             We may update this Privacy Policy from time to time. The &ldquo;last updated&rdquo; date at the top of this
             page shows when it was last revised. Continued use of our website after changes are posted constitutes your
@@ -141,7 +141,7 @@ export default async function PrivacyPage() {
         </section>
 
         <section>
-          <h2 className="text-xl font-semibold text-brand-900">10. Contact us</h2>
+          <h2 className="text-xl font-semibold text-foreground">10. Contact us</h2>
           <p className="mt-3">
             For any privacy enquiries, please contact us at{" "}
             <a href={`mailto:${site.email}`} className="text-brand-600 underline">{site.email}</a>

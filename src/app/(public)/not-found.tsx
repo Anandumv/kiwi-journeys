@@ -1,15 +1,18 @@
 import Link from "next/link";
+import { TaskShell } from "@/components/TaskShell";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-4 text-center">
-      <p className="eyebrow text-sand-600">404</p>
-      <h1 className="mt-3 font-serif text-4xl font-semibold text-brand-900">This page wandered off the trail</h1>
-      <p className="mt-3 text-foreground/65">We couldn&apos;t find what you were looking for. Let&apos;s get you back on track.</p>
-      <div className="mt-7 flex gap-3">
-        <Link href="/" className="rounded-full bg-brand-600 px-6 py-3 text-sm font-semibold text-white hover:bg-brand-700">Home</Link>
-        <Link href="/tours" className="rounded-full border border-brand-300 px-6 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-50">Browse tours</Link>
-      </div>
-    </div>
+    <TaskShell eyebrow="404 · Page not found" title="Off the map" intro="That page doesn&apos;t exist or has moved. These will get you back on the road.">
+      <ul className="border-t border-[#202b2626]">
+        {[["/tours", "All day tours"], ["/destinations", "Destinations"], ["/private-tours", "Private tours"], ["/contact", "Contact us"]].map(([href, label]) => (
+          <li key={href}>
+            <Link href={href} className="group flex items-center justify-between border-b border-[#202b2626] py-4 text-xl font-medium tracking-[-.02em] text-foreground">
+              {label}<span aria-hidden="true" className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">↗</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </TaskShell>
   );
 }

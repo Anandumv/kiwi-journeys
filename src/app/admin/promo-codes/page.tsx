@@ -1,3 +1,4 @@
+import { ConfirmSubmit } from "@/components/admin/ConfirmSubmit";
 import { prisma } from "@/lib/db";
 import { formatNZD } from "@/lib/money";
 import { createPromoCode, deletePromoCode, togglePromoCode, updatePromoCode } from "../actions";
@@ -155,9 +156,9 @@ export default async function AdminPromoCodes({
                       {c.isActive ? "Disable" : "Enable"}
                     </button>
                   </form>
-                  <form action={deletePromoCode} onSubmit={(e) => { if (!confirm("Delete this promo code?")) e.preventDefault(); }}>
+                  <form action={deletePromoCode}>
                     <input type="hidden" name="id" value={c.id} />
-                    <button type="submit" className="text-xs text-red-500 hover:underline">Delete</button>
+                    <ConfirmSubmit message="Delete this promo code?">Delete</ConfirmSubmit>
                   </form>
                 </td>
               </tr>

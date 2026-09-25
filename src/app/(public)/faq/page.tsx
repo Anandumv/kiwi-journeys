@@ -35,25 +35,39 @@ export default function FaqPage() {
       <PageHero
         eyebrow="Help & information"
         title="Frequently Asked Questions"
-        subtitle="Everything you need to know before you book."
-        image="/images/general/tekapo-church-sunset.jpg"
+        subtitle="Practical answers on booking, departures and changes."
+        image="/images/tours/christchurch-city-sightseeing/7395a4_d9ebe4a801d948a1bbfab7a3f6609555-mv2_4.jpg"
+        caption="Port Hills, Christchurch"
       />
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6">
-        <div className="space-y-12">
-          {faqCategories.map((cat) => (
-            <section key={cat.title}>
-              <h2 className="font-serif text-2xl font-semibold text-brand-900 mb-6">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-20">
+        <nav aria-label="FAQ topics" className="lg:sticky lg:top-28 lg:h-fit">
+          <p className="text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75">Topics</p>
+          <ol className="mt-3 border-t border-[#202b2626]">
+            {faqCategories.map((cat, i) => (
+              <li key={cat.title}>
+                <a href={`#faq-${i + 1}`} className="flex gap-3 border-b border-[#202b2626] py-3 text-sm font-medium text-foreground/80 hover:text-foreground">
+                  <span className="tabular-nums text-foreground/75">{String(i + 1).padStart(2, "0")}</span>{cat.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <div>
+        <div className="space-y-16">
+          {faqCategories.map((cat, i) => (
+            <section key={cat.title} id={`faq-${i + 1}`} className="scroll-mt-28">
+              <h2 className="border-b-2 border-foreground pb-3 font-[family-name:var(--font-display)] text-[clamp(38px,4vw,56px)] font-medium leading-none tracking-[-.02em] text-foreground">
                 {cat.title}
               </h2>
-              <div className="space-y-4">
+              <div>
                 {cat.items.map((item) => (
                   <details
                     key={item.q}
-                    className="group rounded-2xl border border-brand-100 bg-white px-6 py-4 shadow-sm"
+                    className="group border-b border-[#202b2626] py-5"
                   >
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-brand-800 marker:hidden">
+                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 text-lg font-medium tracking-[-.01em] text-foreground marker:hidden [&::-webkit-details-marker]:hidden">
                       {item.q}
-                      <span className="shrink-0 text-brand-400 transition-transform group-open:rotate-180">
+                      <span className="shrink-0 text-foreground/75 transition-transform duration-300 group-open:rotate-180">
                         <svg
                           width="20"
                           height="20"
@@ -72,7 +86,7 @@ export default function FaqPage() {
                         </svg>
                       </span>
                     </summary>
-                    <p className="mt-3 text-sm leading-relaxed text-foreground/70">{item.a}</p>
+                    <p className="mt-3 max-w-2xl leading-relaxed text-foreground/75">{item.a}</p>
                   </details>
                 ))}
               </div>
@@ -80,25 +94,26 @@ export default function FaqPage() {
           ))}
         </div>
 
-        <div className="mt-16 rounded-2xl border border-brand-100 bg-brand-50 p-8 text-center">
-          <h3 className="font-serif text-xl font-semibold text-brand-900">Still have questions?</h3>
-          <p className="mt-2 text-sm text-foreground/70">
+        <div className="mt-16 border-t border-[#202b2626] pt-8">
+          <h2 className="text-2xl font-medium tracking-[-.02em] text-foreground">Still have questions?</h2>
+          <p className="mt-2 text-sm text-foreground/75">
             Our team typically responds within one business day.
           </p>
-          <div className="mt-4 flex flex-wrap justify-center gap-3">
+          <div className="mt-5 flex flex-wrap gap-3">
             <Link
               href="/contact"
-              className="rounded-full bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
+              className="bg-[#203c33] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#315445]"
             >
               Contact us
             </Link>
             <Link
               href="/private-tours"
-              className="rounded-full border border-brand-200 px-6 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
+              className="border border-foreground px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-foreground hover:text-[#f8f8f3]"
             >
               Enquire about a private tour
             </Link>
           </div>
+        </div>
         </div>
       </div>
     </>

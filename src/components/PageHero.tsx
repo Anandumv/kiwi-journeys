@@ -1,24 +1,34 @@
 import Image from "next/image";
+import styles from "./PageHero.module.css";
 
 export function PageHero({
   title,
   subtitle,
   eyebrow,
   image = "/images/general/arthurs-pass-landscape.jpg",
+  caption = "South Island, New Zealand",
 }: {
   title: string;
   subtitle?: string;
   eyebrow?: string;
   image?: string;
+  caption?: string;
 }) {
   return (
-    <section className="relative isolate -mt-16 flex min-h-[52vh] items-end overflow-hidden">
-      <Image src={image} alt="" fill priority className="-z-10 object-cover" />
-      <div className="-z-10 absolute inset-0 bg-gradient-to-t from-brand-950/85 via-brand-950/45 to-brand-950/30" />
-      <div className="mx-auto w-full max-w-7xl px-4 pb-14 pt-28 sm:px-6">
-        {eyebrow && <p className="eyebrow text-sand-400">{eyebrow}</p>}
-        <h1 className="mt-3 max-w-3xl font-serif text-4xl font-semibold text-white text-balance sm:text-6xl">{title}</h1>
-        {subtitle && <p className="mt-4 max-w-2xl text-lg text-brand-100/90">{subtitle}</p>}
+    <section className={styles.hero} aria-labelledby="page-heading">
+      <div className={styles.inner}>
+        <div className={styles.copy}>
+          <p className={styles.top}>{eyebrow || "South Island / New Zealand"}</p>
+          <div className={styles.body}>
+            <h1 id="page-heading" className={styles.title}>{title}</h1>
+            {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+          </div>
+          <p className={styles.foot}>Kiwi Globe Tours · Christchurch</p>
+        </div>
+        <div className={styles.media}>
+          <Image src={image} alt="" fill priority sizes="(max-width: 800px) 100vw, 58vw" className={styles.image} />
+          <span className={styles.caption}>{caption}</span>
+        </div>
       </div>
     </section>
   );

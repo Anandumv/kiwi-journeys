@@ -25,7 +25,7 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
   if (reservation.status === "CONVERTED" && reservation.booking) {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <p className="text-lg text-brand-800">This booking is already confirmed.</p>
+        <p className="text-lg text-foreground">This booking is already confirmed.</p>
         <Link href={`/booking/${reservation.booking.reference}`} className="mt-4 inline-block font-semibold text-brand-600 hover:underline">View confirmation →</Link>
       </div>
     );
@@ -36,8 +36,8 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
   if (expired) {
     return (
       <div className="mx-auto max-w-lg px-4 py-20 text-center">
-        <h1 className="text-2xl font-bold text-brand-900">Your seat hold has expired</h1>
-        <p className="mt-3 text-foreground/70">Reservations are held for a limited time. Please choose your date and seats again.</p>
+        <h1 className="text-2xl font-bold text-foreground">Your seat hold has expired</h1>
+        <p className="mt-3 text-foreground/75">Reservations are held for a limited time. Please choose your date and seats again.</p>
         <Link href={`/tours/${reservation.session.tour.slug}/book`} className="mt-6 inline-block rounded-full bg-brand-600 px-6 py-3 font-semibold text-white hover:bg-brand-700">
           Start a new booking
         </Link>
@@ -61,14 +61,14 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <h1 className="text-3xl font-bold text-brand-900">Checkout</h1>
+      <h1 className="text-3xl font-bold text-foreground">Checkout</h1>
       <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_1fr]">
         {/* Summary */}
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm lg:order-2 lg:h-fit">
-          <h2 className="text-lg font-semibold text-brand-900">{reservation.session.tour.title}</h2>
-          <p className="mt-1 text-sm text-foreground/70">{dateLabel(reservation.session.startsAtUtc)}</p>
-          <p className="text-sm text-foreground/70">Departs {timeLabel(reservation.session.startsAtUtc)} (NZ time)</p>
-          <div className="mt-4 space-y-2 border-t border-brand-50 pt-4">
+        <div className="rounded-2xl border border-[#202b2626] bg-white p-6 lg:order-2 lg:h-fit">
+          <h2 className="text-lg font-semibold text-foreground">{reservation.session.tour.title}</h2>
+          <p className="mt-1 text-sm text-foreground/75">{dateLabel(reservation.session.startsAtUtc)}</p>
+          <p className="text-sm text-foreground/75">Departs {timeLabel(reservation.session.startsAtUtc)} (NZ time)</p>
+          <div className="mt-4 space-y-2 border-t border-[#202b2626] pt-4">
             {lines.map((l, i) => (
               <div key={i} className="flex justify-between text-sm">
                 <span className="text-foreground/80">{l.qty} × {l.label}</span>
@@ -76,16 +76,16 @@ export default async function CheckoutPage({ params }: { params: Promise<{ reser
               </div>
             ))}
           </div>
-          <div className="mt-4 flex justify-between border-t border-brand-50 pt-4 text-lg font-bold text-brand-700">
+          <div className="mt-4 flex justify-between border-t border-[#202b2626] pt-4 text-lg font-bold text-brand-700">
             <span>Total</span><span>{formatNZD(reservation.totalCents)}</span>
           </div>
           {/* GST is contained in the total shown above, never added to it. */}
           {gstGst && (
-            <div className="mt-2 flex justify-between text-xs text-foreground/55">
+            <div className="mt-2 flex justify-between text-xs text-foreground/75">
               <span>Includes GST (15%)</span><span>{formatNZD(gstGst.gstCents)}</span>
             </div>
           )}
-          <p className="mt-2 text-xs text-foreground/50">Charged in NZD. Seats held until {timeLabel(reservation.expiresAt)}.</p>
+          <p className="mt-2 text-xs text-foreground/75">Charged in NZD. Seats held until {timeLabel(reservation.expiresAt)}.</p>
         </div>
 
         {/* Payment */}

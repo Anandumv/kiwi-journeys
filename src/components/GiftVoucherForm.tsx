@@ -45,10 +45,10 @@ function GiftVoucherPayment({
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
-      <div className="rounded-xl border border-brand-100 bg-brand-50/50 p-4 text-sm text-foreground/70">
-        Paying <strong className="text-brand-800">{formatNZD(amountCents)} NZD</strong> — gift voucher for {purchaserName}.
+      <div className="rounded-xl border border-[#202b2626] bg-[#eeede6]/50 p-4 text-sm text-foreground/75">
+        Paying <strong className="text-foreground">{formatNZD(amountCents)} NZD</strong> — gift voucher for {purchaserName}.
       </div>
-      <div className="rounded-xl border border-brand-100 p-4">
+      <div className="rounded-xl border border-[#202b2626] p-4">
         <PaymentElement />
       </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -80,7 +80,7 @@ export function GiftVoucherForm() {
 
   const amountCents = selectedPreset ?? (Math.round(Number(form.customAmount) * 100) || 0);
   const field =
-    "w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none";
+    "w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none";
 
   async function proceedToPayment(e: React.FormEvent) {
     e.preventDefault();
@@ -139,7 +139,7 @@ export function GiftVoucherForm() {
   return (
     <form onSubmit={proceedToPayment} className="space-y-6">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-3">
           Voucher value
         </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -150,8 +150,8 @@ export function GiftVoucherForm() {
               onClick={() => { setSelectedPreset(a); setForm({ ...form, customAmount: "" }); }}
               className={`rounded-xl border py-3 text-sm font-semibold transition ${
                 selectedPreset === a
-                  ? "border-brand-500 bg-brand-50 text-brand-700"
-                  : "border-brand-100 hover:border-brand-300"
+                  ? "border-brand-500 bg-[#eeede6] text-brand-700"
+                  : "border-[#202b2626] hover:border-[#202b2640]"
               }`}
             >
               {formatNZD(a)}
@@ -159,15 +159,15 @@ export function GiftVoucherForm() {
           ))}
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <span className="text-sm text-foreground/50">or enter custom:</span>
+          <span className="text-sm text-foreground/75">or enter custom:</span>
           <div className="relative flex items-center">
-            <span className="absolute left-3 text-sm text-foreground/50">NZD $</span>
+            <span className="absolute left-3 text-sm text-foreground/75">NZD $</span>
             <input
               type="number"
               min="50"
               max="2000"
               step="1"
-              className="w-28 rounded-lg border border-brand-200 pl-14 pr-3 py-2 text-sm focus:border-brand-500 focus:outline-none"
+              className="w-28 rounded-lg border border-[#202b2640] pl-14 pr-3 py-2 text-sm focus:border-foreground focus:outline-none"
               placeholder="e.g. 75"
               value={form.customAmount}
               onChange={(e) => { setForm({ ...form, customAmount: e.target.value }); setSelectedPreset(null); }}
@@ -177,7 +177,7 @@ export function GiftVoucherForm() {
       </div>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-3">
           Your details
         </p>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -200,7 +200,7 @@ export function GiftVoucherForm() {
       </div>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/50 mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-foreground/75 mb-3">
           Recipient (optional)
         </p>
         <div className="grid gap-3 sm:grid-cols-2">

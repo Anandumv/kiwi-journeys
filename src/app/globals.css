@@ -15,8 +15,9 @@
   --color-brand-300: #6fb083;
   --color-brand-400: #3f9760;
   --color-brand-500: #2c8551;
-  --color-brand-600: #237043;
-  --color-brand-700: #1d5a37;
+  /* 600/700 match the homepage ink green so every primary button reads as one system. */
+  --color-brand-600: #203c33;
+  --color-brand-700: #315445;
   --color-brand-800: #19482d;
   --color-brand-900: #123823;
   --color-brand-950: #0b2417;
@@ -48,11 +49,36 @@
   --color-stone-500: #9c8f78;
 
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-serif: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  /* One editorial voice: condensed display for page titles, Geist for everything else.
+     `font-serif` is kept as a class name across the codebase but now means "section heading". */
+  --font-serif: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), "Arial Narrow", sans-serif;
+
+  /* Controls and panels are near-square, matching the ruled field-guide layouts. */
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 3px;
+  --radius-2xl: 4px;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-brand-500);
+  outline-offset: 4px;
+}
+
+h1, h2, h3 { text-wrap: balance; }
+
+@keyframes reveal {
+  from { transform: translateY(var(--reveal-y, 24px)); }
+  to { transform: translateY(0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { animation: reveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) backwards; }
 }
 
 body {
@@ -63,7 +89,11 @@ body {
 
 .font-serif {
   font-family: var(--font-serif);
+  letter-spacing: -0.022em;
 }
+
+/* Links and buttons are square-cornered; round shapes stay for dots and step markers only. */
+a.rounded-full, button.rounded-full, input.rounded-full { border-radius: 2px; }
 
 .text-balance {
   text-wrap: balance;
@@ -94,8 +124,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
   * {
     animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
 }

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import { saveSettings } from "../actions";
+import { SettingsForm } from "@/components/admin/SettingsForm";
 import { SingleImageField } from "@/components/admin/ImageFields";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export default async function AdminSettings() {
   return (
     <div className="p-8">
       <h1 className="font-serif text-3xl font-semibold text-brand-900">Site Settings</h1>
-      <form action={saveSettings} className="mt-6 max-w-3xl space-y-5">
+      <SettingsForm>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="text-sm">Brand name<input name="name" defaultValue={s.name} className={input} /></label>
           <label className="text-sm">Tagline<input name="tagline" defaultValue={s.tagline} className={input} /></label>
@@ -45,30 +45,7 @@ export default async function AdminSettings() {
         </label>
         <label className="block text-sm">Currency rates (1 NZD = …)<textarea name="currencyRates" rows={4} defaultValue={J(s.currencyRates)} className={`${input} font-mono text-xs`} data-json /></label>
 
-        <div id="json-error" className="hidden rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" />
-
-        <button id="settings-submit" className="rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white hover:bg-brand-700">Save settings</button>
-      </form>
-      <script dangerouslySetInnerHTML={{ __html: `
-        document.querySelector('form').addEventListener('submit', function(e) {
-          const err = document.getElementById('json-error');
-          err.textContent = '';
-          err.classList.add('hidden');
-          const fields = this.querySelectorAll('textarea[data-json]');
-          for (const f of fields) {
-            f.style.borderColor = '';
-            try { JSON.parse(f.value); } catch (ex) {
-              e.preventDefault();
-              f.style.borderColor = '#ef4444';
-              f.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              const label = f.closest('label')?.firstChild?.textContent?.trim() || 'A JSON field';
-              err.textContent = label + ': ' + ex.message;
-              err.classList.remove('hidden');
-              return;
-            }
-          }
-        });
-      ` }} />
+      </SettingsForm>
     </div>
   );
 }

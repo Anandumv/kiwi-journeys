@@ -29,7 +29,7 @@ export default function UnsubscribeClient({ e }: { e: string }) {
   if (!e) {
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
-        <p className="text-foreground/60">Invalid unsubscribe link. Please use the link from your email.</p>
+        <p className="text-foreground/75">Invalid unsubscribe link. Please use the link from your email.</p>
       </div>
     );
   }
@@ -38,8 +38,8 @@ export default function UnsubscribeClient({ e }: { e: string }) {
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
         <div className="text-5xl">✓</div>
-        <h1 className="mt-4 font-serif text-2xl font-semibold text-brand-900">You&apos;ve been unsubscribed</h1>
-        <p className="mt-2 text-sm text-foreground/60">
+        <h1 className="mt-4 font-serif text-2xl font-semibold text-foreground">You&apos;ve been unsubscribed</h1>
+        <p className="mt-2 text-sm text-foreground/75">
           You won&apos;t receive any more marketing emails from us. We&apos;re sorry to see you go!
         </p>
         <Link
@@ -54,8 +54,8 @@ export default function UnsubscribeClient({ e }: { e: string }) {
 
   return (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <h1 className="font-serif text-2xl font-semibold text-brand-900">Unsubscribe</h1>
-      <p className="mt-2 text-sm text-foreground/60">
+      <h1 className="font-serif text-2xl font-semibold text-foreground">Unsubscribe</h1>
+      <p className="mt-2 text-sm text-foreground/75">
         Are you sure you want to unsubscribe from our newsletter?
       </p>
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}

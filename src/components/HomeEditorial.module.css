@@ -1,0 +1,239 @@
+/* The home page uses the typography and numbering of a printed field guide. */
+.page { --ink: #202723; --paper: #f8f8f3; position: relative; z-index: 1; background: var(--paper); color: var(--ink); }
+.hero { position: relative; margin-top: -4rem; background: #182923; color: white; }
+.heroFrame { position: sticky; top: 0; isolation: isolate; min-height: 100svh; overflow: hidden; padding: 110px 4vw 32px; display: flex; flex-direction: column; justify-content: space-between; }
+.heroPhoto, .heroVideo { z-index: -3; object-fit: cover; }
+.heroVideo { position: absolute; inset: 0; height: 100%; width: 100%; opacity: 0; transition: opacity .5s; }
+.videoReady { opacity: 1; }
+.heroShade { position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg,rgba(12,24,26,.55),rgba(12,24,26,.1) 32%,rgba(12,24,26,.65)); }
+.heroTopline { display: flex; justify-content: space-between; gap: 16px; font-size: 11px; text-transform: uppercase; letter-spacing: .13em; border-top: 1px solid #ffffff70; padding-top: 15px; }
+.heroContent { margin-top: 48px; }
+.heroIntro { margin-left: 51%; font-size: 16px; line-height: 1.4; }
+.heroTitle { margin: 20px 0 24px; font-size: clamp(100px,17vw,250px); line-height: .77; font-weight: 600; letter-spacing: -.085em; text-wrap: initial; }
+.heroTitle span { display: block; padding-left: 15%; }
+.heroBottom { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-top: 38px; }
+.heroBottom p { font-size: 14px; line-height: 1.6; }
+.heroCta { display: flex; align-items: center; justify-content: space-between; gap: 54px; padding: 18px 23px; background: #e8f174; color: #202723; font-size: 15px; font-weight: 600; }
+.heroCta span { font-size: 24px; line-height: 1; }
+.heroCta:hover { background: #f4f6b6; }
+.routeBar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 23px 4vw; border-bottom: 1px solid #20272330; font-size: 12px; }
+.routeBar a { text-decoration: underline; text-underline-offset: 5px; }
+.tours { padding: 88px 4vw 0; max-width: 1600px; margin: auto; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.sectionHeading { display: grid; grid-template-columns: 1fr 2fr 1fr; align-items: start; gap: 28px; padding-bottom: 48px; }
+.sectionHeading h2 { font-size: clamp(32px,4.4vw,66px); line-height: 1.03; letter-spacing: -.06em; font-weight: 500; }
+.textLink { justify-self: end; align-self: end; font-size: 13px; padding-bottom: 6px; border-bottom: 1px solid; }
+.tourLayout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 6vw; }
+.leadPhoto { position: relative; aspect-ratio: 1.12; overflow: hidden; background: #dfe4de; }
+.cover { object-fit: cover; transition: transform .6s; }
+.leadTour:hover .cover, .indexTour:hover .cover { transform: scale(1.025); }
+.photoLabel { position: absolute; left: 20px; bottom: 20px; padding: 6px 10px; background: #f8f8f3; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.tourMeta { display: flex; justify-content: space-between; gap: 15px; margin-top: 19px; font-size: 11px; text-transform: uppercase; letter-spacing: .025em; }
+.leadTour h3 { display: flex; justify-content: space-between; gap: 24px; font-size: clamp(25px,2.6vw,38px); font-weight: 500; letter-spacing: -.04em; line-height: 1.15; margin-top: 12px; }
+.leadSummary { font-size: 14px; line-height: 1.75; margin-top: 15px; max-width: 530px; color: #535b55; }
+.indexTitle { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding-bottom: 20px; border-bottom: 1px solid #20272370; }
+.indexTour { display: grid; grid-template-columns: 22px 1fr 85px; gap: 16px; padding: 24px 0; border-bottom: 1px solid #20272330; }
+.tourNumber { font-size: 10px; padding-top: 4px; color: #59635c; }
+.indexMeta { font-size: 10px; color: #535b55; text-transform: uppercase; letter-spacing: .04em; }
+.indexTour h3 { font-size: 19px; font-weight: 500; letter-spacing: -.04em; line-height: 1.2; margin: 7px 0 10px; }
+.indexPrice { font-size: 12px; display: flex; justify-content: space-between; }
+.thumb { position: relative; aspect-ratio: 1; overflow: hidden; }
+.indexAll { display: flex; justify-content: space-between; font-size: 13px; font-weight: 500; margin-top: 24px; }
+.categories { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 30px; margin-top: 70px; padding: 26px 0; border-top: 1px solid #20272330; font-size: 12px; }
+.categories > span { margin-right: auto; color: #535b55; }
+.categories a:hover, .indexAll:hover, .textLink:hover { text-decoration: underline; text-underline-offset: 5px; }
+.destinations { display: grid; grid-template-columns: 1fr 1.25fr; gap: 8vw; background: #20362f; color: #f8f8f3; padding: 75px 4vw 85px; }
+.destinationIntro h2 { margin-top: 45px; font-size: clamp(40px,5vw,72px); line-height: .98; letter-spacing: -.06em; font-weight: 500; }
+.destinationFigure { max-width: 350px; margin-top: 40px; }
+.destinationPhoto { position: relative; aspect-ratio: 4/3; background: #385447; }
+.destinationFigure figcaption { font-size: 10px; margin-top: 12px; color: #d3dbd4; }
+.destinationList > p { font-size: 13px; margin-bottom: 30px; }
+.destinationList > a { display: grid; grid-template-columns: 20px 1fr 24px; align-items: start; gap: 20px; border-top: 1px solid #ffffff40; padding: 23px 0; }
+.destinationNumber { font-size: 10px; margin-top: 7px; color: #d3dbd4; }
+.destinationList h3 { font-size: clamp(24px,3vw,42px); line-height: 1.1; font-weight: 400; letter-spacing: -.045em; }
+.destinationList a:hover h3 { color: #e8f174; }
+.destinationList a p { font-size: 12px; line-height: 1.5; color: #d3dbd4; margin-top: 10px; }
+.destinationList .allDestinations { display: block; font-size: 13px; padding-bottom: 0; }
+.private { padding: 82px 4vw; }
+.privateLayout { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10vw; margin-top: 45px; }
+.private h2 { font-size: clamp(50px,8.7vw,130px); line-height: .94; letter-spacing: -.07em; font-weight: 500; }
+.private h2 > span { color: #647340; }
+.privateCopy { padding-top: 4px; max-width: 440px; }
+.privateCopy > p { font-size: 19px; line-height: 1.5; letter-spacing: -.02em; }
+.darkCta { display: flex; justify-content: space-between; padding: 18px 20px; font-size: 13px; background: #20362f; color: white; margin-top: 26px; }
+.darkCta:hover { background: #355548; }
+.practical { margin-top: 48px; padding-top: 20px; border-top: 1px solid #20272330; font-size: 12px; line-height: 1.6; }
+.practical h3 { font-weight: 600; margin-bottom: 8px; }
+.practical p { color: #535b55; }
+.practical a { display: block; margin-top: 14px; text-decoration: underline; text-underline-offset: 4px; }
+.guests { border-top: 1px solid #20272330; padding: 45px 4vw 70px; }
+.quotes { display: grid; grid-template-columns: repeat(3,1fr); gap: 40px; margin-top: 35px; }
+.quotes blockquote { font-size: 17px; line-height: 1.6; letter-spacing: -.02em; }
+.quotes figcaption { font-size: 11px; margin-top: 25px; }
+.quotes figcaption > span { color: #535b55; }
+.rating { display: block; margin-top: 8px; letter-spacing: .1em; }
+@media (prefers-reduced-motion: no-preference) { .hero { height: 125svh; } }
+@media (min-width: 1600px) { .destinations, .private, .guests { padding-left: max(4vw,calc((100vw - 1472px)/2)); padding-right: max(4vw,calc((100vw - 1472px)/2)); } }
+@media (max-width: 1000px) {
+  .sectionHeading { grid-template-columns: 1fr 2fr; }.sectionHeading .textLink { grid-column: 2; justify-self: start; }
+  .tourLayout { gap: 30px; }.indexTour { grid-template-columns: 1fr 64px; gap: 12px; }.tourNumber { display: none; }.indexTour h3 { font-size: 16px; }
+  .heroTitle { font-size: 20vw; }.heroIntro { margin-left: 65%; font-size: 13px; }.heroBottom p { max-width: 290px; }
+}
+@media (max-width: 760px) {
+  .heroFrame { padding: 100px 20px 26px; min-height: 100svh; }.heroTopline { font-size: 9px; }.heroTopline > span { display: none; }
+  .heroContent { margin-top: 45px; }.heroIntro { margin-left: 42%; font-size: 12px; margin-bottom: 40px; }.heroTitle { font-size: 25vw; margin: 0; }.heroTitle span { padding-left: 6%; }
+  .heroBottom { display: block; margin-top: 40px; }.heroBottom p { font-size: 12px; max-width: none; }.heroCta { margin-top: 22px; font-size: 13px; padding: 15px 18px; }.heroCta span { font-size: 20px; }
+  .routeBar { padding: 18px 20px; font-size: 10px; }.routeBar > span:nth-child(2) { display: none; }
+  .tours { padding: 50px 20px 0; }.sectionHeading { display: block; padding-bottom: 28px; }.sectionHeading h2 { margin-top: 24px; font-size: 39px; }.textLink { display: inline-block; margin-top: 22px; }
+  .tourLayout { grid-template-columns: 1fr; gap: 38px; }.leadPhoto { aspect-ratio: 1.1; }.leadTour h3 { font-size: 27px; }.leadSummary { font-size: 13px; }
+  .indexTour { grid-template-columns: 20px 1fr 75px; gap: 12px; padding: 20px 0; }.tourNumber { display: block; }.indexTour h3 { font-size: 18px; }.categories { margin-top: 40px; padding: 24px 0; gap: 18px; }.categories > span { width: 100%; }
+  .destinations { grid-template-columns: 1fr; padding: 45px 20px; gap: 40px; }.destinationIntro h2 { margin-top: 25px; font-size: 50px; }.destinationFigure { margin-top: 28px; max-width: none; }.destinationPhoto { aspect-ratio: 1.6; }.destinationList h3 { font-size: 30px; }.destinationList > a { gap: 12px; }.destinationList > p { margin-bottom: 22px; }
+  .private { padding: 50px 20px; }.privateLayout { grid-template-columns: 1fr; gap: 32px; margin-top: 28px; }.private h2 { font-size: 72px; }.privateCopy > p { font-size: 17px; }.practical { margin-top: 30px; }
+  .guests { padding: 35px 20px 45px; }.quotes { grid-template-columns: 1fr; gap: 30px; }.quotes figure + figure { border-top: 1px solid #20272330; padding-top: 25px; }.quotes blockquote { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .cover, .heroVideo { transition: none; }.leadTour:hover .cover, .indexTour:hover .cover { transform: none; } }
+
+/* Travel Next Level reference: tall type and a clear landscape stage. */
+.heroFrame { justify-content: flex-start; }
+.heroContent { display: flex; flex-direction: column; flex: 1; margin-top: 50px; }
+.heroIntro { order: 1; margin: auto 0 0; padding-top: 80px; font-size: 12px; }
+.heroTitle { order: 0; font-family: var(--font-barlow-condensed), sans-serif; font-size: clamp(80px,8.5vw,132px); font-weight: 500; line-height: .93; letter-spacing: -.025em; margin: 0; }
+.heroTitle span { padding-left: 0; display: inline; }
+.heroBottom { order: 2; display: block; margin-top: 16px; }
+.heroBottom p { max-width: 330px; font-size: 13px; }
+.heroCta { display: inline-flex; min-width: 195px; margin-top: 22px; background: #f8f8f3; font-size: 13px; padding: 16px 20px; }
+.heroCta:hover { background: white; }
+.heroShade { background: linear-gradient(90deg,rgba(12,24,26,.65),rgba(12,24,26,.22) 55%,rgba(12,24,26,.1)); }
+@media (max-width: 760px) {
+  .heroContent { margin-top: 35px; }
+  .heroTitle { font-size: clamp(76px,20vw,112px); }
+  .heroIntro { margin: auto 0 0; padding-top: 130px; font-size: 11px; }
+  .heroBottom { margin-top: 12px; }
+  .heroBottom p { font-size: 12px; }
+  .heroCta { margin-top: 20px; min-width: 200px; }
+}
+
+.heroTopline a { white-space: nowrap; }
+
+/* The carriage surround recedes as the window becomes the landscape. */
+.hero { --journey-progress: 0; background: #1c292b; }
+.carriageWindow {
+  position: absolute; z-index: -2;
+  top: calc(18% * (1 - var(--journey-progress)));
+  right: calc(4% * (1 - var(--journey-progress)));
+  bottom: calc(13% * (1 - var(--journey-progress)));
+  left: calc(36% * (1 - var(--journey-progress)));
+  padding: calc(18px * (1 - var(--journey-progress)));
+  border-radius: calc(85px * (1 - var(--journey-progress)));
+  background: linear-gradient(135deg, #a3aaa6, #475456 30%, #273337 65%, #87908a);
+  box-shadow: 0 0 0 calc(2px * (1 - var(--journey-progress))) #111d20, 0 15px 45px #0004;
+}
+.carriageView {
+  position: relative; height: 100%; overflow: hidden; isolation: isolate;
+  border-radius: calc(68px * (1 - var(--journey-progress)));
+}
+.carriageView::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 3px #091719b0, inset 7px 5px 20px #07171a88;
+  background: linear-gradient(112deg, transparent 14%, #f5fff815 15%, #f5fff805 27%, transparent 28%, transparent 68%, #fff2 69%, transparent 72%);
+  opacity: calc(1 - var(--journey-progress));
+}
+.heroShade { background: rgba(8,22,20,calc(.5 * var(--journey-progress))); pointer-events: none; }
+.heroTitle { font-size: clamp(58px,5.4vw,84px); text-shadow: 0 2px 24px #10201a40; }
+.heroIntro { padding-top: 60px; }
+.heroContent { margin-top: 90px; }
+.heroBottom p { max-width: 290px; }
+@media (prefers-reduced-motion: no-preference) { .hero { height: 175svh; } }
+@media (max-width: 760px) {
+  .carriageWindow {
+    top: calc(37% * (1 - var(--journey-progress)));
+    right: calc(5% * (1 - var(--journey-progress)));
+    bottom: calc(28% * (1 - var(--journey-progress)));
+    left: calc(5% * (1 - var(--journey-progress)));
+    padding: calc(12px * (1 - var(--journey-progress)));
+    border-radius: calc(45px * (1 - var(--journey-progress)));
+  }
+  .carriageView { border-radius: calc(33px * (1 - var(--journey-progress))); }
+  .heroContent { margin-top: 32px; }
+  .heroTitle { font-size: clamp(56px,15vw,74px); }
+  .heroIntro { padding-top: 270px; }
+}
+
+/* A window seat with real, bookable views of the island. */
+.hero { background: radial-gradient(ellipse at 65% 30%, #465151 0%, #202d30 52%, #142124 100%); }
+.heroFrame::before { content: ""; position: absolute; z-index: -3; inset: 0; background: linear-gradient(180deg, transparent 82%, #0c171966 82.3%, transparent 83%); opacity: calc(1 - var(--journey-progress)); }
+.carriageWindow::before { content: ""; position: absolute; left: 8%; right: 8%; bottom: -12px; height: 14px; border-radius: 0 0 40% 40%; background: linear-gradient(#67716d,#2b383a); box-shadow: 0 8px 15px #0005; opacity: calc(1 - var(--journey-progress)); }
+.heroPhoto, .heroVideo { transform: scale(calc(1.07 - .07 * var(--journey-progress))); }
+.windowControls { position: absolute; right: 7%; bottom: 16%; z-index: 2; padding: 15px 18px; color: white; background: #112529e8; border: 1px solid #ffffff30; }
+.windowControls > p { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: #e2e7e4; margin-bottom: 10px; }
+.windowControls > div { display: flex; gap: 6px; }
+.windowControls button { cursor: pointer; padding: 8px 11px; border: 1px solid #ffffff50; font-size: 12px; transition: background .2s; }
+.windowControls button[aria-pressed="true"] { background: #f1f2e9; color: #142124; border-color: #f1f2e9; }
+.windowControls button:hover { border-color: white; }
+.windowControls > a { display: flex; justify-content: space-between; font-size: 11px; margin-top: 13px; padding-top: 10px; border-top: 1px solid #ffffff30; }
+.scrollCue { position: absolute; bottom: 5%; right: 5%; display: flex; align-items: center; gap: 12px; font-size: 10px; letter-spacing: .04em; opacity: calc(1 - var(--journey-progress)); }
+.scrollCue > span { display: block; height: 28px; width: 1px; background: #ffffff80; transform: scaleY(calc(1 - .5 * var(--journey-progress))); transform-origin: top; }
+@media (max-width: 760px) {
+  .windowControls { right: 9%; left: 9%; bottom: 30%; padding: 10px 12px; }
+  .windowControls > p { display: none; }
+  .windowControls > div { gap: 5px; }
+  .windowControls button { flex: 1; padding: 7px 5px; font-size: 10px; }
+  .windowControls > a { margin-top: 8px; padding-top: 7px; font-size: 10px; }
+  .scrollCue { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .scrollCue { display: none; }.heroPhoto, .heroVideo { transform: none; } }
+
+/* Photographic material study: the interactive landscape remains a separate layer. */
+.hero { background: #d8d4ca; color: #23322e; }
+.heroFrame::before {
+  background: url('/images/brand/carriage-interior.webp') center / cover no-repeat;
+  box-shadow: inset 0 20px 65px #55574c20;
+}
+.heroFrame::after { content: none; }
+.heroContent { padding-bottom: 110px; }
+@media (min-width: 761px) {
+  .heroIntro { margin: 48px 0 0; padding-top: 0; }
+  .heroBottom p { max-width: 310px; }
+  .scrollCue { bottom: 12%; left: 18%; }
+}
+.carriageWindow {
+  background: linear-gradient(120deg,#eee9db 0%,#b0b0a2 21%,#e6e3d4 24%,#8c9388 78%,#d3d1c3 100%);
+  box-shadow: 0 0 0 calc(3px * (1 - var(--journey-progress))) #969c91, 0 0 0 calc(12px * (1 - var(--journey-progress))) #cbcbbf, 0 8px 20px #2b382b40, inset 0 2px 4px #fff9;
+}
+.carriageWindow::before { left: -2%; right: -2%; height: 17px; background: linear-gradient(#f5f0e4,#b6b5a8); border-bottom: 2px solid #878d80; }
+.heroTitle { text-shadow: none; }
+.heroTopline { border-color: #34473a50; }
+.heroCta { background: #203c33; color: white; }
+.heroCta:hover { background: #315445; }
+.scrollCue > span { background: #34473a80; }
+.heroContent, .heroTopline { color: color-mix(in srgb, #23322e calc(100% - min(1, var(--journey-progress) * 3) * 100%), white); }
+.heroShade { background: rgba(8,22,20,calc(.65 * min(1, var(--journey-progress) * 3))); }
+@media (max-width: 760px) {
+  .heroFrame::before { background-image: linear-gradient(0deg, #e5dfd0 0%, #e5dfd0 20%, transparent 40%), url("/images/brand/carriage-interior.webp"); background-position: center, 65% center; }
+  .heroContent { padding-bottom: 0; }
+  .heroFrame::after { width: 160px; height: 100px; bottom: -75px; left: -45px; }
+}
+
+/* Scene choices sit on the wall beneath the glass, leaving the view clear. */
+.windowControls { right: 4%; bottom: 3%; display: flex; align-items: center; gap: 18px; padding: 10px 14px; color: #23322e; background: #eae8df; border: 1px solid #a9afa2; box-shadow: 0 2px 4px #27372c15; }
+.windowControls > p { display: none; }
+.windowControls > a { margin: 0; padding: 0 0 0 18px; border-top: 0; border-left: 1px solid #a9afa2; min-height: 44px; align-items: center; gap: 20px; }
+.windowControls button { min-height: 44px; border-color: transparent; }
+.windowControls button[aria-pressed="true"] { background: #244639; color: white; border-color: #244639; }
+.windowControls button:hover { border-color: #244639; }
+.scrollCue { right: auto; left: 18%; bottom: 12%; color: #fff9e9; }
+.scrollCue > span { background: #fff9e9; }
+@media (max-width: 760px) {
+  .heroFrame { min-height: max(100svh, 860px); }
+  .windowControls { right: 5%; left: 5%; bottom: 20%; display: block; padding: 6px 9px; }
+  .windowControls > a { border-left: 0; border-top: 1px solid #a9afa2; padding-top: 4px; min-height: 32px; font-size: 11px; }
+  .windowControls button { min-height: 40px; font-size: 11px; }
+  .carriageWindow { bottom: calc(33% * (1 - var(--journey-progress))); }
+  .heroIntro { padding-top: 340px; }
+}
+
+/* The backdrop's timber post fills the left 5% of the image; keep copy clear of it. */
+@media (min-width: 761px) {
+  .heroTopline, .heroContent { margin-left: calc(5vw + 28px - 4vw); }
+}

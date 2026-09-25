@@ -1,12 +1,13 @@
 import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
-import { Geist, Fraunces } from "next/font/google";
+import { Geist, Barlow_Condensed } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import { getSiteSettings, getTestimonials } from "@/lib/content";
+import { getSiteSettings } from "@/lib/content";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
-const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], display: "swap" });
+
+const barlowCondensed = Barlow_Condensed({ variable: "--font-barlow-condensed", weight: ["500", "600"], subsets: ["latin"], display: "swap" });
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -33,7 +34,6 @@ export async function generateMetadata(): Promise<Metadata> {
       "best day trips from Christchurch",
       "South Island guided tours",
       "free cancellation New Zealand tours",
-      "small group max 16 guests",
       "shore excursions Lyttelton Akaroa",
       "Canterbury day tours",
       "Banks Peninsula tours",
@@ -43,7 +43,6 @@ export async function generateMetadata(): Promise<Metadata> {
     creator: s.name,
     publisher: s.name,
     robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
-    alternates: { canonical: SITE_URL },
     openGraph: {
       title: `${s.name} — ${s.tagline}`,
       description: s.description,
@@ -63,11 +62,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const [s, testimonials] = await Promise.all([getSiteSettings(), getTestimonials()]);
+  const s = await getSiteSettings();
   const abs = (p?: string | null) => (p ? (p.startsWith("http") ? p : `${SITE_URL}${p}`) : undefined);
-  const avgRating = testimonials.length
-    ? +(testimonials.reduce((sum, t) => sum + t.rating, 0) / testimonials.length).toFixed(1)
-    : 5;
 
   // Site-wide structured data — TravelAgency + WebSite with sitelinks search box.
   const orgLd = {
@@ -129,7 +125,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID;
   return (
-    <html lang="en" className={`${geistSans.variable} ${fraunces.variable} h-full antialiased`}>
+    <html lang="en" className={`${geistSans.variable} ${barlowCondensed.variable} h-full antialiased`}>
       <body className="min-h-screen bg-ivory text-foreground">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(orgLd) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(siteLd) }} />

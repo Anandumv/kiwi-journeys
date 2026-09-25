@@ -38,12 +38,12 @@ export function UpdateNotesForm({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-brand-800">
+      <label className="block text-sm font-medium text-foreground">
         Pickup hotel / special notes
-        {!canEdit && <span className="ml-2 text-xs font-normal text-foreground/40">(locked — within 48h of departure)</span>}
+        {!canEdit && <span className="ml-2 text-xs font-normal text-foreground/75">(locked — within 48h of departure)</span>}
       </label>
       <textarea
-        className="mt-2 w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none disabled:bg-ivory"
+        className="mt-2 w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none disabled:bg-ivory"
         rows={3}
         value={notes}
         onChange={(e) => { setNotes(e.target.value); setSaved(false); }}
@@ -114,19 +114,19 @@ export function CancelRequestButton({
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="text-sm text-foreground/50 underline hover:text-red-600"
+          className="text-sm text-foreground/75 underline hover:text-red-600"
         >
           Request cancellation
         </button>
       ) : (
         <div className="rounded-xl border border-red-100 bg-red-50/50 p-4 space-y-3">
-          <p className="text-sm font-medium text-brand-900">Request cancellation</p>
-          <p className="text-xs text-foreground/60">
+          <p className="text-sm font-medium text-foreground">Request cancellation</p>
+          <p className="text-xs text-foreground/75">
             Refund policy: <strong>{pct} refund</strong> with {hoursUntilDeparture.toFixed(0)}h notice.
             Our team will confirm by email.
           </p>
           <textarea
-            className="w-full rounded-lg border border-brand-200 px-3 py-2 text-sm focus:outline-none"
+            className="w-full rounded-lg border border-[#202b2640] px-3 py-2 text-sm focus:outline-none"
             rows={2}
             placeholder="Reason (optional)"
             value={reason}
@@ -141,7 +141,7 @@ export function CancelRequestButton({
             >
               {sending ? "Sending…" : "Confirm request"}
             </button>
-            <button onClick={() => setOpen(false)} className="text-sm text-foreground/50 hover:text-foreground">
+            <button onClick={() => setOpen(false)} className="text-sm text-foreground/75 hover:text-foreground">
               Cancel
             </button>
           </div>

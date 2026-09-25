@@ -32,7 +32,7 @@ function ContactFields({
   contact: { fullName: string; email: string; phone: string; notes: string };
   setContact: (c: typeof contact) => void;
 }) {
-  const field = "w-full rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none";
+  const field = "w-full rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none";
   return (
     <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
@@ -184,15 +184,15 @@ function PaymentInner({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       <div>
-        <h2 className="text-lg font-semibold text-brand-900">Your details</h2>
+        <h2 className="text-lg font-semibold text-foreground">Your details</h2>
         <div className="mt-3"><ContactFields contact={contact} setContact={setContact} /></div>
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-brand-900">Promo code</h2>
+        <h2 className="text-lg font-semibold text-foreground">Promo code</h2>
         <div className="mt-3 flex gap-2">
           <input
-            className="flex-1 rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            className="flex-1 rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none"
             placeholder="Enter code"
             value={promoCode}
             onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromoResult(null); }}
@@ -201,7 +201,7 @@ function PaymentInner({
             type="button"
             onClick={applyPromo}
             disabled={applyingPromo || !promoCode.trim()}
-            className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:opacity-50"
+            className="rounded-lg border border-[#202b2640] px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-[#eeede6] disabled:opacity-50"
           >
             {applyingPromo ? "…" : "Apply"}
           </button>
@@ -214,10 +214,10 @@ function PaymentInner({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-brand-900">Gift voucher</h2>
+        <h2 className="text-lg font-semibold text-foreground">Gift voucher</h2>
         <div className="mt-3 flex gap-2">
           <input
-            className="flex-1 rounded-lg border border-brand-200 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none"
+            className="flex-1 rounded-lg border border-[#202b2640] px-3 py-2.5 text-sm focus:border-foreground focus:outline-none"
             placeholder="GV-XXXXXXXX"
             value={giftVoucherCode}
             onChange={(e) => { setGiftVoucherCode(e.target.value.toUpperCase()); setVoucherResult(null); }}
@@ -226,7 +226,7 @@ function PaymentInner({
             type="button"
             onClick={applyVoucher}
             disabled={applyingVoucher || !giftVoucherCode.trim()}
-            className="rounded-lg border border-brand-300 px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50 disabled:opacity-50"
+            className="rounded-lg border border-[#202b2640] px-4 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-[#eeede6] disabled:opacity-50"
           >
             {applyingVoucher ? "…" : "Apply"}
           </button>
@@ -239,32 +239,32 @@ function PaymentInner({
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold text-brand-900">Payment</h2>
-        <div className="mt-3 rounded-xl border border-brand-100 p-4">
+        <h2 className="text-lg font-semibold text-foreground">Payment</h2>
+        <div className="mt-3 rounded-xl border border-[#202b2626] p-4">
           <PaymentElement />
         </div>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-brand-100 bg-brand-50/50 p-4">
+      <div className="space-y-3 rounded-xl border border-[#202b2626] bg-[#eeede6]/50 p-4">
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
-            className="mt-0.5 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+            className="mt-0.5 h-4 w-4 rounded border-[#202b2640] text-brand-600 focus:ring-brand-500"
             checked={marketingConsent}
             onChange={(e) => setMarketingConsent(e.target.checked)}
           />
-          <span className="text-sm text-foreground/70">
+          <span className="text-sm text-foreground/75">
             Send me travel inspiration, special offers, and tour news. You can unsubscribe at any time.
           </span>
         </label>
         <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
-            className="mt-0.5 h-4 w-4 rounded border-brand-300 text-brand-600 focus:ring-brand-500"
+            className="mt-0.5 h-4 w-4 rounded border-[#202b2640] text-brand-600 focus:ring-brand-500"
             checked={termsAccepted}
             onChange={(e) => setTermsAccepted(e.target.checked)}
           />
-          <span className="text-sm text-foreground/70">
+          <span className="text-sm text-foreground/75">
             I agree to the{" "}
             <a href="/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-brand-600 underline">
               Terms &amp; Conditions
@@ -280,7 +280,7 @@ function PaymentInner({
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
-      <div className="flex items-center justify-between text-sm text-foreground/60">
+      <div className="flex items-center justify-between text-sm text-foreground/75">
         <span>Seats held for <Countdown expiresAt={expiresAt} /></span>
         {discountCents > 0 && (
           <span className="font-medium text-teal-700">Saving {formatNZD(discountCents)}</span>
@@ -316,8 +316,8 @@ export function CheckoutForm({
   if (!stripeReady || !clientSecret) {
     return (
       <div className="rounded-2xl border border-sand-400/50 bg-sand-400/10 p-6">
-        <h2 className="font-semibold text-brand-900">Online booking is temporarily unavailable</h2>
-        <p className="mt-2 text-sm text-foreground/70">
+        <h2 className="font-semibold text-foreground">Online booking is temporarily unavailable</h2>
+        <p className="mt-2 text-sm text-foreground/75">
           Please contact our team to arrange your tour. No payment has been taken.
           <a href="/contact" className="mt-3 block font-semibold underline">Contact us about your booking</a>
         </p>

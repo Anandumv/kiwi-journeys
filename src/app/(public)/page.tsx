@@ -4,10 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { getTours, getDestinations, getTestimonials, getSiteSettings } from "@/lib/content";
 import { categories } from "@/data/tours";
-import { TourCard } from "@/components/TourCard";
-import { Reveal } from "@/components/Reveal";
-import { Blob, Frond } from "@/components/OrganicShape";
-import { WhyBookDirect } from "@/components/WhyBookDirect";
+import { formatNZD } from "@/lib/money";
+import styles from "@/components/HomeEditorial.module.css";
 import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { CinematicHero } from "@/components/CinematicHero";
 
@@ -16,7 +14,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSiteSettings();
   return {
-    title: `${s.name} — New Zealand Small-Group Day Tours`,
+    title: { absolute: `${s.name} — New Zealand Small-Group Day Tours` },
     description: `Explore the South Island with ${s.name}. Small groups, local guides, year-round departures from Christchurch. Book online — free cancellation.`,
     alternates: { canonical: SITE_URL },
     openGraph: {
@@ -28,13 +26,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-const experienceImages: Record<string, string> = {
-  "iconic-day-trips": "/images/brand/Discover.jpg",
-  wildlife: "/images/brand/Glow-Worms.jpg",
-  adventure: "/images/brand/Adventure.jpg",
-  "wine-food": "/images/brand/Queens.jpg",
-};
-
 export default async function HomePage() {
   const [tours, destinations, testimonials, s] = await Promise.all([
     getTours(),
@@ -43,6 +34,10 @@ export default async function HomePage() {
     getSiteSettings(),
   ]);
   const featured = tours.filter((t) => t.featured).slice(0, 6);
+  const lead = featured.find((t) => t.destination !== "Christchurch") ?? featured[0];
+  const otherTours = featured.filter((t) => t.slug !== lead?.slug);
+  const destinationPhoto = tours.find((t) => t.destination === "Akaroa") ?? lead;
+  const activeDestinations = destinations.filter((d) => d.status === "active");
 
   const reviewsLd = {
     "@context": "https://schema.org",
@@ -64,154 +59,99 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(reviewsLd) }} />
-      <CinematicHero settings={s} />
+      <CinematicHero settings={s} views={[
+        { label: "Coast", destination: "Kaikōura" },
+        { label: "High country", destination: "Lake Tekapo" },
+        { label: "Harbour", destination: "Akaroa" },
+      ].flatMap(({ label, destination }, index) => {
+        const tour = tours.find((t) => t.destination === destination);
+        return tour ? [{ label, image: index === 0 ? s.heroImage || tour.heroImage : tour.heroImage, href: `/tours/${tour.slug}` }] : [];
+      })} />
 
-      <div className="relative z-10 bg-white">
-        {/* Trust strip */}
-        <section className="border-b border-ivory-200 bg-white">
-          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-4 text-sm font-medium text-foreground/70 sm:px-6">
-            <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Locally owned &amp; operated</span>
-            <span className="hidden text-ivory-200 sm:inline">|</span>
-            <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Free cancellation</span>
-            <span className="hidden text-ivory-200 sm:inline">|</span>
-            <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> Small groups · max 16</span>
-            <span className="hidden text-ivory-200 sm:inline">|</span>
-            <span className="flex items-center gap-2"><span className="text-teal-600">✓</span> No booking fees</span>
-            <span className="hidden text-ivory-200 sm:inline">|</span>
-            <span className="flex items-center gap-2">🔒 Secure payment</span>
+      <div className={styles.page}>
+        <div className={styles.routeBar}>
+          <span>Based in Christchurch</span>
+          <span>Across the South Island</span>
+          <Link href="/private-tours">Your own itinerary ↗</Link>
+        </div>
+
+        <section className={styles.tours} aria-labelledby="tour-heading">
+          <div className={styles.sectionHeading}>
+            <p className={styles.label}>01 / Days out</p>
+            <h2 id="tour-heading">Leave the city.<br />See what’s out there.</h2>
+            <Link href="/tours" className={styles.textLink}>Browse all tours ↗</Link>
           </div>
-        </section>
-
-        {/* Featured tours */}
-        <section className="relative mx-auto max-w-7xl overflow-hidden px-4 py-14 sm:px-6 sm:py-20">
-          <Blob className="pointer-events-none absolute -right-24 -top-10 -z-0 h-72 w-72 text-brand-100/70 animate-floaty" />
-          <Frond className="pointer-events-none absolute -left-10 bottom-10 -z-0 h-40 w-40 text-sand-400/30" />
-          <Reveal>
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="eyebrow text-sand-600">Handpicked days out</p>
-                <h2 className="mt-3 font-serif text-4xl font-semibold text-brand-900">Our favourite tours</h2>
+          <div className={styles.tourLayout}>
+            {lead && <Link href={`/tours/${lead.slug}`} className={styles.leadTour}>
+              <div className={styles.leadPhoto}>
+                <Image src={lead.heroImage} alt={lead.title} fill sizes="(max-width: 760px) 100vw, 55vw" className={styles.cover} />
+                <span className={styles.photoLabel}>{lead.destination}</span>
               </div>
-              <Link href="/tours" className="hidden text-sm font-semibold text-brand-600 hover:underline sm:block">View all tours →</Link>
-            </div>
-          </Reveal>
-          <div className="mt-10 grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {featured.map((t, i) => (
-              <Reveal key={t.slug} delay={(i % 3) * 0.08}>
-                <TourCard tour={t} />
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
-        {/* Value props — full-bleed band */}
-        <section className="bg-brand-900 text-white">
-          <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-            <Reveal>
-              <p className="eyebrow text-sand-400">Ways to explore</p>
-              <h2 className="mt-3 font-serif text-4xl font-semibold">However you'd rather travel</h2>
-            </Reveal>
-            <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-              {s.valueProps.map((v, i) => (
-                <Reveal key={v.title} delay={(i % 4) * 0.08}>
-                  <div className="border-t border-brand-700/60 pt-5">
-                    <h3 className="font-serif text-xl text-sand-400">{v.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-brand-100/85">{v.body}</p>
-                  </div>
-                </Reveal>
-              ))}
+              <div className={styles.tourMeta}><span>{lead.durationLabel} / {lead.destination}</span><span>From {formatNZD(lead.priceFromCents)}</span></div>
+              <h3>{lead.title} <span aria-hidden="true">↗</span></h3>
+              <p className={styles.leadSummary}>{lead.summary}</p>
+            </Link>}
+            <div className={styles.tourIndex}>
+              <p className={styles.indexTitle}>Choose a change of scene</p>
+              {otherTours.map((t, i) => <Link key={t.slug} href={`/tours/${t.slug}`} className={styles.indexTour}>
+                <span className={styles.tourNumber}>{String(i + 2).padStart(2, "0")}</span>
+                <div><p className={styles.indexMeta}>{t.destination} / {t.durationLabel}</p><h3>{t.title}</h3><p className={styles.indexPrice}>From {formatNZD(t.priceFromCents)} <span aria-hidden="true">↗</span></p></div>
+                <div className={styles.thumb}><Image src={t.heroImage} alt="" fill sizes="100px" className={styles.cover} /></div>
+              </Link>)}
+              {featured.length === 0 && <p>Browse our tour list for available days out.</p>}
+              <Link href="/tours" className={styles.indexAll}>All tours & departure dates <span aria-hidden="true">↗</span></Link>
             </div>
           </div>
+          <nav className={styles.categories} aria-label="Tour experiences">
+            <span>Go for the</span>
+            {categories.map((c) => <Link key={c.key} href={`/tours?type=${c.key}`}>{c.label} ↗</Link>)}
+          </nav>
         </section>
 
-        {/* Destinations */}
-        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-          <Reveal>
-            <p className="eyebrow text-brand-500">Travel New Zealand Your Way</p>
-            <h2 className="mt-3 font-serif text-4xl font-semibold text-brand-900">Explore Destinations</h2>
-          </Reveal>
-          <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {destinations.map((d) => (
-              <Link
-                key={d.slug}
-                href={d.status === "active" ? `/destinations/${d.slug}` : "/destinations"}
-                className={`rounded-xl border p-5 transition ${
-                  d.status === "active"
-                    ? "border-brand-200 bg-white hover:border-brand-400 hover:shadow-md"
-                    : "border-dashed border-ivory-200 bg-ivory/60 text-foreground/45"
-                }`}
-              >
-                <div className="font-serif text-lg text-brand-800">{d.name}</div>
-                <div className="mt-1 text-xs text-foreground/55">{d.status === "active" ? d.blurb : "Coming Soon"}</div>
-              </Link>
-            ))}
+        <section className={styles.destinations} aria-labelledby="destination-heading">
+          <div className={styles.destinationIntro}>
+            <p className={styles.label}>02 / The places</p>
+            <h2 id="destination-heading">Our corner<br />of the world.</h2>
+            {destinationPhoto && <figure className={styles.destinationFigure}>
+              <div className={styles.destinationPhoto}><Image src={destinationPhoto.heroImage} alt={destinationPhoto.title} fill sizes="(max-width: 760px) 100vw, 33vw" className={styles.cover} /></div>
+              <figcaption>{destinationPhoto.destination} / South Island, New Zealand</figcaption>
+            </figure>}
+          </div>
+          <div className={styles.destinationList}>
+            <p>Pick a place. We’ll take you there.</p>
+            {activeDestinations.map((d, i) => <Link key={d.slug} href={`/destinations/${d.slug}`}>
+              <span className={styles.destinationNumber}>{String(i + 1).padStart(2, "0")}</span>
+              <div><h3>{d.name}</h3><p>{d.blurb}</p></div><span aria-hidden="true">↗</span>
+            </Link>)}
+            <Link href="/destinations" className={styles.allDestinations}>Explore all destinations ↗</Link>
           </div>
         </section>
 
-        {/* Browse by experience */}
-        <section className="border-y border-ivory-200 bg-ivory">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Reveal>
-              <p className="eyebrow text-sand-600">Browse by experience</p>
-              <h2 className="mt-3 font-serif text-4xl font-semibold text-brand-900">Find your kind of day</h2>
-            </Reveal>
-            <div className="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {categories.map((c, i) => (
-                <Reveal key={c.key} delay={(i % 4) * 0.07}>
-                  <Link href={`/tours?type=${c.key}`} className="group relative block aspect-[4/5] overflow-hidden rounded-[1.6rem_1.6rem_0.75rem_0.75rem]">
-                    <Image src={experienceImages[c.key] ?? "/images/brand/Discover.jpg"} alt={c.label} fill sizes="(max-width:1024px) 50vw, 25vw" className="object-cover transition duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-950/80 via-brand-950/10 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-5">
-                      <h3 className="font-serif text-xl font-semibold text-white">{c.label}</h3>
-                      <span className="mt-1 inline-block text-sm text-white/80 transition group-hover:translate-x-0.5">Explore →</span>
-                    </div>
-                  </Link>
-                </Reveal>
-              ))}
+        <section className={styles.private} aria-labelledby="private-heading">
+          <p className={styles.label}>03 / Make it yours</p>
+          <div className={styles.privateLayout}>
+            <h2 id="private-heading">Your people.<br />Your kind<br />of day<span>.</span></h2>
+            <div className={styles.privateCopy}>
+              <p>A family trip, a day with friends, or somewhere you’ve always wanted to go. Tell us what you have in mind.</p>
+              <Link href="/private-tours" className={styles.darkCta}>Plan a private tour <span aria-hidden="true">↗</span></Link>
+              <div className={styles.practical}>
+                <h3>A few practical things</h3>
+                <p>Tour pages include pickup details, what’s included and available departures.</p>
+                <Link href="/terms-of-use">Read the cancellation policy ↗</Link>
+                <Link href="/contact">Ask our team a question ↗</Link>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Testimonials */}
-        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
-          <Reveal>
-            <h2 className="font-serif text-4xl font-semibold text-brand-900">What our guests say</h2>
-          </Reveal>
-          <div className="mt-10 grid gap-7 md:grid-cols-3">
-            {testimonials.map((t, i) => (
-              <Reveal key={t.name} delay={(i % 3) * 0.08}>
-                <figure className="relative h-full overflow-hidden rounded-2xl border border-ivory-200 bg-white p-7 shadow-sm">
-                  <span aria-hidden className="pointer-events-none absolute -right-1 -top-8 select-none font-serif text-[7rem] leading-none text-brand-100">&rdquo;</span>
-                  <div className="relative">
-                    <div className="text-gold-500">{"★".repeat(t.rating)}</div>
-                    <div className="mt-3 h-px w-10 bg-gold-400/70" />
-                    <blockquote className="mt-4 font-serif text-lg italic leading-relaxed text-brand-900">{t.text}</blockquote>
-                    <figcaption className="mt-6 flex items-center gap-3">
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 font-serif text-sm font-semibold text-brand-700">{t.name.charAt(0)}</span>
-                      <span className="text-sm font-semibold text-brand-800">{t.name} <span className="font-normal text-foreground/50">· {t.country}</span></span>
-                    </figcaption>
-                  </div>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
-        </section>
-
-        <WhyBookDirect />
+        {testimonials.length > 0 && <section className={styles.guests} aria-label="Guest reviews">
+          <p className={styles.label}>In good company</p>
+          <div className={styles.quotes}>{testimonials.map((t) => <figure key={`${t.name}-${t.country}`}>
+            <blockquote>“{t.text}”</blockquote>
+            <figcaption>{t.name} <span>/ {t.country}</span></figcaption>
+          </figure>)}</div>
+        </section>}
         <NewsletterSignup />
-
-        {/* CTA */}
-        <section className="mx-auto max-w-7xl px-4 pb-10 sm:px-6">
-          <div className="paper-grain relative isolate overflow-hidden rounded-3xl px-8 py-20 text-center text-white">
-            <Image src="/images/brand/Queens.jpg" alt="" fill sizes="100vw" className="-z-10 object-cover" />
-            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-brand-950/92 via-brand-900/80 to-brand-800/70" />
-            <Blob className="pointer-events-none absolute -right-20 -top-16 -z-0 h-72 w-72 text-white/[0.06] animate-floaty" />
-            <p className="eyebrow text-gold-400">Your adventure awaits</p>
-            <h2 className="mt-3 font-serif text-4xl font-semibold sm:text-5xl">Ready for your New Zealand journey?</h2>
-            <p className="mx-auto mt-4 max-w-xl text-brand-100/90">Browse our day tours, choose your date, and book online in minutes.</p>
-            <Link href="/tours" className="mt-8 inline-block rounded-full bg-sand-500 px-8 py-3.5 font-semibold text-white shadow-lg transition hover:bg-sand-700">Find your tour</Link>
-          </div>
-        </section>
       </div>
     </>
   );

@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { AdminNav } from "@/components/AdminNav";
 import { getCurrentAdmin } from "@/lib/auth";
+
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export const dynamic = "force-dynamic";
 

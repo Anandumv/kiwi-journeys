@@ -7,8 +7,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.
 export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-  const staticPaths = ["", "/tours", "/destinations", "/about", "/sustainability", "/contact", "/cruise-excursions", "/travel-insights", "/privacy-policy", "/terms-of-use", "/faq", "/private-tours", "/gift-vouchers"];
+  const staticPaths = ["", "/tours", "/destinations", "/about", "/sustainability", "/contact", "/cruise-excursions", "/travel-insights", "/faq", "/private-tours", "/gift-vouchers"];
 
   let tours: Awaited<ReturnType<typeof getTours>> = [];
   let destinations: Awaited<ReturnType<typeof getDestinations>> = [];
@@ -24,19 +23,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPaths.map((p) => ({
       url: `${SITE_URL}${p}`,
-      lastModified: now,
       changeFrequency: freq(p),
       priority: priorities[p] ?? 0.5,
     })),
     ...tours.map((t) => ({
       url: `${SITE_URL}/tours/${t.slug}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: t.featured ? 0.9 : 0.8,
     })),
     ...destinations.filter((d) => d.status === "active").map((d) => ({
       url: `${SITE_URL}/destinations/${d.slug}`,
-      lastModified: now,
       changeFrequency: "weekly" as const,
       priority: 0.7,
     })),

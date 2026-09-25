@@ -51,7 +51,7 @@ function PostForm({ p }: { p?: Post }) {
       </label>
       <label className="block text-sm">Excerpt<input name="excerpt" defaultValue={p?.excerpt} className={input} /></label>
       <label className="block text-sm">
-        Body <span className="text-xs text-foreground/45">(separate paragraphs with a blank line)</span>
+        Body <span className="text-xs text-foreground/60">(separate paragraphs with a blank line)</span>
         <textarea name="body" rows={8} defaultValue={(p?.body ?? []).join("\n\n")} className={input} />
       </label>
       <SingleImageField name="coverImage" label="Cover image" defaultValue={p?.coverImage ?? ""} />

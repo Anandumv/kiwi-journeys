@@ -9,7 +9,7 @@ const prisma = new PrismaClient();
 
 const valueProps = [
   { title: "Small-group day trips", body: "Fully guided days out in a small group, led by someone who actually lives here and knows the back roads." },
-  { title: "Multi-day journeys", body: "Set-route trips spread over a few days, with the driving, timing and bookings handled for you. (Coming soon.)" },
+  { title: "Day trips from Christchurch", body: "Explore the South Island and return the same day, with driving and timing handled for you." },
   { title: "Cruise shore excursions", body: "Port-timed tours for cruise guests — ashore, out exploring, and back to the ship without the stress." },
   { title: "Private & bespoke", body: "Your own driver-guide and a day shaped entirely around what you'd most like to see." },
 ];
@@ -104,7 +104,7 @@ async function main() {
   // Kiwi Globe Tours brand. Prices charged in NZD; INR shown via the currency switcher.
   const brand = {
     name: site.name, // Kiwi Globe Tours
-    tagline: "New Zealand Adventure Tours & Packages",
+    tagline: "South Island Day Tours",
     description:
       "Explore Aotearoa — relishing the wonders of New Zealand. Tailor-made coach, honeymoon, self-drive and South Island day tours, planned by people who know the country.",
     phone: site.phone,
@@ -114,7 +114,7 @@ async function main() {
     currency: site.currency,
     logoImage: "/images/brand/Kiwi-Globe-Tours-NZ-resized.png",
     heroImage: "/images/brand/Hero-Ocean-Alps.jpg",
-    footerTagline: "New Zealand adventure tours and packages, crafted around how you want to travel.",
+    footerTagline: "Small-group and private day trips, returning the same day.",
     social: site.social,
     nav: site.nav,
     valueProps,

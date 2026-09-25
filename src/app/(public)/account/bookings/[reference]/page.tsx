@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS: Record<string, { label: string; className: string }> = {
   CONFIRMED: { label: "Confirmed", className: "bg-teal-100 text-teal-800" },
-  CANCELLED: { label: "Cancelled", className: "bg-ivory text-foreground/50" },
+  CANCELLED: { label: "Cancelled", className: "bg-ivory text-foreground/75" },
   REFUNDED: { label: "Refunded", className: "bg-amber-100 text-amber-800" },
 };
 
@@ -42,7 +42,7 @@ export default async function BookingDetailPage({
   const canCancel = !isPast && booking.status === "CONFIRMED";
   const canReschedule = !isPast && booking.status === "CONFIRMED" && hoursUntilDeparture >= 48;
 
-  const st = STATUS[booking.status] ?? { label: booking.status, className: "bg-ivory text-foreground/50" };
+  const st = STATUS[booking.status] ?? { label: booking.status, className: "bg-ivory text-foreground/75" };
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
@@ -50,13 +50,13 @@ export default async function BookingDetailPage({
         ← My bookings
       </Link>
 
-      <div className="mt-6 rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-[#202b2626] bg-white p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-foreground/40">
+            <p className="text-xs font-semibold uppercase tracking-widest text-foreground/75">
               {booking.reference}
             </p>
-            <h1 className="mt-1 font-serif text-2xl font-semibold text-brand-900">
+            <h1 className="mt-1 font-serif text-2xl font-semibold text-foreground">
               {booking.session.tour.title}
             </h1>
           </div>
@@ -65,27 +65,27 @@ export default async function BookingDetailPage({
           </span>
         </div>
 
-        <div className="mt-4 space-y-1 text-sm text-foreground/70">
+        <div className="mt-4 space-y-1 text-sm text-foreground/75">
           <p>{dateLabel(booking.session.startsAtUtc)}</p>
           <p>Departs {timeLabel(booking.session.startsAtUtc)} (NZ time)</p>
           <p>{booking.seats} guest{booking.seats !== 1 ? "s" : ""}</p>
         </div>
 
-        <div className="mt-5 space-y-2 border-t border-brand-50 pt-5">
+        <div className="mt-5 space-y-2 border-t border-[#202b2626] pt-5">
           {booking.items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
-              <span className="text-foreground/70">{item.qty} × {item.label}</span>
+              <span className="text-foreground/75">{item.qty} × {item.label}</span>
               <span className="font-medium">{formatNZD(item.unitPriceCents * item.qty)}</span>
             </div>
           ))}
-          <div className="flex justify-between border-t border-brand-50 pt-3 font-semibold text-brand-700">
+          <div className="flex justify-between border-t border-[#202b2626] pt-3 font-semibold text-brand-700">
             <span>Total paid</span>
             <span>{formatNZD(booking.totalCents)}</span>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-brand-100 bg-white p-6 shadow-sm space-y-5">
+      <div className="mt-4 rounded-2xl border border-[#202b2626] bg-white p-6 space-y-5">
         <UpdateNotesForm
           reference={booking.reference}
           initialNotes={booking.notes ?? ""}
@@ -93,9 +93,9 @@ export default async function BookingDetailPage({
         />
 
         {canReschedule && (
-          <div className="border-t border-brand-50 pt-5">
-            <p className="text-sm font-medium text-brand-800 mb-2">Change your date</p>
-            <p className="text-xs text-foreground/50 mb-3">
+          <div className="border-t border-[#202b2626] pt-5">
+            <p className="text-sm font-medium text-foreground mb-2">Change your date</p>
+            <p className="text-xs text-foreground/75 mb-3">
               Reschedule to any available date for the same tour.
             </p>
             <RescheduleForm
@@ -107,7 +107,7 @@ export default async function BookingDetailPage({
         )}
 
         {canCancel && (
-          <div className="border-t border-brand-50 pt-5">
+          <div className="border-t border-[#202b2626] pt-5">
             <CancelRequestButton
               reference={booking.reference}
               hoursUntilDeparture={hoursUntilDeparture}
@@ -116,7 +116,7 @@ export default async function BookingDetailPage({
         )}
       </div>
 
-      <p className="mt-6 text-center text-xs text-foreground/40">
+      <p className="mt-6 text-center text-xs text-foreground/75">
         Questions?{" "}
         <Link href="/contact" className="text-brand-600 underline">Contact us</Link>
       </p>

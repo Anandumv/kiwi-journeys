@@ -1,51 +1,23 @@
-const reasons = [
-  {
-    title: "Book with your tour operator",
-    body: "See tour prices, choose your departure, and arrange your trip directly with the team running it.",
-  },
-  {
-    title: "Local guides, local knowledge",
-    body: "Every guide lives in the region they show you. No scripts — just genuine insider stories, shortcuts and hidden spots.",
-  },
-  {
-    title: "Guaranteed small groups",
-    body: "We cap every departure at 16 guests. You'll never be one face in a 50-seat coach.",
-  },
-  {
-    title: "Direct support",
-    body: "Questions before, during or after? You reach us directly — not a call centre. We respond within one business day.",
-  },
-  {
-    title: "Travel with care",
-    body: "We travel with care for the land, sea and communities we visit. Your booking supports local family businesses.",
-  },
-  {
-    title: "Free cancellation",
-    body: "Plans change. Cancel up to 48 hours before departure for a full refund — no questions asked.",
-  },
+import Link from "next/link";
+
+const details = [
+  { title: "Book directly", body: "Choose your tour, check departure dates, and book with the team running your trip.", href: "/tours", link: "See tours" },
+  { title: "Ask us first", body: "Need help with pickup, dates, or travelling with a group? Talk to our team before you book.", href: "/contact", link: "Contact the team" },
+  { title: "Know your options", body: "Cancel more than 72 hours before departure for a full refund. Check the terms for shorter-notice cancellations.", href: "/terms-of-use", link: "Read the terms" },
 ];
 
 export function WhyBookDirect() {
   return (
-    <section className="bg-brand-900 py-16 sm:py-20 text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="text-center">
-          <p className="eyebrow text-sand-400">Why book direct?</p>
-          <h2 className="mt-3 font-serif text-4xl font-semibold">
-            Your trip, with a local team
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-brand-100/80">
-            Choose your day out and talk directly with our team about dates, pickup, and the details that matter to you.
-          </p>
-        </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {reasons.map((r) => (
-            <div key={r.title} className="rounded-2xl border border-brand-700/50 bg-brand-800/60 p-6">
-              <h3 className="font-serif text-lg font-semibold text-white">{r.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-brand-100/75">{r.body}</p>
-            </div>
-          ))}
-        </div>
+    <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
+      <h2 className="text-2xl font-semibold tracking-tight text-brand-900">Good to know before you go.</h2>
+      <div className="mt-8 grid gap-8 md:grid-cols-3 md:gap-12">
+        {details.map((detail) => (
+          <div key={detail.title} className="border-t border-brand-900/20 pt-5">
+            <h3 className="text-base font-semibold text-brand-900">{detail.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-foreground/80">{detail.body}</p>
+            <Link href={detail.href} className="mt-5 inline-block text-sm font-semibold text-brand-800 underline underline-offset-4">{detail.link} →</Link>
+          </div>
+        ))}
       </div>
     </section>
   );

@@ -70,22 +70,22 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
       <article className="mx-auto max-w-3xl px-4 py-20 sm:px-6">
         <Link href="/travel-insights" className="text-sm font-semibold text-brand-600 hover:underline">← All insights</Link>
-        <time className="mt-6 block text-xs font-medium uppercase tracking-wider text-brand-500">
+        <time className="mt-6 block text-xs font-medium uppercase tracking-wider text-brand-700">
           {new Date(post.date).toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" })}
         </time>
-        <h1 className="mt-2 font-serif text-4xl font-semibold text-brand-900 text-balance">{post.title}</h1>
+        <h1 className="mt-3 font-[family-name:var(--font-barlow-condensed)] text-6xl font-medium leading-none text-foreground text-balance sm:text-7xl">{post.title}</h1>
         <div className="mt-8 space-y-5 text-lg leading-relaxed text-foreground/80">
           {post.body.map((para, i) => <p key={i}>{para}</p>)}
         </div>
 
         {/* Book a tour CTA */}
-        <div className="mt-14 rounded-2xl bg-brand-50 border border-brand-100 px-8 py-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-brand-500">Ready to explore?</p>
-          <h2 className="mt-2 font-serif text-2xl font-semibold text-brand-900">
+        <div className="mt-14 border-t border-[#202b2626] py-10">
+          <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">Ready to explore?</p>
+          <h2 className="mt-2 text-2xl font-medium text-foreground">
             See New Zealand with {s.name}
           </h2>
-          <p className="mt-3 text-sm text-foreground/60 max-w-md mx-auto">
-            Small groups, local guides, and hand-crafted itineraries across the South Island. Free cancellation on most tours.
+          <p className="mt-3 text-sm text-foreground/75 max-w-md mx-auto">
+            Small groups, local guides, and day trips across the South Island. Free cancellation on most tours.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
@@ -96,7 +96,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             </Link>
             <Link
               href="/contact"
-              className="inline-block rounded-full border border-brand-300 px-7 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-100 transition"
+              className="inline-block rounded-full border border-[#202b2640] px-7 py-3 text-sm font-semibold text-brand-700 hover:bg-brand-100 transition"
             >
               Ask a question
             </Link>

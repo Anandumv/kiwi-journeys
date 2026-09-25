@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { TourForm } from "@/components/admin/TourForm";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
-import { saveTour, regenerateDepartures, cancelSession, addSession } from "../../actions";
+import { regenerateDepartures, cancelSession, addSession } from "../../actions";
 import { MultiImageField } from "@/components/admin/ImageFields";
 import { dateLabel, timeLabel, todayInAuckland } from "@/lib/time";
 
@@ -21,7 +22,7 @@ function Field({ label, name, defaultValue, placeholder, type = "text" }: { labe
 function Area({ label, name, defaultValue, rows = 4, hint }: { label: string; name: string; defaultValue?: string; rows?: number; hint?: string }) {
   return (
     <label className="block">
-      <span className={labelCls}>{label}{hint && <span className="ml-2 text-xs font-normal text-foreground/45">{hint}</span>}</span>
+      <span className={labelCls}>{label}{hint && <span className="ml-2 text-xs font-normal text-foreground/60">{hint}</span>}</span>
       <textarea className={`${input} mt-1`} name={name} rows={rows} defaultValue={defaultValue} />
     </label>
   );
@@ -53,7 +54,7 @@ export default async function TourEditor({
       <Link href="/admin/tours" className="text-sm font-semibold text-brand-600 hover:underline">← All tours</Link>
       <h1 className="mt-2 font-serif text-3xl font-semibold text-brand-900">{isNew ? "New tour" : tour!.title}</h1>
 
-      <form action={saveTour} className="mt-6 max-w-3xl space-y-5">
+      <TourForm>
         {!isNew && <input type="hidden" name="id" value={tour!.id} />}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Title" name="title" defaultValue={tour?.title} />
@@ -108,8 +109,7 @@ export default async function TourEditor({
           </div>
         </div>
 
-        <button className="rounded-full bg-brand-600 px-8 py-3 text-sm font-semibold text-white hover:bg-brand-700">Save tour</button>
-      </form>
+      </TourForm>
 
       {!isNew && (
         <section className="mt-12 max-w-3xl">

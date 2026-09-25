@@ -27,6 +27,14 @@ export async function POST(req: Request) {
   const tour = await prisma.tour.findUnique({ where: { id: tourId, isActive: true }, select: { title: true } });
   if (!tour) return NextResponse.json({ error: "Tour not found." }, { status: 404 });
 
+  if (sessionId) {
+    const session = await prisma.session.findFirst({
+      where: { id: sessionId, tourId, status: "SCHEDULED", startsAtUtc: { gt: new Date() } },
+      select: { id: true },
+    });
+    if (!session) return NextResponse.json({ error: "Departure not found." }, { status: 404 });
+  }
+
   await prisma.waitlist.create({
     data: {
       tourId,

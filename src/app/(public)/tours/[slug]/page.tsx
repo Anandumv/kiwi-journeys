@@ -7,7 +7,7 @@ import { Gallery } from "@/components/Gallery";
 import { TourCard } from "@/components/TourCard";
 import { CurrencyConverter } from "@/components/CurrencyConverter";
 import { formatNZD } from "@/lib/money";
-import { PaymentBadges } from "@/components/TrustBadges";
+import styles from "@/components/TourDetail.module.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
 
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const image = tour.heroImage || tour.gallery?.[0] || "";
   const fromChch = tour.destination !== "Christchurch" ? ` | Day Trip from Christchurch` : ` | Christchurch Day Tour`;
   const seoTitle = `${tour.title}${fromChch}`;
-  const seoDesc = `${tour.summary} Small group, max 16 guests. Free cancellation. Book online — instant confirmation.`;
+  const seoDesc = `${tour.summary} Book a South Island day trip online. See the cancellation terms before checkout.`;
   return {
     title: seoTitle,
     description: seoDesc,
@@ -114,154 +114,137 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
   };
 
   return (
-    <>
+    <div className={styles.page}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(tripLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(productLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(breadcrumbLd) }} />
-      {/* Title bar */}
-      <div className="bg-brand-50 border-b border-brand-100">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-          <div className="flex items-center gap-2 text-xs font-semibold text-brand-600">
-            <Link href="/tours" className="hover:underline">Tours</Link>
-            <span>/</span>
-            <span className="rounded-full bg-white px-2 py-0.5">{tour.code}</span>
+
+      <section className={styles.hero} aria-labelledby="tour-title">
+        <div className={styles.copy}>
+          <nav aria-label="Breadcrumb" className={styles.crumbs}>
+            <Link href="/tours">Tours</Link>
+            <span aria-hidden="true">/</span>
+            <span>{tour.destination}</span>
+          </nav>
+          <h1 id="tour-title" className={styles.title}>{tour.title}</h1>
+          <p className={styles.summary}>{tour.summary}</p>
+          <dl className={styles.facts}>
+            <div><dt>Duration</dt><dd>{tour.durationLabel}</dd></div>
+            <div><dt>From</dt><dd>{formatNZD(tour.priceFromCents)} per person</dd></div>
+            <div><dt>Route</dt><dd>{tour.startEnd}</dd></div>
+            <div><dt>Ages</dt><dd>{tour.ageRange}</dd></div>
+          </dl>
+          <div className={styles.heroActions}>
+            <Link href={`/tours/${tour.slug}/book`} className={styles.cta}>Check dates <span aria-hidden="true">↗</span></Link>
+            <p className={styles.policy}>Full refund when cancelled more than 72 hours before.</p>
           </div>
-          <h1 className="mt-2 font-serif text-4xl font-semibold text-brand-900 sm:text-5xl">{tour.title}</h1>
-          <p className="mt-2 max-w-2xl text-foreground/70">{tour.summary}</p>
         </div>
-      </div>
+        <div className={styles.media}>
+          <Gallery images={tour.gallery.length ? tour.gallery : [tour.heroImage].filter(Boolean)} title={tour.title} />
+        </div>
+      </section>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.6fr_1fr]">
-        {/* Left: gallery + content */}
-        <div>
-          <Gallery images={tour.gallery} title={tour.title} />
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-brand-900">Highlights</h2>
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-              {tour.highlights.map((h) => (
-                <li key={h} className="flex items-start gap-2 text-foreground/80">
-                  <span className="mt-1 text-brand-500">✦</span>{h}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-2xl font-bold text-brand-900">What to Expect</h2>
-            <ol className="mt-4 space-y-4">
-              {tour.itinerary.map((step, i) => (
-                <li key={i} className="flex gap-4">
-                  <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-sm font-semibold text-white">{i + 1}</span>
-                  <p className="text-foreground/80 leading-relaxed">{step}</p>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          <div className="mt-10 grid gap-8 sm:grid-cols-2">
-            <section>
-              <h2 className="text-xl font-bold text-brand-900">What&apos;s Included</h2>
-              <ul className="mt-3 space-y-2">
-                {tour.included.map((x) => (
-                  <li key={x} className="flex items-start gap-2 text-sm text-foreground/80"><span className="mt-0.5 text-brand-500">✓</span>{x}</li>
-                ))}
-              </ul>
-            </section>
-            {tour.optionalUpgrades && tour.optionalUpgrades.length > 0 && (
-              <section>
-                <h2 className="text-xl font-bold text-brand-900">Optional Upgrades</h2>
-                <ul className="mt-3 space-y-2">
-                  {tour.optionalUpgrades.map((x) => (
-                    <li key={x} className="flex items-start gap-2 text-sm text-foreground/80"><span className="mt-0.5 text-sand-500">+</span>{x}</li>
-                  ))}
+      <div className={styles.body}>
+        <div className={styles.main}>
+          {tour.highlights.length > 0 && (
+            <section className={styles.section} aria-labelledby="highlights">
+              <p className={styles.label}><b>01</b>Highlights</p>
+              <div>
+                <h2 id="highlights" className={styles.heading}>What you&apos;ll see</h2>
+                <ul className={styles.highlights}>
+                  {tour.highlights.map((h) => <li key={h}>{h}</li>)}
                 </ul>
-              </section>
-            )}
-          </div>
-
-          {tour.importantInfo && tour.importantInfo.length > 0 && (
-            <section className="mt-10 rounded-2xl border border-sand-400/40 bg-sand-400/10 p-6">
-              <h2 className="text-lg font-bold text-brand-900">Important Information</h2>
-              <ul className="mt-3 space-y-2">
-                {tour.importantInfo.map((x) => (
-                  <li key={x} className="text-sm text-foreground/80">• {x}</li>
-                ))}
-              </ul>
+              </div>
             </section>
           )}
+
+          {tour.itinerary.length > 0 && (
+            <section className={styles.section} aria-labelledby="the-day">
+              <p className={styles.label}><b>02</b>The day</p>
+              <div>
+                <h2 id="the-day" className={styles.heading}>How the day runs</h2>
+                <ol className={styles.timeline}>
+                  {tour.itinerary.map((step, i) => <li key={i}><p>{step}</p></li>)}
+                </ol>
+              </div>
+            </section>
+          )}
+
+          <section className={styles.section} aria-labelledby="included">
+            <p className={styles.label}><b>03</b>Included</p>
+            <div>
+              <h2 id="included" className={styles.heading}>What&apos;s in the price</h2>
+              <div className={styles.lists}>
+                <div>
+                  <h3>Included</h3>
+                  <ul>{tour.included.map((x) => <li key={x}>{x}</li>)}</ul>
+                </div>
+                {tour.optionalUpgrades && tour.optionalUpgrades.length > 0 && (
+                  <div>
+                    <h3>Optional extras</h3>
+                    <ul>{tour.optionalUpgrades.map((x) => <li key={x} className={styles.upgrade}>{x}</li>)}</ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.section} aria-labelledby="good-to-know">
+            <p className={styles.label}><b>04</b>Good to know</p>
+            <div>
+              <h2 id="good-to-know" className={styles.heading}>Before you go</h2>
+              <p className={styles.lede}>{tour.pickup}</p>
+              {tour.importantInfo && tour.importantInfo.length > 0 && (
+                <ul className={styles.notes}>{tour.importantInfo.map((x) => <li key={x}>{x}</li>)}</ul>
+              )}
+            </div>
+          </section>
         </div>
 
-        {/* Right: sticky booking sidebar */}
-        <aside className="lg:sticky lg:top-24 lg:h-fit">
-          <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
-            <div className="flex items-center gap-1.5 text-sm">
-              <span className="text-gold-500" aria-hidden>★★★★★</span>
-              <span className="text-foreground/55">Loved by our guests</span>
-            </div>
-            <div className="mt-3 text-sm text-foreground/60">Price from</div>
-            <div className="font-serif text-3xl font-bold text-brand-700">{formatNZD(tour.priceFromCents)} <span className="text-base font-normal text-foreground/50">/ person</span></div>
-
-            <div className="mt-4 space-y-2">
+        <aside className={styles.aside} aria-label="Book this tour">
+          <div className={styles.panel}>
+            <p className={styles.panelLabel}>Price from</p>
+            <p className={styles.price}>{formatNZD(tour.priceFromCents)}<small>/ person</small></p>
+            <dl className={styles.options}>
               {tour.priceOptions.map((po) => (
-                <div key={po.key} className="flex items-center justify-between border-b border-brand-50 pb-2 text-sm">
-                  <span className="text-foreground/80">{po.label}</span>
-                  <span className="font-semibold text-brand-700">{formatNZD(po.priceCents)}</span>
-                </div>
-              ))}
-            </div>
-
-            <CurrencyConverter priceFromCents={tour.priceFromCents} rates={settings.currencyRates} />
-
-            <Link
-              href={`/tours/${tour.slug}/book`}
-              className="mt-4 block rounded-full bg-sand-500 px-6 py-3.5 text-center font-semibold text-white shadow-sm transition hover:bg-sand-700"
-            >
-              Check Availability &amp; Book
-            </Link>
-            <div className="mt-3 space-y-1 text-center text-xs text-foreground/55">
-              <p><span className="text-teal-600">✓</span> Free cancellation up to 48 h before</p>
-              <p><span className="text-teal-600">✓</span> Small groups · max 16 guests · Locally owned</p>
-              <p><span className="text-teal-600">✓</span> No booking fees — best price direct</p>
-            </div>
-            <PaymentBadges className="mt-4 border-t border-brand-50 pt-4" />
-            <Link href="/contact" className="mt-3 block text-center text-sm font-medium text-brand-600 hover:underline">
-              Have questions? Contact us
-            </Link>
-
-            <dl className="mt-6 space-y-2 border-t border-brand-50 pt-4">
-              {facts.map((f) => (
-                <div key={f.label} className="flex justify-between text-sm">
-                  <dt className="text-foreground/55">{f.label}</dt>
-                  <dd className="font-medium text-brand-800 text-right">{f.value}</dd>
-                </div>
+                <div key={po.key}><dt>{po.label}</dt><dd>{formatNZD(po.priceCents)}</dd></div>
               ))}
             </dl>
-            <p className="mt-4 text-xs text-foreground/50">{tour.pickup}</p>
+            <CurrencyConverter priceFromCents={tour.priceFromCents} rates={settings.currencyRates} />
+            <Link href={`/tours/${tour.slug}/book`} className={styles.cta}>Check availability <span aria-hidden="true">↗</span></Link>
+            <ul className={styles.assurances}>
+              <li>Full refund when cancelled more than 72 hours before.</li>
+              <li>Charged in NZD. No booking fee.</li>
+            </ul>
+            <dl className={styles.panelFacts}>
+              {facts.map((f) => (
+                <div key={f.label}><dt>{f.label}</dt><dd>{f.value}</dd></div>
+              ))}
+            </dl>
+            <Link href="/contact" className={styles.ask}>Ask us about this day</Link>
           </div>
         </aside>
       </div>
 
       {related.length > 0 && (
-        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
-          <h2 className="font-serif text-2xl font-semibold text-brand-900 sm:text-3xl">You might also like</h2>
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((t) => <TourCard key={t.slug} tour={t} />)}
+        <section className={styles.related} aria-labelledby="related">
+          <div className={styles.relatedInner}>
+            <div className={styles.relatedHead}>
+              <h2 id="related">More days like this</h2>
+              <Link href="/tours">All tours</Link>
+            </div>
+            <div className={styles.relatedGrid}>
+              {related.map((t) => <TourCard key={t.slug} tour={t} />)}
+            </div>
           </div>
         </section>
       )}
 
-      {/* Mobile sticky book bar */}
-      <div className="h-20 lg:hidden" />
-      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-ivory-200 bg-ivory/95 px-4 py-3 backdrop-blur lg:hidden">
-        <div>
-          <div className="text-xs text-foreground/55">from</div>
-          <div className="font-serif text-lg font-semibold text-brand-700">{formatNZD(tour.priceFromCents)}</div>
-        </div>
-        <Link href={`/tours/${tour.slug}/book`} className="rounded-full bg-sand-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition active:bg-sand-700">
-          Check availability
-        </Link>
+      <div className={styles.spacer} />
+      <div className={styles.bar}>
+        <p>From<strong>{formatNZD(tour.priceFromCents)}</strong></p>
+        <Link href={`/tours/${tour.slug}/book`} className={styles.cta}>Check availability <span aria-hidden="true">↗</span></Link>
       </div>
-    </>
+    </div>
   );
 }

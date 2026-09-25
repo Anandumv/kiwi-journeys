@@ -27,6 +27,12 @@ export async function GET(req: Request) {
   const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
   let notified = 0;
+  let failed = 0;
+  const now = new Date();
+  const inventory = {
+    bookings: { where: { status: "CONFIRMED" as const }, select: { seats: true } },
+    reservations: { where: { status: "HELD" as const, expiresAt: { gt: now } }, select: { seats: true } },
+  };
 
   for (const entry of entries) {
     let hasAvailability = false;
@@ -36,10 +42,10 @@ export async function GET(req: Request) {
       // Check specific session availability.
       const session = await prisma.session.findUnique({
         where: { id: entry.sessionId },
-        include: { tour: { select: { slug: true } }, bookings: { where: { status: "CONFIRMED" }, select: { seats: true } } },
+        include: { tour: { select: { slug: true, isActive: true } }, ...inventory },
       });
-      if (session && session.status === "SCHEDULED" && session.startsAtUtc > new Date()) {
-        const usedSeats = session.bookings.reduce((sum, b) => sum + b.seats, 0);
+      if (session && session.tourId === entry.tourId && session.tour.isActive && session.status === "SCHEDULED" && session.startsAtUtc > now) {
+        const usedSeats = session.bookings.reduce((sum, b) => sum + b.seats, 0) + session.reservations.reduce((sum, r) => sum + r.seats, 0);
         if (session.capacity - usedSeats >= entry.seats) {
           hasAvailability = true;
           sessionInfo = { startsAtUtc: session.startsAtUtc, tourSlug: session.tour.slug };
@@ -48,18 +54,18 @@ export async function GET(req: Request) {
     } else {
       // Tour-level waitlist: check if any future session for this tour has capacity.
       const tour = await prisma.tour.findUnique({
-        where: { id: entry.tourId },
+        where: { id: entry.tourId, isActive: true },
         include: {
           sessions: {
             where: { status: "SCHEDULED", startsAtUtc: { gt: new Date() } },
-            include: { bookings: { where: { status: "CONFIRMED" }, select: { seats: true } } },
+            include: inventory,
             orderBy: { startsAtUtc: "asc" },
           },
         },
       });
       if (tour) {
         const available = tour.sessions.find((s) => {
-          const used = s.bookings.reduce((sum, b) => sum + b.seats, 0);
+          const used = s.bookings.reduce((sum, b) => sum + b.seats, 0) + s.reservations.reduce((sum, r) => sum + r.seats, 0);
           return s.capacity - used >= entry.seats;
         });
         if (available) {
@@ -75,7 +81,7 @@ export async function GET(req: Request) {
       ? `${baseUrl}/tours/${sessionInfo.tourSlug}/book`
       : `${baseUrl}/tours`;
 
-    await resend.emails.send({
+    const delivery = await resend.emails.send({
       from,
       to: entry.email,
       subject: `Good news! A spot opened up on ${entry.tourTitle} — ${site.name}`,
@@ -88,11 +94,16 @@ export async function GET(req: Request) {
         `Book now before it fills up again:\n${bookUrl}\n\n` +
         `Seats are limited — first come, first served.\n\n` +
         `${site.name}\n${site.phone}`,
-    }).catch((e) => console.error(`Waitlist email failed ${entry.id}:`, e));
+    }).catch(() => null);
+    if (!delivery?.data?.id || delivery.error) {
+      failed++;
+      console.error(`Waitlist email rejected for entry ${entry.id}`);
+      continue;
+    }
 
     await prisma.waitlist.update({ where: { id: entry.id }, data: { notified: true } });
     notified++;
   }
 
-  return NextResponse.json({ checked: entries.length, notified });
+  return NextResponse.json({ checked: entries.length, notified, failed });
 }

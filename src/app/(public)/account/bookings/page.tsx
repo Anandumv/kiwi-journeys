@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS: Record<string, { label: string; className: string }> = {
   CONFIRMED: { label: "Confirmed", className: "bg-teal-100 text-teal-800" },
-  CANCELLED: { label: "Cancelled", className: "bg-ivory text-foreground/50" },
+  CANCELLED: { label: "Cancelled", className: "bg-ivory text-foreground/75" },
   REFUNDED: { label: "Refunded", className: "bg-amber-100 text-amber-800" },
 };
 
@@ -33,15 +33,15 @@ export default async function MyBookingsPage() {
     <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-semibold text-brand-900">My bookings</h1>
-          {session.name && <p className="mt-1 text-sm text-foreground/60">Signed in as {session.name}</p>}
+          <h1 className="font-serif text-3xl font-semibold text-foreground">My bookings</h1>
+          {session.name && <p className="mt-1 text-sm text-foreground/75">Signed in as {session.name}</p>}
         </div>
         <div className="flex items-center gap-3">
           <Link href="/account/profile" className="text-sm font-medium text-brand-600 hover:underline">
             Profile
           </Link>
           <form action="/api/account/logout" method="POST">
-            <button type="submit" className="text-sm text-foreground/50 hover:text-foreground/80">
+            <button type="submit" className="text-sm text-foreground/75 hover:text-foreground/80">
               Sign out
             </button>
           </form>
@@ -49,8 +49,8 @@ export default async function MyBookingsPage() {
       </div>
 
       {bookings.length === 0 && (
-        <div className="mt-12 rounded-2xl border border-dashed border-brand-200 py-16 text-center">
-          <p className="text-foreground/50">No bookings found for {session.email}.</p>
+        <div className="mt-12 rounded-2xl border border-dashed border-[#202b2640] py-16 text-center">
+          <p className="text-foreground/75">No bookings found for {session.email}.</p>
           <Link href="/tours" className="mt-4 inline-block text-sm font-semibold text-brand-600 hover:underline">
             Browse tours →
           </Link>
@@ -59,7 +59,7 @@ export default async function MyBookingsPage() {
 
       {upcoming.length > 0 && (
         <section className="mt-8">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-foreground/40">Upcoming</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-foreground/75">Upcoming</h2>
           <div className="mt-3 space-y-3">
             {upcoming.map((b) => (
               <BookingRow key={b.id} booking={b} />
@@ -70,7 +70,7 @@ export default async function MyBookingsPage() {
 
       {past.length > 0 && (
         <section className="mt-10">
-          <h2 className="text-xs font-semibold uppercase tracking-widest text-foreground/40">Past &amp; other</h2>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-foreground/75">Past &amp; other</h2>
           <div className="mt-3 space-y-3">
             {past.map((b) => (
               <BookingRow key={b.id} booking={b} />
@@ -91,16 +91,16 @@ function BookingRow({ booking }: {
     session: { startsAtUtc: Date; tour: { title: string } };
   };
 }) {
-  const st = STATUS[booking.status] ?? { label: booking.status, className: "bg-ivory text-foreground/50" };
+  const st = STATUS[booking.status] ?? { label: booking.status, className: "bg-ivory text-foreground/75" };
   return (
     <Link
       href={`/account/bookings/${booking.reference}`}
-      className="flex items-center justify-between rounded-2xl border border-brand-100 bg-white p-5 shadow-sm transition hover:border-brand-300 hover:shadow-md"
+      className="flex items-center justify-between rounded-2xl border border-[#202b2626] bg-white p-5 transition hover:border-[#202b2640] hover:shadow-md"
     >
       <div>
-        <p className="font-medium text-brand-900">{booking.session.tour.title}</p>
-        <p className="mt-0.5 text-sm text-foreground/60">{dateLabel(booking.session.startsAtUtc)}</p>
-        <p className="mt-0.5 text-xs text-foreground/40">
+        <p className="font-medium text-foreground">{booking.session.tour.title}</p>
+        <p className="mt-0.5 text-sm text-foreground/75">{dateLabel(booking.session.startsAtUtc)}</p>
+        <p className="mt-0.5 text-xs text-foreground/75">
           {booking.seats} guest{booking.seats !== 1 ? "s" : ""} · {booking.reference}
         </p>
       </div>

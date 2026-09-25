@@ -3,13 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { Resend } from "resend";
+import { cancelDeparture } from "@/lib/cancel-departure";
 import { prisma } from "@/lib/db";
 import { generateSessions } from "@/lib/availability";
 import { sessionsOverlap } from "@/lib/vehicles";
-import { aucklandLocalToUtc, aucklandDateOnly, dateLabel, timeLabel } from "@/lib/time";
+import { aucklandLocalToUtc, aucklandDateOnly } from "@/lib/time";
 import { getCurrentAdmin } from "@/lib/auth";
-import { getSiteSettings } from "@/lib/content";
+import { parseSettingsJson, parseTourPrices } from "@/lib/cms-validation";
 
 async function assertAdmin() {
   const session = await getCurrentAdmin();
@@ -22,7 +22,6 @@ const num = (fd: FormData, k: string, d = 0) => { const n = Number(fd.get(k)); r
 const bool = (fd: FormData, k: string) => fd.get(k) === "on" || fd.get(k) === "true";
 const lines = (fd: FormData, k: string) => str(fd, k).split("\n").map((s) => s.trim()).filter(Boolean);
 const csvNums = (fd: FormData, k: string) => str(fd, k).split(",").map((s) => Number(s.trim())).filter((n) => Number.isFinite(n));
-const dollarsToCents = (v: string) => Math.round(parseFloat(v || "0") * 100);
 
 // Public pages render dynamically, so no cache-tag invalidation is required.
 function revalidateAll() {
@@ -30,15 +29,17 @@ function revalidateAll() {
 }
 
 // ─── Tours ──────────────────────────────────────────────────────────────────
-export async function saveTour(fd: FormData) {
+export async function saveTour(_previous: { error: string }, fd: FormData) {
   await assertAdmin();
   const id = str(fd, "id");
   const gallery = lines(fd, "gallery");
-  const priceOptions = lines(fd, "priceOptions").map((line, i) => {
-    // format: key | label | dollars | seatsPerUnit
-    const [key, label, dollars, seats] = line.split("|").map((s) => s.trim());
-    return { key: key || `opt${i}`, label: label || key || `Option ${i + 1}`, priceCents: dollarsToCents(dollars), seatsPerUnit: Number(seats) || 1, sortOrder: i };
-  });
+  let priceOptions;
+  try {
+    priceOptions = parseTourPrices(str(fd, "priceOptions"));
+    const duration = num(fd, "durationMins", 480);
+    if (!str(fd, "title") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(str(fd, "slug"))) throw new Error("A title and lowercase hyphenated slug are required.");
+    if (!Number.isInteger(duration) || duration <= 0 || duration >= 1440) throw new Error("Day trips must have a duration between 1 and 1439 minutes.");
+  } catch (error) { return { error: error instanceof Error ? error.message : "Invalid tour" }; }
   const priceFromCents = priceOptions.length ? Math.min(...priceOptions.map((p) => p.priceCents)) : num(fd, "priceFromCents") * 100;
 
   const defaultVehicleId = str(fd, "defaultVehicleId") || null;
@@ -81,18 +82,29 @@ export async function saveTour(fd: FormData) {
     isActive: bool(fd, "isActive"),
   };
 
-  const tour = id
-    ? await prisma.tour.update({ where: { id }, data })
-    : await prisma.tour.create({ data });
+  try {
+    await prisma.$transaction(async (tx) => {
+      const tour = id
+        ? await tx.tour.update({ where: { id }, data })
+        : await tx.tour.create({ data });
 
-  // Replace price options.
-  await prisma.priceOption.deleteMany({ where: { tourId: tour.id, key: { notIn: priceOptions.map((p) => p.key) } } });
-  for (const po of priceOptions) {
-    await prisma.priceOption.upsert({
-      where: { tourId_key: { tourId: tour.id, key: po.key } },
-      create: { tourId: tour.id, ...po },
-      update: { label: po.label, priceCents: po.priceCents, seatsPerUnit: po.seatsPerUnit, sortOrder: po.sortOrder },
+      // Replace price options.
+      await tx.priceOption.deleteMany({ where: { tourId: tour.id, key: { notIn: priceOptions.map((p) => p.key) } } });
+      for (const po of priceOptions) {
+        await tx.priceOption.upsert({
+          where: { tourId_key: { tourId: tour.id, key: po.key } },
+          create: { tourId: tour.id, ...po },
+          update: { label: po.label, priceCents: po.priceCents, seatsPerUnit: po.seatsPerUnit, sortOrder: po.sortOrder },
+        });
+      }
+
     });
+
+  } catch (error) {
+    const code = (error as { code?: string }).code;
+    if (code === 'P2002') return { error: 'This slug or price key is already in use. No changes were saved.' };
+    if (code === 'P2003') return { error: 'A price option is referenced by existing bookings and cannot be removed. No changes were saved.' };
+    throw error;
   }
 
   revalidateAll();
@@ -130,46 +142,7 @@ export async function cancelSession(fd: FormData) {
   const sessionId = str(fd, "sessionId");
   const tourId = str(fd, "tourId");
 
-  // Fetch session + affected bookings before cancelling
-  const session = await prisma.session.findUnique({
-    where: { id: sessionId },
-    include: {
-      tour: { select: { title: true } },
-      bookings: {
-        where: { status: "CONFIRMED" },
-        select: { reference: true, customer: { select: { fullName: true, email: true } } },
-      },
-    },
-  });
-
-  await prisma.session.update({ where: { id: sessionId }, data: { status: "CANCELLED" } });
-
-  // Email every affected customer
-  const apiKey = process.env.RESEND_API_KEY;
-  if (session && session.bookings.length > 0 && apiKey) {
-    const resend = new Resend(apiKey);
-    const site = await getSiteSettings();
-    const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
-    for (const b of session.bookings) {
-      await resend.emails
-        .send({
-          from,
-          to: b.customer.email,
-          subject: `Important update: Your ${session.tour.title} tour has been cancelled`,
-          text:
-            `Hi ${b.customer.fullName},\n\n` +
-            `We're very sorry to inform you that the ${session.tour.title} tour on ` +
-            `${dateLabel(session.startsAtUtc)} at ${timeLabel(session.startsAtUtc)} (NZ time) ` +
-            `has been cancelled.\n\n` +
-            `Your booking (ref: ${b.reference}) will be fully refunded. ` +
-            `Refunds typically appear within 5–10 business days depending on your bank.\n\n` +
-            `We sincerely apologise for the inconvenience. ` +
-            `To book an alternative date, visit our website or call us at ${site.phone}.\n\n` +
-            `${site.name}`,
-        })
-        .catch((e: Error) => console.error(`Cancel email failed ${b.reference}:`, e));
-    }
-  }
+  await cancelDeparture(sessionId, tourId);
 
   revalidatePath(`/admin/tours/${tourId}`);
 }
@@ -284,9 +257,11 @@ export async function deleteTestimonial(fd: FormData) {
 }
 
 // ─── Site settings ─────────────────────────────────────────────────────────────
-export async function saveSettings(fd: FormData) {
+export async function saveSettings(_previous: { error: string }, fd: FormData) {
   await assertAdmin();
-  const parseJson = (k: string, fallback: unknown) => { try { return JSON.parse(str(fd, k)); } catch { return fallback; } };
+  let structured;
+  try { structured = parseSettingsJson(fd); }
+  catch (error) { return { error: error instanceof Error ? error.message : "Invalid settings" }; }
   await prisma.siteSetting.update({
     where: { id: "singleton" },
     data: {
@@ -294,8 +269,7 @@ export async function saveSettings(fd: FormData) {
       logoImage: str(fd, "logoImage") || null,
       phone: str(fd, "phone"), phoneHref: str(fd, "phoneHref"), email: str(fd, "email"), address: str(fd, "address"),
       currency: str(fd, "currency") || "NZD", heroImage: str(fd, "heroImage"), footerTagline: str(fd, "footerTagline"),
-      social: parseJson("social", {}), stats: parseJson("stats", []), nav: parseJson("nav", []),
-      valueProps: parseJson("valueProps", []), currencyRates: parseJson("currencyRates", {}),
+      ...structured,
     },
   });
   revalidatePath("/", "layout");

@@ -1,12 +1,8 @@
 "use client";
 
-import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
-// Tasteful fade + rise on mount. Animates immediately rather than gating on
-// IntersectionObserver-based whileInView, which can leave content stuck at
-// opacity:0 forever if the viewport-enter callback never fires (e.g. under
-// slow/interrupted hydration). Honors reduced-motion via CSS.
+// Visible server HTML; CSS enhances it without depending on hydration.
 export function Reveal({
   children,
   delay = 0,
@@ -19,13 +15,11 @@ export function Reveal({
   y?: number;
 }) {
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+    <div
+      className={`reveal ${className}`}
+      style={{ "--reveal-y": `${y}px`, animationDelay: `${delay}s` } as CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

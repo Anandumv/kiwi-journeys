@@ -105,13 +105,13 @@ export function RescheduleForm({
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="text-sm text-brand-600 underline hover:text-brand-800"
+          className="text-sm text-brand-600 underline hover:text-foreground"
         >
           Change date
         </button>
       ) : (
-        <div className="rounded-xl border border-brand-100 bg-brand-50/40 p-4 space-y-4">
-          <p className="text-sm font-medium text-brand-900">Choose a new departure date</p>
+        <div className="rounded-xl border border-[#202b2626] bg-[#eeede6]/40 p-4 space-y-4">
+          <p className="text-sm font-medium text-foreground">Choose a new departure date</p>
 
           <div className="flex items-center justify-between">
             <button
@@ -121,7 +121,7 @@ export function RescheduleForm({
             >
               ← Prev
             </button>
-            <span className="text-sm font-semibold text-brand-800">
+            <span className="text-sm font-semibold text-foreground">
               {MONTHS[month - 1]} {year}
             </span>
             <button onClick={nextMonth} className="px-2 py-1 text-sm text-brand-600 hover:underline">
@@ -129,10 +129,10 @@ export function RescheduleForm({
             </button>
           </div>
 
-          {loading && <p className="text-xs text-foreground/50">Loading availability…</p>}
+          {loading && <p className="text-xs text-foreground/75">Loading availability…</p>}
 
           {!loading && days.length === 0 && !error && (
-            <p className="text-xs text-foreground/50">
+            <p className="text-xs text-foreground/75">
               No available dates this month with {seats} seat{seats > 1 ? "s" : ""}.
             </p>
           )}
@@ -159,14 +159,14 @@ export function RescheduleForm({
                     onClick={() => setSelectedSessionId(s.sessionId)}
                     className={`w-full flex items-center justify-between rounded-lg border px-4 py-2.5 text-sm transition ${
                       sel
-                        ? "border-brand-500 bg-brand-50 font-medium text-brand-700"
-                        : "border-brand-100 bg-white hover:border-brand-300"
+                        ? "border-brand-500 bg-[#eeede6] font-medium text-brand-700"
+                        : "border-[#202b2626] bg-white hover:border-[#202b2640]"
                     }`}
                   >
                     <span>
                       {label} — {time}
                     </span>
-                    <span className="text-xs text-foreground/50">{s.remaining} left</span>
+                    <span className="text-xs text-foreground/75">{s.remaining} left</span>
                   </button>
                 );
               }),
@@ -185,7 +185,7 @@ export function RescheduleForm({
             </button>
             <button
               onClick={() => setOpen(false)}
-              className="text-sm text-foreground/50 hover:text-foreground"
+              className="text-sm text-foreground/75 hover:text-foreground"
             >
               Cancel
             </button>

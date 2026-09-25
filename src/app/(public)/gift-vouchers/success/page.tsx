@@ -1,33 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TaskShell } from "@/components/TaskShell";
 
 export const metadata: Metadata = { title: "Gift Voucher purchased!" };
 
 export default function GiftVoucherSuccessPage() {
   return (
-    <div className="mx-auto max-w-lg px-4 py-24 text-center sm:px-6">
-      <div className="text-5xl mb-4">🎁</div>
-      <h1 className="font-serif text-3xl font-semibold text-brand-900">
-        Your gift voucher is on its way!
-      </h1>
-      <p className="mt-4 text-foreground/70">
-        The voucher code has been sent to your email. If you provided a recipient email, they'll
-        receive the gift message too.
-      </p>
-      <div className="mt-8 flex flex-wrap justify-center gap-4">
-        <Link
-          href="/tours"
-          className="rounded-full bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-700"
-        >
-          Browse tours
-        </Link>
-        <Link
-          href="/"
-          className="rounded-full border border-brand-200 px-6 py-2.5 text-sm font-semibold text-brand-700 transition hover:bg-brand-50"
-        >
-          Back to home
-        </Link>
+    <TaskShell
+      eyebrow="Gift voucher"
+      title="Your voucher is on its way"
+      intro="Once payment is confirmed, the voucher code is emailed to you. If you added a recipient email, they receive the gift message too."
+    >
+      <p className="text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75">What next</p>
+      <ul className="mt-3 border-t border-[#202b2626] text-foreground/85">
+        <li className="border-b border-[#202b2626] py-3">The code works on any day tour, for a full or partial balance.</li>
+        <li className="border-b border-[#202b2626] py-3">Enter it in the gift voucher field at checkout.</li>
+      </ul>
+      <div className="mt-8 flex flex-wrap gap-3">
+        <Link href="/tours" className="bg-[#203c33] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#315445]">Browse tours</Link>
+        <Link href="/" className="border border-foreground px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-foreground hover:text-[#f8f8f3]">Back to home</Link>
       </div>
-    </div>
+    </TaskShell>
   );
 }

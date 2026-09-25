@@ -13,11 +13,11 @@ export const metadata: Metadata = {
   alternates: { canonical: `${SITE_URL}/tours` },
   openGraph: {
     title: "New Zealand Day Tours | Kiwi Globe Tours",
-    description: "Small-group South Island day tours. Book online, instant confirmation.",
+    description: "Small-group South Island day tours. Browse available departures and book online.",
     url: `${SITE_URL}/tours`,
     images: [{ url: "/images/brand/Hero-Ocean-Alps.jpg", width: 1200, height: 630, alt: "South Island Day Tours from Christchurch" }],
   },
-  twitter: { card: "summary_large_image", title: "New Zealand Day Tours | Kiwi Globe Tours", description: "Small-group South Island day tours. Book online, instant confirmation.", images: ["/images/brand/Hero-Ocean-Alps.jpg"] },
+  twitter: { card: "summary_large_image", title: "New Zealand Day Tours | Kiwi Globe Tours", description: "Small-group South Island day tours. Browse available departures and book online.", images: ["/images/brand/Hero-Ocean-Alps.jpg"] },
 };
 
 export default async function ToursPage() {
@@ -45,13 +45,14 @@ export default async function ToursPage() {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(itemListLd) }} />
       <PageHero
-        eyebrow="Exciting Experiences"
-        title="Our Tours"
+        eyebrow="The day trips"
+        title="A day well spent"
         subtitle="Small-group days out across the South Island — pick a date and book online in minutes."
-        image="/images/brand/Hero-Ocean-Alps.jpg"
+        image="/images/tours/jet-boating-waimakariri/7395a4_190a72a3a4994cf293a93975bd1bedfc-mv2_1.jpg"
+        caption="Waimakariri Gorge, Canterbury"
       />
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <Suspense fallback={<p className="text-foreground/60">Loading tours…</p>}>
+        <Suspense fallback={<p className="text-foreground/75">Loading tours…</p>}>
           <ToursExplorer tours={tours} />
         </Suspense>
       </div>

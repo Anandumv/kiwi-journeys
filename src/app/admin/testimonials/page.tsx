@@ -37,7 +37,7 @@ export default async function AdminTestimonials() {
         <div><h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-foreground/55">Add new</h2><TForm /></div>
         <div className="space-y-4">
           <h2 className="text-sm font-semibold uppercase tracking-wide text-foreground/55">Existing ({items.length})</h2>
-          {items.map((t) => <details key={t.id} className="rounded-xl border border-ivory-200 bg-white"><summary className="cursor-pointer px-5 py-3 font-medium text-brand-800">{t.name} <span className="text-xs text-foreground/45">· {t.country}</span></summary><div className="p-4 pt-0"><TForm t={t} /></div></details>)}
+          {items.map((t) => <details key={t.id} className="rounded-xl border border-ivory-200 bg-white"><summary className="cursor-pointer px-5 py-3 font-medium text-brand-800">{t.name} <span className="text-xs text-foreground/60">· {t.country}</span></summary><div className="p-4 pt-0"><TForm t={t} /></div></details>)}
         </div>
       </div>
     </div>

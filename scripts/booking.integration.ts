@@ -171,3 +171,15 @@ test('two tours sharing a vehicle with overlapping departures both get created, 
  assert.equal(await prisma.session.count({where:{tourId:tourB.id}}),resultB.created);
 });
 test.after(async()=>{await prisma.$disconnect();});
+
+
+test('departure cancellation queues durable notice once without claiming refund completion',async()=>{
+ const {cancelDeparture}=await import('../src/lib/cancel-departure');
+ const f=await fixture();const h=await f.hold();await f.prepare(h.reservationId);
+ const booking=await commitReservation(h.reservationId,`pi_${h.reservationId}`);
+ await Promise.all([cancelDeparture(f.session.id,f.tour.id),cancelDeparture(f.session.id,f.tour.id)]);
+ assert.equal((await prisma.session.findUniqueOrThrow({where:{id:f.session.id}})).status,'CANCELLED');
+ const jobs=await prisma.emailJob.findMany({where:{id:`departure-cancelled-${f.session.id}-${booking.reference}`}});
+ assert.equal(jobs.length,1);assert.match(jobs[0].body,/refund has not yet been confirmed/);
+ assert.equal((await prisma.booking.findUniqueOrThrow({where:{reference:booking.reference}})).status,'CONFIRMED');
+});

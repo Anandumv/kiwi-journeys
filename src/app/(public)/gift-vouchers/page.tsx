@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 };
 
 const HOW_IT_WORKS = [
-  { title: "Valid for 1 year", body: "Recipients have a full year to choose their perfect adventure." },
+  { title: "Valid for 1 year", body: "The recipient has a year to choose a date." },
   { title: "Redeemable on any tour", body: "Apply on any Kiwi Journeys day tour — full or partial balance." },
-  { title: "Instant digital delivery", body: "Voucher code emailed instantly after purchase. No waiting." },
+  { title: "Delivery by email", body: "The code is sent by email after payment is confirmed." },
   { title: "Any amount from $50", body: "Choose a preset value or enter your own custom amount." },
 ];
 
@@ -27,19 +27,20 @@ export default function GiftVouchersPage() {
   return (
     <>
       <PageHero
-        eyebrow="Give the gift of adventure"
+        eyebrow="For someone going places"
         title="Gift Vouchers"
-        subtitle="The perfect present for anyone who loves to explore New Zealand."
-        image="/images/general/tekapo-church-sunset.jpg"
+        subtitle="A day out they can choose for themselves."
+        image="/images/tours/hanmer-springs-day-tour/7395a4_529cbc3a6ae14c5997e962e0245b3268-mv2_4.jpg"
+        caption="Hanmer Springs thermal pools"
       />
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
         <div className="grid gap-16 lg:grid-cols-2">
           <div>
-            <h2 className="font-serif text-3xl font-semibold text-brand-900">
+            <h2 className="font-serif text-3xl font-semibold text-foreground">
               Purchase a voucher
             </h2>
-            <p className="mt-2 text-sm text-foreground/70">
-              The voucher code is emailed instantly after payment.
+            <p className="mt-2 text-sm text-foreground/75">
+              The voucher code is sent by email after payment is confirmed.
             </p>
             <div className="mt-8">
               <GiftVoucherForm />
@@ -48,20 +49,20 @@ export default function GiftVouchersPage() {
 
           <div className="space-y-8">
             <div>
-              <h2 className="font-serif text-3xl font-semibold text-brand-900">How it works</h2>
+              <h2 className="font-serif text-3xl font-semibold text-foreground">How it works</h2>
               <div className="mt-6 grid gap-4 sm:grid-cols-2">
                 {HOW_IT_WORKS.map((f) => (
-                  <div key={f.title} className="rounded-2xl border border-brand-100 bg-white p-5 shadow-sm">
-                    <h3 className="font-semibold text-brand-800">{f.title}</h3>
-                    <p className="mt-1 text-sm text-foreground/70">{f.body}</p>
+                  <div key={f.title} className="border-t border-[#202b2626] py-4">
+                    <h3 className="font-semibold text-foreground">{f.title}</h3>
+                    <p className="mt-1 text-sm text-foreground/75">{f.body}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-2xl border border-brand-100 bg-brand-50 p-6">
-              <h3 className="font-semibold text-brand-800">How to redeem</h3>
-              <ol className="mt-3 space-y-2 text-sm text-foreground/70 list-decimal list-inside">
+            <div className="border-t border-[#202b2626] pt-6">
+              <h3 className="font-semibold text-foreground">How to redeem</h3>
+              <ol className="mt-3 space-y-2 text-sm text-foreground/75 list-decimal list-inside">
                 <li>Browse and choose a tour at /tours</li>
                 <li>Select your date and guests, proceed to checkout</li>
                 <li>

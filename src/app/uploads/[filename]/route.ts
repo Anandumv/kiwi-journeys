@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { uploadDir } from '@/lib/upload';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -12,7 +13,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ fil
   const type = types[path.extname(filename)];
   if (!type || !/^[a-zA-Z0-9_-]+\.(jpg|png|gif|webp|avif)$/.test(filename)) return new Response(null, { status: 404 });
   try {
-    const bytes = await readFile(path.join(process.cwd(), 'public', 'uploads', filename));
+    const bytes = await readFile(path.join(uploadDir(), filename));
     return new Response(bytes, { headers: { 'Content-Type': type, 'X-Content-Type-Options': 'nosniff', 'Cache-Control': 'public, max-age=31536000, immutable' } });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === 'ENOENT') return new Response(null, { status: 404 });

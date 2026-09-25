@@ -28,6 +28,11 @@ export function safeName(name: string, type: string): string {
  * Store an uploaded image. Uses Vercel Blob when BLOB_READ_WRITE_TOKEN is set,
  * otherwise writes to public/uploads/ for local development. Returns a public URL.
  */
+/** Where filesystem uploads live. Set UPLOAD_DIR to a persistent volume in production. */
+export function uploadDir(): string {
+  return process.env.UPLOAD_DIR || path.join(process.cwd(), "public", "uploads");
+}
+
 export async function storeUpload(file: File): Promise<{ url: string }> {
   if (!ALLOWED.includes(file.type)) {
     throw new Error("Unsupported file type");
@@ -40,9 +45,9 @@ export async function storeUpload(file: File): Promise<{ url: string }> {
     return { url: blob.url };
   }
 
-  // Local dev fallback.
+  // Filesystem storage: a mounted volume in production (UPLOAD_DIR), public/uploads locally.
   const bytes = Buffer.from(await file.arrayBuffer());
-  const dir = path.join(process.cwd(), "public", "uploads");
+  const dir = uploadDir();
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, filename), bytes);
   return { url: `/uploads/${filename}` };

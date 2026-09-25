@@ -210,7 +210,7 @@
 .heroContent, .heroTopline { color: color-mix(in srgb, #23322e calc(100% - min(1, var(--journey-progress) * 3) * 100%), white); }
 .heroShade { background: rgba(8,22,20,calc(.65 * min(1, var(--journey-progress) * 3))); }
 @media (max-width: 760px) {
-  .heroFrame::before { background-image: linear-gradient(0deg, #e5dfd0 0%, #e5dfd0 20%, transparent 40%), url("/images/brand/carriage-interior.webp"); background-position: center, 65% center; }
+  .heroFrame::before { background-image: linear-gradient(0deg, #e5dfd0 0%, #e5dfd0 20%, transparent 40%), url("/images/brand/carriage-interior-900.webp"); background-position: center, 65% center; }
   .heroContent { padding-bottom: 0; }
   .heroFrame::after { width: 160px; height: 100px; bottom: -75px; left: -45px; }
 }

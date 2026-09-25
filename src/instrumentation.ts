@@ -15,11 +15,11 @@
  * same code — an external scheduler can still be pointed at these routes and
  * this can be switched off.
  *
- * Only safe while the service runs a single replica: scale past one and every
- * replica gets its own timers. `deliver-emails` and `expire-holds` are already
- * concurrency-safe (SKIP LOCKED leases and a single atomic UPDATE), but the
- * daily notification jobs are not. Set ENABLE_INTERNAL_CRON=false and move to
- * dedicated cron services before scaling out.
+ * Every job tolerates running on several replicas at once: `deliver-emails`
+ * and `expire-holds` use SKIP LOCKED leases and atomic updates, departures are
+ * unique per tour and start time, and notification jobs claim their rows and
+ * queue emails with ids derived from the booking/entry (`enqueueUniqueEmails`),
+ * so overlapping runs add nothing. Extra replicas only add redundant ticks.
  */
 
 type Job = { name: string; path: string; everyMs: number; firstRunMs: number };

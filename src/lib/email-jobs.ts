@@ -105,3 +105,30 @@ export async function processEmailJobs(limit = 3, send: (job: EmailJob) => Promi
   }
   return result;
 }
+
+/**
+ * Queue emails whose ids are derived from what they are about (for example
+ * `reminder-24h-<bookingId>`). Re-running a job, a second replica, or a crash
+ * mid-run cannot create a second copy: duplicates are skipped by primary key,
+ * and the worker's idempotency key is the same id. Returns how many were new.
+ */
+export async function enqueueUniqueEmails(
+  client: Prisma.TransactionClient | typeof prisma,
+  emails: (OutboundEmail & { id: string })[],
+) {
+  if (emails.length === 0) return 0;
+  const site = await getSiteSettings();
+  const sender = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
+  const result = await client.emailJob.createMany({
+    data: emails.map((email) => ({
+      id: email.id,
+      bookingReference: email.bookingReference,
+      recipient: email.to,
+      sender,
+      subject: email.subject,
+      body: email.body,
+    })),
+    skipDuplicates: true,
+  });
+  return result.count;
+}

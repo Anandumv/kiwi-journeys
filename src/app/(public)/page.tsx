@@ -82,7 +82,7 @@ export default async function HomePage() {
           <Link href="/private-tours">Your own itinerary ↗</Link>
         </div>
 
-        <section className={styles.tours} aria-labelledby="tour-heading">
+        <section className={`${styles.tours} defer-render`} aria-labelledby="tour-heading">
           <div className={styles.sectionHeading}>
             <p className={styles.label}>01 / Days out</p>
             <h2 id="tour-heading">Leave the city.<br />See what’s out there.</h2>
@@ -115,11 +115,11 @@ export default async function HomePage() {
           </nav>
         </section>
 
-        <section className={styles.destinations} aria-labelledby="destination-heading">
+        <section className={`${styles.destinations} defer-render`} aria-labelledby="destination-heading">
           <DestinationDirectory places={destinationPlaces} />
         </section>
 
-        <section className={styles.private} aria-labelledby="private-heading">
+        <section className={`${styles.private} defer-render`} aria-labelledby="private-heading">
           <p className={styles.label}>03 / Make it yours</p>
           <div className={styles.privateLayout}>
             <h2 id="private-heading">Your people.<br />Your kind<br />of day<span>.</span></h2>
@@ -136,7 +136,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {testimonials.length > 0 && <section className={styles.guests} aria-label="Guest reviews">
+        {testimonials.length > 0 && <section className={`${styles.guests} defer-render`} aria-label="Guest reviews">
           <p className={styles.label}>In good company</p>
           <div className={styles.quotes}>{testimonials.map((t) => <figure key={`${t.name}-${t.country}`}>
             <blockquote>“{t.text}”</blockquote>

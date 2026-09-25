@@ -171,3 +171,7 @@ a.rounded-full, button.rounded-full, input.rounded-full { border-radius: 2px; }
 @keyframes sd-clip { from { clip-path: inset(10% 6% 10% 6%); } to { clip-path: inset(0); } }
 @keyframes sd-rise { from { transform: translateY(36px); } to { transform: none; } }
 @keyframes sd-rule { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Below-the-fold homepage sections skip rendering (and their lazy images) until near
+   the viewport, so nothing competes with the hero on first paint. */
+.defer-render { content-visibility: auto; contain-intrinsic-size: auto 1100px; }

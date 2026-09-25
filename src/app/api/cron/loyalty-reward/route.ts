@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { enqueueUniqueEmails } from "@/lib/email-jobs";
 import { getSiteSettings } from "@/lib/content";
 import { cronAuthorized } from "@/lib/cron";
 import { randomCode as randomSuffix } from "@/lib/codes";
@@ -48,18 +48,17 @@ export async function GET(req: Request) {
   const eligible = customers.filter((c) => c._count.bookings >= 2);
   if (eligible.length === 0) return NextResponse.json({ rewarded: 0, note: "none qualified" });
 
-  const apiKey = process.env.RESEND_API_KEY;
-  const resend = apiKey ? new Resend(apiKey) : null;
   const site = await getSiteSettings();
-  const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
   const expiresAt = new Date(now.getTime() + 60 * D);
   let rewarded = 0;
 
   for (const customer of eligible) {
     const code = `RETURN${randomSuffix(6)}`;
-
-    await prisma.$transaction(async (tx) => {
+    // Claim, create the code and queue its email atomically: no lost or duplicate rewards.
+    const issued = await prisma.$transaction(async (tx) => {
+      const claim = await tx.customer.updateMany({ where: { id: customer.id, loyaltyEmailSentAt: null }, data: { loyaltyEmailSentAt: now } });
+      if (claim.count !== 1) return false;
       await tx.promoCode.create({
         data: {
           code,
@@ -71,34 +70,24 @@ export async function GET(req: Request) {
           isActive: true,
         },
       });
-      await tx.customer.update({
-        where: { id: customer.id },
-        data: { loyaltyEmailSentAt: now },
-      });
+      await enqueueUniqueEmails(tx, [{
+        id: `loyalty-${customer.id}`,
+        bookingReference: `LOYALTY-${customer.id}`,
+        to: customer.email,
+        subject: `A little thank-you from ${site.name} — 10% off your next day out`,
+        body:
+          `Hi ${customer.fullName.split(" ")[0]},\n\n` +
+          `Thank you for travelling with us again.\n\n` +
+          `As a returning guest, here's a personal 10% discount for your next booking:\n\n` +
+          `  Promo code: ${code}\n` +
+          `  Valid until: ${expiresAt.toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" })}\n\n` +
+          `Enter the code at checkout on any of our South Island day tours:\n` +
+          `${baseUrl}/tours\n\n` +
+          `We hope to see you again soon.\n${site.name}\n${site.phone}`,
+      }]);
+      return true;
     });
-
-    if (resend) {
-      await resend.emails
-        .send({
-          from,
-          to: customer.email,
-          subject: `A little thank-you from ${site.name} — 10% off your next adventure`,
-          text:
-            `Hi ${customer.fullName.split(" ")[0]},\n\n` +
-            `Thank you for adventuring with us again — it means a great deal.\n\n` +
-            `As a returning guest, here's a personal 10% discount for your next booking:\n\n` +
-            `  Promo code: ${code}\n` +
-            `  Valid until: ${expiresAt.toLocaleDateString("en-NZ", { day: "numeric", month: "long", year: "numeric" })}\n\n` +
-            `Enter the code at checkout on any of our South Island day tours:\n` +
-            `${baseUrl}/tours\n\n` +
-            `We hope to see you on the road again soon!\n${site.name}\n${site.phone}`,
-        })
-        .catch((e) => console.error(`Loyalty email failed ${customer.email}:`, e));
-    } else {
-      console.log(`[loyalty] (no RESEND_API_KEY) code ${code} for ${customer.email}`);
-    }
-
-    rewarded++;
+    if (issued) rewarded++;
   }
 
   return NextResponse.json({ eligible: eligible.length, rewarded });

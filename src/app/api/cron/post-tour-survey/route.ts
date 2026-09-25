@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { enqueueUniqueEmails } from "@/lib/email-jobs";
 import { getSiteSettings } from "@/lib/content";
 import { dateLabel } from "@/lib/time";
 import { cronAuthorized } from "@/lib/cron";
@@ -41,31 +41,21 @@ export async function GET(req: Request) {
 
   if (pending.length === 0) return NextResponse.json({ surveyed: 0, note: "all already surveyed" });
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) return NextResponse.json({ surveyed: 0, pending: pending.length, note: "No RESEND_API_KEY" });
-
-  const resend = new Resend(apiKey);
   const site = await getSiteSettings();
-  const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://kiwiglobetours.co.nz";
-  let sent = 0;
+  // The eligibility window spans two daily runs; the per-booking id sends one survey.
+  const queued = await enqueueUniqueEmails(prisma, pending.map((b) => ({
+    id: `survey-${b.id}`,
+    bookingReference: b.reference,
+    to: b.customer.email,
+    subject: `How was your ${b.session.tour.title} tour? — ${site.name}`,
+    body:
+      `Hi ${b.customer.fullName},\n\n` +
+      `We hope you had a great day on your ${b.session.tour.title} tour on ${dateLabel(b.session.startsAtUtc)}.\n\n` +
+      `We would love to hear your feedback. It takes less than a minute and helps us improve for future guests:\n\n` +
+      `${baseUrl}/survey/${b.reference}\n\n` +
+      `Thank you for choosing ${site.name}.\n${site.phone}`,
+  })));
 
-  for (const b of pending) {
-    const surveyUrl = `${baseUrl}/survey/${b.reference}`;
-    await resend.emails.send({
-      from,
-      to: b.customer.email,
-      subject: `How was your ${b.session.tour.title} tour? — ${site.name}`,
-      text:
-        `Hi ${b.customer.fullName},\n\n` +
-        `We hope you had an amazing day on your ${b.session.tour.title} tour on ${dateLabel(b.session.startsAtUtc)}!\n\n` +
-        `We would love to hear your feedback — it takes less than a minute and helps us improve for future guests:\n\n` +
-        `${surveyUrl}\n\n` +
-        `Your honest feedback means a great deal to us.\n\n` +
-        `Thank you for choosing ${site.name}!\n${site.phone}`,
-    }).catch((e) => console.error(`Survey email failed ${b.reference}:`, e));
-    sent++;
-  }
-
-  return NextResponse.json({ pending: pending.length, sent });
+  return NextResponse.json({ pending: pending.length, queued });
 }

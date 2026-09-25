@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { prisma } from "@/lib/db";
+import { enqueueUniqueEmails } from "@/lib/email-jobs";
 import { getSiteSettings } from "@/lib/content";
 import { dateLabel, timeLabel } from "@/lib/time";
 import { cronAuthorized } from "@/lib/cron";
 
 export const dynamic = "force-dynamic";
 
-// Run every hour via Railway cron. Each window is 2 hours wide — no double-send risk.
+// Runs hourly over 4-hour windows, so a booking is seen by several runs. Email ids
+// are per booking and kind, which makes every run after the first a no-op.
 // 7-day window:  departures between now+6d22h and now+7d2h
 // 24h window:    departures between now+22h and now+26h
 export async function GET(req: Request) {
@@ -44,42 +45,26 @@ export async function GET(req: Request) {
     }),
   ]);
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json({
-      sevenDay: sevenDay.length,
-      oneDay: oneDay.length,
-      sent: 0,
-      note: "No RESEND_API_KEY",
-    });
-  }
-
-  const resend = new Resend(apiKey);
   const site = await getSiteSettings();
-  const from = process.env.BOOKINGS_FROM_EMAIL || `${site.name} <onboarding@resend.dev>`;
-  let sent = 0;
-
-  for (const b of sevenDay) {
-    await resend.emails.send({
-      from,
+  // One reminder of each kind per booking, however often this runs.
+  const queued = await enqueueUniqueEmails(prisma, [
+    ...sevenDay.map((b) => ({
+      id: `reminder-7d-${b.id}`,
+      bookingReference: b.reference,
       to: b.customer.email,
       subject: `Your tour is in 7 days — ${b.session.tour.title}`,
-      text: reminder7dText({ booking: b, siteName: site.name, sitePhone: site.phone }),
-    }).catch((e) => console.error(`7d reminder failed ${b.reference}:`, e));
-    sent++;
-  }
-
-  for (const b of oneDay) {
-    await resend.emails.send({
-      from,
+      body: reminder7dText({ booking: b, siteName: site.name, sitePhone: site.phone }),
+    })),
+    ...oneDay.map((b) => ({
+      id: `reminder-24h-${b.id}`,
+      bookingReference: b.reference,
       to: b.customer.email,
       subject: `See you tomorrow! ${b.session.tour.title} — ${dateLabel(b.session.startsAtUtc)}`,
-      text: reminder24hText({ booking: b, siteName: site.name, sitePhone: site.phone }),
-    }).catch((e) => console.error(`24h reminder failed ${b.reference}:`, e));
-    sent++;
-  }
+      body: reminder24hText({ booking: b, siteName: site.name, sitePhone: site.phone }),
+    })),
+  ]);
 
-  return NextResponse.json({ sevenDay: sevenDay.length, oneDay: oneDay.length, sent });
+  return NextResponse.json({ sevenDay: sevenDay.length, oneDay: oneDay.length, queued });
 }
 
 type ReminderArgs = {

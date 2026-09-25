@@ -46,7 +46,7 @@ export default async function BlogIndex() {
       <section className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20" aria-label="Articles">
         <ol className="border-b border-[#202b2626]">
           {posts.map((p, i) => (
-            <li key={p.slug}>
+            <li key={p.slug} className="sd-rise">
               <Link href={`/travel-insights/${p.slug}`} className="group grid gap-x-8 gap-y-3 border-t border-[#202b2626] py-8 sm:grid-cols-[64px_150px_minmax(0,1fr)_28px] sm:py-10">
                 <span className="font-[family-name:var(--font-display)] text-3xl leading-none text-foreground/75" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                 <time dateTime={new Date(p.date).toISOString()} className="pt-1 text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/75">

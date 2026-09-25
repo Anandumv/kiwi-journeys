@@ -149,3 +149,25 @@ a.rounded-full, button.rounded-full, input.rounded-full { border-radius: 2px; }
 .animate-floaty {
   animation: floaty 9s ease-in-out infinite;
 }
+
+/* ---- Route transitions (React ViewTransition). Tour photos morph card → detail. ---- */
+::view-transition-old(.page-fade) { animation: 180ms cubic-bezier(.4,0,1,1) both vt-out; }
+::view-transition-new(.page-fade) { animation: 420ms cubic-bezier(.22,1,.36,1) 60ms both vt-in; }
+::view-transition-group(.morph) { animation-duration: 520ms; animation-timing-function: cubic-bezier(.22,1,.36,1); }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(12px); } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* ---- Scroll choreography: pure CSS, content stays visible where unsupported. ---- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .sd-clip { animation: sd-clip linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    .sd-rise { animation: sd-rise linear both; animation-timeline: view(); animation-range: entry 0% entry 55%; }
+    .sd-rule { animation: sd-rule linear both; animation-timeline: view(); animation-range: entry 10% entry 80%; transform-origin: left; }
+  }
+}
+@keyframes sd-clip { from { clip-path: inset(10% 6% 10% 6%); } to { clip-path: inset(0); } }
+@keyframes sd-rise { from { transform: translateY(36px); } to { transform: none; } }
+@keyframes sd-rule { from { transform: scaleX(0); } to { transform: scaleX(1); } }

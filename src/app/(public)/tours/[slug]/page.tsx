@@ -1,6 +1,7 @@
 import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { notFound } from "next/navigation";
 import { getTour, getTours, getSiteSettings, getTestimonials } from "@/lib/content";
 import { Gallery } from "@/components/Gallery";
@@ -139,15 +140,17 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
             <p className={styles.policy}>Full refund when cancelled more than 72 hours before.</p>
           </div>
         </div>
+        <ViewTransition name={`tour-photo-${tour.slug}`} share="morph">
         <div className={styles.media}>
           <Gallery images={tour.gallery.length ? tour.gallery : [tour.heroImage].filter(Boolean)} title={tour.title} />
         </div>
+        </ViewTransition>
       </section>
 
       <div className={styles.body}>
         <div className={styles.main}>
           {tour.highlights.length > 0 && (
-            <section className={styles.section} aria-labelledby="highlights">
+            <section className={`${styles.section} sd-rise`} aria-labelledby="highlights">
               <p className={styles.label}><b>01</b>Highlights</p>
               <div>
                 <h2 id="highlights" className={styles.heading}>What you&apos;ll see</h2>
@@ -159,7 +162,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
           )}
 
           {tour.itinerary.length > 0 && (
-            <section className={styles.section} aria-labelledby="the-day">
+            <section className={`${styles.section} sd-rise`} aria-labelledby="the-day">
               <p className={styles.label}><b>02</b>The day</p>
               <div>
                 <h2 id="the-day" className={styles.heading}>How the day runs</h2>
@@ -170,7 +173,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
             </section>
           )}
 
-          <section className={styles.section} aria-labelledby="included">
+          <section className={`${styles.section} sd-rise`} aria-labelledby="included">
             <p className={styles.label}><b>03</b>Included</p>
             <div>
               <h2 id="included" className={styles.heading}>What&apos;s in the price</h2>
@@ -189,7 +192,7 @@ export default async function TourDetailPage({ params }: { params: Promise<{ slu
             </div>
           </section>
 
-          <section className={styles.section} aria-labelledby="good-to-know">
+          <section className={`${styles.section} sd-rise`} aria-labelledby="good-to-know">
             <p className={styles.label}><b>04</b>Good to know</p>
             <div>
               <h2 id="good-to-know" className={styles.heading}>Before you go</h2>

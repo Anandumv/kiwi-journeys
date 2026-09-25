@@ -99,7 +99,7 @@ export function CinematicHero({ settings, views = [] }: { settings: SiteSettings
       <div className={styles.heroFrame}>
         <div className={styles.carriageWindow} aria-hidden="true">
           <div className={styles.carriageView}>
-        <Image src={view?.image || settings.heroImage || "/images/brand/Hero-Ocean-Alps.jpg"} alt="" fill priority sizes="100vw" className={styles.heroPhoto} />
+        <Image src={view?.image || settings.heroImage || "/images/brand/Hero-Ocean-Alps.jpg"} alt="" fill priority fetchPriority="high" sizes="(max-width: 760px) 92vw, 100vw" className={styles.heroPhoto} />
         {motionEnabled && videoRequested && selectedView === 0 && !hasChosenView && (
           <video ref={videoRef} src="/videos/kiwi_mobile.mp4" muted playsInline preload="metadata" aria-hidden="true"
             onLoadedData={() => setVideoReady(true)} onError={() => setVideoReady(false)}

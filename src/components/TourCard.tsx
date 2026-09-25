@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import Image from "next/image";
 import { type Tour } from "@/data/tours";
 import { formatNZD } from "@/lib/money";
@@ -6,7 +7,8 @@ import { formatNZD } from "@/lib/money";
 export function TourCard({ tour }: { tour: Tour }) {
   return (
     <Link href={`/tours/${tour.slug}`} className="group flex h-full flex-col">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#c9cfc4]">
+      <ViewTransition name={`tour-photo-${tour.slug}`} share="morph">
+      <div className="sd-clip relative aspect-[4/3] overflow-hidden bg-[#c9cfc4]">
         <Image
           src={tour.heroImage}
           alt=""
@@ -15,6 +17,7 @@ export function TourCard({ tour }: { tour: Tour }) {
           className="object-cover transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] motion-safe:group-hover:scale-[1.04]"
         />
       </div>
+      </ViewTransition>
       <div className="flex flex-1 flex-col border-b border-[#202b2626] pb-5 pt-4">
         <p className="text-[11px] font-semibold uppercase tracking-[.13em] text-foreground/65">
           {tour.durationLabel} <span aria-hidden="true">/</span> {tour.destination}

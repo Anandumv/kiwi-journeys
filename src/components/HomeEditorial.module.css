@@ -237,3 +237,10 @@
 @media (min-width: 761px) {
   .heroTopline, .heroContent { margin-left: calc(5vw + 28px - 4vw); }
 }
+
+/* Destination photo crossfades to the hovered or focused place. */
+.destinationSwap { opacity: 0; transform: scale(1.04); transition: opacity .6s cubic-bezier(.22,1,.36,1), transform 1.2s cubic-bezier(.22,1,.36,1); }
+.destinationSwapOn { opacity: 1; transform: none; }
+.destinationList a[data-active] h3 { transform: translateX(6px); }
+.destinationList a h3 { transition: transform .4s cubic-bezier(.22,1,.36,1); }
+@media (prefers-reduced-motion: reduce) { .destinationSwap, .destinationList a h3 { transition: none; transform: none; } }

@@ -10,7 +10,7 @@ export function EditorialSection({ number, label, title, id, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <section className={styles.section} aria-labelledby={id}>
+    <section className={`${styles.section} sd-rise`} aria-labelledby={id}>
       <p className={styles.label}><b>{String(number).padStart(2, "0")}</b>{label}</p>
       <div>
         <h2 id={id} className={styles.heading}>{title}</h2>

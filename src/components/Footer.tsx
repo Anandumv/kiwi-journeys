@@ -26,7 +26,7 @@ export function Footer({
     <footer className="relative z-[100] bg-[#16231d] text-[#d9e0d6]">
       <div className="mx-auto max-w-7xl px-5 pt-16 sm:px-6 sm:pt-20">
         <div className="flex flex-col gap-8 border-b border-white/15 pb-12 sm:pb-16 lg:flex-row lg:items-end lg:justify-between">
-          <p className="max-w-4xl font-[family-name:var(--font-display)] text-[clamp(56px,8.5vw,132px)] font-medium leading-[.84] tracking-[-.03em] text-[#f3f1e8]">
+          <p className="sd-rise max-w-4xl font-[family-name:var(--font-display)] text-[clamp(56px,8.5vw,132px)] font-medium leading-[.84] tracking-[-.03em] text-[#f3f1e8]">
             Pick a day.<br />We&apos;ll do the driving.
           </p>
           <Link href="/tours" className="group inline-flex min-h-12 shrink-0 items-center justify-between gap-10 bg-[#f3f1e8] px-5 text-sm font-semibold text-[#16231d] transition hover:bg-white">

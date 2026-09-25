@@ -1,6 +1,7 @@
 import { serializeJsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { DestinationDirectory } from "@/components/DestinationDirectory";
 import Image from "next/image";
 import { getTours, getDestinations, getTestimonials, getSiteSettings } from "@/lib/content";
 import { categories } from "@/data/tours";
@@ -38,6 +39,12 @@ export default async function HomePage() {
   const otherTours = featured.filter((t) => t.slug !== lead?.slug);
   const destinationPhoto = tours.find((t) => t.destination === "Akaroa") ?? lead;
   const activeDestinations = destinations.filter((d) => d.status === "active");
+  // Pair each place with a published tour photograph from that place when one exists.
+  const destinationPlaces = activeDestinations.map((d) => {
+    const tour = tours.find((t) => t.destination === d.name || d.name.startsWith(t.destination) || t.destination.startsWith(d.name));
+    const photo = tour ?? destinationPhoto;
+    return { slug: d.slug, name: d.name, blurb: d.blurb, image: d.heroImage || photo?.heroImage || "/images/brand/Hero-Ocean-Alps.jpg", caption: tour ? tour.destination : d.name };
+  });
 
   const reviewsLd = {
     "@context": "https://schema.org",
@@ -109,22 +116,7 @@ export default async function HomePage() {
         </section>
 
         <section className={styles.destinations} aria-labelledby="destination-heading">
-          <div className={styles.destinationIntro}>
-            <p className={styles.label}>02 / The places</p>
-            <h2 id="destination-heading">Our corner<br />of the world.</h2>
-            {destinationPhoto && <figure className={styles.destinationFigure}>
-              <div className={styles.destinationPhoto}><Image src={destinationPhoto.heroImage} alt={destinationPhoto.title} fill sizes="(max-width: 760px) 100vw, 33vw" className={styles.cover} /></div>
-              <figcaption>{destinationPhoto.destination} / South Island, New Zealand</figcaption>
-            </figure>}
-          </div>
-          <div className={styles.destinationList}>
-            <p>Pick a place. We’ll take you there.</p>
-            {activeDestinations.map((d, i) => <Link key={d.slug} href={`/destinations/${d.slug}`}>
-              <span className={styles.destinationNumber}>{String(i + 1).padStart(2, "0")}</span>
-              <div><h3>{d.name}</h3><p>{d.blurb}</p></div><span aria-hidden="true">↗</span>
-            </Link>)}
-            <Link href="/destinations" className={styles.allDestinations}>Explore all destinations ↗</Link>
-          </div>
+          <DestinationDirectory places={destinationPlaces} />
         </section>
 
         <section className={styles.private} aria-labelledby="private-heading">

@@ -55,7 +55,7 @@ export default function FaqPage() {
         <div>
         <div className="space-y-16">
           {faqCategories.map((cat, i) => (
-            <section key={cat.title} id={`faq-${i + 1}`} className="scroll-mt-28">
+            <section key={cat.title} id={`faq-${i + 1}`} className="sd-rise scroll-mt-28">
               <h2 className="border-b-2 border-foreground pb-3 font-[family-name:var(--font-display)] text-[clamp(38px,4vw,56px)] font-medium leading-none tracking-[-.02em] text-foreground">
                 {cat.title}
               </h2>
